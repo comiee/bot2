@@ -4,7 +4,7 @@ import os
 # os.system('start python client.py')
 # os.system('start python client.py')
 
-from client import Client
+from client_socket import Client
 from threading import Thread
 import message
 

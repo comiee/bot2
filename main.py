@@ -1,3 +1,3 @@
-from communication.server import run_server
+from communication.server_socket import run_server
 
 run_server()

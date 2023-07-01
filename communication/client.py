@@ -1,41 +1,40 @@
-from communication.comm import *
-from communication import message
-from tools.log import get_logger, LogLevel
-import socket
-from threading import Thread
-
-__all__ = ['Client']
-
-logger = get_logger('client', LogLevel.DEBUG)
+import asyncio
+import json
 
 
-class Client:
-    def __init__(self, name):
-        self.name = name
-        # 创建 socket 对象
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+class ClientProtocol(asyncio.Protocol):
+    def connection_made(self, transport: asyncio.transports.Transport):
+        peername = transport.get_extra_info('peername')
+        print('Connection from {}'.format(peername))
+        self.transport = transport
 
-        # 连接服务，指定主机和端口
-        while self.sock.connect_ex((HOST, PORT)):
-            pass
+        self.transport.write('{"msg":"hi"}'.encode())
 
-        self.send(message.register_msg.build(name=self.name))
+    def data_received(self, data):
+        message = data.decode()
+        result = self.parse(message)
+        self.transport.write(json.dumps(result).encode())
 
-    def send(self, s: str):
-        send_msg(self.sock, s)
+    def connection_lost(self, exc):
+        print('The connection closed')
+        self.transport.close()
 
-    def run(self):
-        while True:
-            msg = recv_msg(self.sock)
-            logger.debug(f'客户端[{self.name}]收到服务器的消息：' + msg)
-            try:
-                message.Message.parse(self.sock, msg)
-            except Exception as e:
-                logger.error(e.args[0])
+    def send(self, msg):
+        self.transport.write(msg.encode())
+
+    async def main(self, host, port):
+        # Get a reference to the event loop as we plan to use
+        # low-level APIs.
+        loop = asyncio.get_running_loop()
+        await loop.create_connection(lambda: self, host, port)
+        await loop.create_future()
+
+    def run(self, host, port, *coroutines):
+        asyncio.run(asyncio.gather(self.main(host, port), *coroutines))
+
+    def parse(self, message):
+        print('已接收：' + message)
+        return {"msg":input()}
 
 
-if __name__ == '__main__':
-    client = Client('test')
-    Thread(target=client.run).start()
-    while True:
-        client.send(message.debug_msg.build(string=input()))
+asyncio.run(ClientProtocol().main('127.0.0.1', 8888))
