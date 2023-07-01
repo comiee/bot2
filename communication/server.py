@@ -13,17 +13,23 @@ client_dict = {}
 
 
 @message.register_msg.on_receive
-def _register_client(sock, name):
-    client_dict[name] = sock
-    return name
+def _register(sock, name, client_type):
+    client_dict.setdefault(name, {})[client_type] = sock
+    logger.info(f'客户端[{name}]注册{client_type}')
+    return name, client_type
 
 
-def get_client(name: str):
-    return client_dict[name]
-
-
-def send_to(client_name: str, s: str):
-    send_msg(get_client(client_name), s)
+def send_to(client_name: str, msg: str):
+    if client_name not in client_dict:
+        raise Exception('发送失败：未注册的客户端')
+    if 'receiver' not in client_dict[client_name]:
+        raise Exception('发送失败：客户端无接收器')
+    client = client_dict[client_name]['receiver']
+    send_msg(client, msg)
+    logger.debug(f'服务器发送消息到客户端[{client_name}]：{msg}')
+    ret = message.result_msg.parse(recv_msg(client))
+    logger.debug(f'服务器收到客户端[{client_name}]回响应：{ret}')
+    return ret
 
 
 class Server:
@@ -40,13 +46,17 @@ class Server:
         logger.info("连接地址: %s" % str(addr))
         # 第一条消息为注册消息
         msg = recv_msg(client)
-        client_name = message.register_msg.parse(client, msg)  # 解析消息可能出错，如果在注册阶段出错，此线程抛异常终止，不会影响其他线程
+        name, client_type = message.register_msg.parse(client, msg)  # 解析消息可能出错，如果在注册阶段出错，此线程抛异常终止，不会影响其他线程
+        if client_type != 'sender':
+            return
 
         while True:
             msg = recv_msg(client)
-            logger.debug(f'服务器收到客户端[{client_name}]的消息：' + msg)
+            logger.debug(f'服务器收到客户端[{name}]的消息：{msg}')
             try:
-                message.Message.parse(client, msg)
+                ret = message.Message.parse(client, msg)
+                logger.debug(f'服务器向客户端[{name}]回响应：{ret}')
+                send_msg(client, message.result_msg.build(ret))
             except Exception as e:
                 logger.error(e.args[0])
 
@@ -60,5 +70,5 @@ if __name__ == '__main__':
     server = Server()
     Thread(target=server.run).start()
     while True:
-        send_to('test', message.debug_msg.build(string=input()))
-        send_to('test2', message.debug_msg.build(string=input()))
+        print('result ', send_to('test', message.debug_msg.build(input())))
+        # print('result ', send_to('test2', message.debug_msg.build(input())))

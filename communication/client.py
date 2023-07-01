@@ -12,24 +12,36 @@ logger = get_logger('client', LogLevel.DEBUG)
 class Client:
     def __init__(self, name):
         self.name = name
+        self.sender = self.register('sender')
+
+    def register(self, client_type):
         # 创建 socket 对象
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         # 连接服务，指定主机和端口
-        while self.sock.connect_ex((HOST, PORT)):
+        while sock.connect_ex((HOST, PORT)):
             pass
 
-        self.send(message.register_msg.build(name=self.name))
+        send_msg(sock, message.register_msg.build(name=self.name, client_type=client_type))
+        logger.info(f'客户端[{self.name}] {client_type} 成功连接服务器')
+        return sock
 
-    def send(self, s: str):
-        send_msg(self.sock, s)
+    def send(self, msg: str):
+        send_msg(self.sender, msg)
+        logger.debug(f'客户端[{self.name}]发送消息到服务器：{msg}')
+        ret = message.result_msg.parse(recv_msg(self.sender))
+        logger.debug(f'客户端[{self.name}]收到服务器回响应：{ret}')
+        return ret
 
     def run(self):
+        receiver = self.register('receiver')
         while True:
-            msg = recv_msg(self.sock)
-            logger.debug(f'客户端[{self.name}]收到服务器的消息：' + msg)
+            msg = recv_msg(receiver)
+            logger.debug(f'客户端[{self.name}]收到服务器的消息：{msg}')
             try:
-                message.Message.parse(self.sock, msg)
+                ret = message.Message.parse(receiver, msg)
+                logger.debug(f'客户端[{self.name}]向服务器回响应：{ret}')
+                send_msg(receiver, message.result_msg.build(ret))
             except Exception as e:
                 logger.error(e.args[0])
 
@@ -38,4 +50,4 @@ if __name__ == '__main__':
     client = Client('test')
     Thread(target=client.run).start()
     while True:
-        client.send(message.debug_msg.build(string=input()))
+        print('result ', client.send(message.debug_msg.build(input())))

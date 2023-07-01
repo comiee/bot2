@@ -12,4 +12,4 @@ if __name__ == '__main__':
     client = Client('test2')
     Thread(target=client.run).start()
     while True:
-        client.send(message.debug_msg.build(string=input()))
+        print('result', client.send(message.debug_msg.build(input())))
