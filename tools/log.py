@@ -24,7 +24,7 @@ def get_logger(name, level):
 @overload
 def get_logger(name, level, file_name, file_level):
     logger = logging.getLogger(name)
-    logger.setLevel(level)
+    logger.setLevel(LogLevel.DEBUG)
     formatter = logging.Formatter('[%(asctime)s] %(name)s %(levelname)s: %(message)s')
     ch = logging.StreamHandler()
     ch.setLevel(level)

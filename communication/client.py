@@ -1,12 +1,13 @@
 from communication.comm import *
 from communication import message
 from tools.log import get_logger, LogLevel
+from tools.exception import MessageException
 import socket
 from threading import Thread
 
 __all__ = ['Client']
 
-logger = get_logger('client', LogLevel.DEBUG)
+logger = get_logger('client', LogLevel.INFO, 'client.txt', LogLevel.DEBUG)
 
 
 class Client:
@@ -42,5 +43,5 @@ class Client:
                 ret = message.Message.parse(receiver, msg)
                 logger.debug(f'客户端[{self.name}]向服务器回响应：{ret}')
                 send_msg(receiver, message.result_msg.build(ret))
-            except Exception as e:
+            except MessageException as e:
                 logger.error(e.args[0])

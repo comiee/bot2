@@ -1,12 +1,13 @@
 from communication.comm import *
 from communication import message
 from tools.log import get_logger, LogLevel
+from tools.exception import MessageException, InteractException
 import socket
 from threading import Thread
 
 __all__ = ['Server', 'send_to']
 
-logger = get_logger('server', LogLevel.DEBUG)
+logger = get_logger('server', LogLevel.INFO, 'server.txt', LogLevel.DEBUG)
 
 # 保存注册的客户端
 client_dict = {}
@@ -21,9 +22,9 @@ def _register(sock, name, client_type):
 
 def send_to(client_name: str, msg: str):
     if client_name not in client_dict:
-        raise Exception('发送失败：未注册的客户端')
+        raise InteractException('发送失败：未注册的客户端')
     if 'receiver' not in client_dict[client_name]:
-        raise Exception('发送失败：客户端无接收器')
+        raise InteractException('发送失败：客户端无接收器')
     client = client_dict[client_name]['receiver']
     send_msg(client, msg)
     logger.debug(f'服务器发送消息到客户端[{client_name}]：{msg}')
@@ -57,7 +58,7 @@ class Server:
                 ret = message.Message.parse(client, msg)
                 logger.debug(f'服务器向客户端[{name}]回响应：{ret}')
                 send_msg(client, message.result_msg.build(ret))
-            except Exception as e:
+            except MessageException as e:
                 logger.error(e.args[0])
 
     def run(self):

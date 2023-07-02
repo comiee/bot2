@@ -1,4 +1,5 @@
 """定义组件中通信的消息格式"""
+from tools.exception import MessageException
 import json
 from comiee import overload
 
@@ -11,13 +12,13 @@ class Message:
     @staticmethod
     def add_message(cmd: str, message: 'Message'):
         if cmd in Message.message_dict:
-            raise Exception('消息命令字重复：' + cmd)
+            raise MessageException('消息命令字重复：' + cmd)
         Message.message_dict[cmd] = message
 
     @staticmethod
     def get_message(cmd: str) -> 'Message':
         if cmd not in Message.message_dict:
-            raise Exception('未知的消息：' + cmd)
+            raise MessageException('未知的消息：' + cmd)
         return Message.message_dict[cmd]
 
     def __init__(self, cmd: str, value_format: ValueFormatType):
@@ -40,7 +41,7 @@ class Message:
     def on_receive(self, function):
         """接受到消息以后的回调函数，函数的第一个参数是发送方的sock，其余参数是解包后的msg_value"""
         if self.call_back is not None:
-            raise Exception(f'命令字<{self.cmd}>回调函数已被注册')
+            raise MessageException(f'命令字<{self.cmd}>回调函数已被注册')
         self.call_back = function
         return function
 
@@ -50,15 +51,15 @@ class Message:
             return
         elif isinstance(value_format, dict):
             if not isinstance(msg_value, dict):
-                raise Exception('参数类型错误：应为字典')
+                raise MessageException('参数类型错误：应为字典')
             if keys := value_format.keys() - msg_value.keys():
-                raise Exception(f'缺少参数{keys}')
+                raise MessageException(f'缺少参数{keys}')
             if keys := msg_value.keys() - value_format.keys():
-                raise Exception(f'多余参数{keys}')
+                raise MessageException(f'多余参数{keys}')
             for k in msg_value:
                 Message.check_format(value_format[k], msg_value[k])
         elif not isinstance(msg_value, value_format):
-            raise Exception(f'参数类型错误：期望{value_format}，实际{type(msg_value)}')
+            raise MessageException(f'参数类型错误：期望{value_format}，实际{type(msg_value)}')
 
     @overload
     def build(self, **kwargs) -> str:
@@ -68,8 +69,8 @@ class Message:
     def build(self, msg_value) -> str:
         try:
             self.check_format(self.value_format, msg_value)
-        except Exception as e:
-            raise Exception(f'命令字<{self.cmd}>消息构建失败：{e.args[0]}')
+        except MessageException as e:
+            raise MessageException(f'命令字<{self.cmd}>消息构建失败：{e.args[0]}')
         msg = {'cmd': self.cmd, 'value': msg_value}
         return json.dumps(msg, ensure_ascii=False)
 
@@ -89,14 +90,14 @@ class Message:
         cmd = msg['cmd']
         value = msg['value']
         if cmd != self.cmd:
-            raise Exception(f'命令字匹配失败：收到{cmd}，目标{self.cmd}')
+            raise MessageException(f'命令字匹配失败：收到{cmd}，目标{self.cmd}')
         return Message.get_message(cmd).solve(sock, value)
 
     def solve(self, sock, value):
         try:
             self.check_format(self.value_format, value)
-        except Exception as e:
-            raise Exception(f'命令字<{self.cmd}>消息解析失败：{e.args[0]}')
+        except MessageException as e:
+            raise MessageException(f'命令字<{self.cmd}>消息解析失败：{e.args[0]}')
 
         if function := self.call_back:
             if isinstance(self.value_format, dict):
@@ -108,7 +109,7 @@ class Message:
 
 
 # 调测信息，使接受端的打印信息
-debug_msg = Message('debug', None)
+debug_msg = Message('debug', str)
 
 
 @debug_msg.on_receive
@@ -127,3 +128,8 @@ register_msg = Message('register', {
 
 # 响应消息，除注册消息外，每次发送消息都会返回此消息
 result_msg = Message('result', None)
+
+chat_msg = Message('chat', {
+    'user_id': int,  # 用户id，比如QQ号
+    'text': str,  # 聊天内容
+})

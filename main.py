@@ -1,3 +1,9 @@
-from communication.server import test
+from master_server import server_main
 
-test()
+
+def main():
+    server_main()
+
+
+if __name__ == '__main__':
+    main()
