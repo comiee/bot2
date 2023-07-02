@@ -64,11 +64,3 @@ class Server:
         while True:
             # 建立客户端连接
             Thread(target=self.listen_client, args=self.sock.accept()).start()
-
-
-if __name__ == '__main__':
-    server = Server()
-    Thread(target=server.run).start()
-    while True:
-        print('result ', send_to('test', message.debug_msg.build(input())))
-        # print('result ', send_to('test2', message.debug_msg.build(input())))

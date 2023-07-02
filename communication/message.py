@@ -39,6 +39,8 @@ class Message:
 
     def on_receive(self, function):
         """接受到消息以后的回调函数，函数的第一个参数是发送方的sock，其余参数是解包后的msg_value"""
+        if self.call_back is not None:
+            raise Exception(f'命令字<{self.cmd}>回调函数已被注册')
         self.call_back = function
         return function
 
@@ -67,9 +69,9 @@ class Message:
         try:
             self.check_format(self.value_format, msg_value)
         except Exception as e:
-            raise Exception('消息构建失败：' + e.args[0])
+            raise Exception(f'命令字<{self.cmd}>消息构建失败：{e.args[0]}')
         msg = {'cmd': self.cmd, 'value': msg_value}
-        return json.dumps(msg)
+        return json.dumps(msg, ensure_ascii=False)
 
     @overload
     @staticmethod
@@ -94,7 +96,7 @@ class Message:
         try:
             self.check_format(self.value_format, value)
         except Exception as e:
-            raise Exception('消息解析失败：' + e.args[0])
+            raise Exception(f'命令字<{self.cmd}>消息解析失败：{e.args[0]}')
 
         if function := self.call_back:
             if isinstance(self.value_format, dict):

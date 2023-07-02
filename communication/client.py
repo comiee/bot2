@@ -33,7 +33,7 @@ class Client:
         logger.debug(f'客户端[{self.name}]收到服务器回响应：{ret}')
         return ret
 
-    def run(self):
+    def listen_server(self):
         receiver = self.register('receiver')
         while True:
             msg = recv_msg(receiver)
@@ -44,10 +44,3 @@ class Client:
                 send_msg(receiver, message.result_msg.build(ret))
             except Exception as e:
                 logger.error(e.args[0])
-
-
-if __name__ == '__main__':
-    client = Client('test')
-    Thread(target=client.run).start()
-    while True:
-        print('result ', client.send(message.debug_msg.build(input())))
