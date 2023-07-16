@@ -1,7 +1,7 @@
 from communication.comm import *
 from communication import message
 from tools.log import get_logger, LogLevel
-from tools.exception import MessageException, InteractException
+from tools.exception import MessageException
 import socket
 from threading import Thread
 
@@ -23,16 +23,24 @@ class Server:
         self.client_dict = {}
 
     def send_to(self, client_name: str, msg: str):
+        # json格式不能传输Ellipsis对象，用Ellipsis对象表示发送失败
         if client_name not in self.client_dict:
-            raise InteractException('发送失败：未注册的客户端')
+            logger.error(f'服务器向客户端[{client_name}]发送消息失败：未注册的客户端')
+            return ...
         if 'receiver' not in self.client_dict[client_name]:
-            raise InteractException('发送失败：客户端无接收器')
+            logger.error(f'服务器向客户端[{client_name}]发送消息失败：客户端无接收器')
+            return ...
         client = self.client_dict[client_name]['receiver']
-        send_msg(client, msg)
-        logger.debug(f'服务器发送消息到客户端[{client_name}]：{msg}')
-        ret = message.result_msg.parse(recv_msg(client))
-        logger.debug(f'服务器收到客户端[{client_name}]回响应：{ret}')
-        return ret
+        try:
+            send_msg(client, msg)
+            logger.debug(f'服务器发送消息到客户端[{client_name}]：{msg}')
+            ret = message.result_msg.parse(recv_msg(client))
+            logger.debug(f'服务器收到客户端[{client_name}]回响应：{ret}')
+            return ret
+        except ConnectionError as e:
+            logger.error(f'服务器向客户端[{client_name}]发送消息失败，即将断开连接：{e}')
+            del self.client_dict[client_name]['receiver']
+            return ...
 
     def register_client(self, client_name, client_type, sock):
         self.client_dict.setdefault(client_name, {})[client_type] = sock
@@ -40,14 +48,17 @@ class Server:
 
     def listen_client(self, client, name):
         while True:
-            msg = recv_msg(client)
-            logger.debug(f'服务器收到客户端[{name}]的消息：{msg}')
             try:
+                msg = recv_msg(client)
+                logger.debug(f'服务器收到客户端[{name}]的消息：{msg}')
                 ret = message.Message.parse(msg)
                 logger.debug(f'服务器向客户端[{name}]回响应：{ret}')
                 send_msg(client, message.result_msg.build(ret))
             except MessageException as e:
-                logger.error(e.args[0])
+                logger.error(f'服务器解析客户端[{name}]消息失败：{e.args[0]}')
+            except ConnectionError as e:
+                logger.error(f'服务器接收客户端[{name}]消息失败，即将断开连接：{e}')
+                break
 
     def accept_client(self, client, addr):
         logger.info("连接地址: %s" % str(addr))

@@ -17,7 +17,6 @@ class Client:
     def register(self, client_type):
         # 创建 socket 对象
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
         # 连接服务，指定主机和端口
         while sock.connect_ex((HOST, PORT)):
             pass
@@ -27,20 +26,28 @@ class Client:
         return sock
 
     def send(self, msg: str):
-        send_msg(self.sender, msg)
-        logger.debug(f'客户端[{self.name}]发送消息到服务器：{msg}')
-        ret = message.result_msg.parse(recv_msg(self.sender))
-        logger.debug(f'客户端[{self.name}]收到服务器回响应：{ret}')
-        return ret
+        try:
+            send_msg(self.sender, msg)
+            logger.debug(f'客户端[{self.name}]发送消息到服务器：{msg}')
+            ret = message.result_msg.parse(recv_msg(self.sender))
+            logger.debug(f'客户端[{self.name}]收到服务器回响应：{ret}')
+            return ret
+        except ConnectionError as e:
+            logger.error(f'客户端[{self.name}]发送消息失败，即将重连：{e}')
+            self.sender = self.register('sender')
+            self.send(msg)
 
     def listen_server(self):
         receiver = self.register('receiver')
         while True:
-            msg = recv_msg(receiver)
-            logger.debug(f'客户端[{self.name}]收到服务器的消息：{msg}')
             try:
+                msg = recv_msg(receiver)
+                logger.debug(f'客户端[{self.name}]收到服务器的消息：{msg}')
                 ret = message.Message.parse(msg)
                 logger.debug(f'客户端[{self.name}]向服务器回响应：{ret}')
                 send_msg(receiver, message.result_msg.build(ret))
             except MessageException as e:
-                logger.error(e.args[0])
+                logger.error(f'客户端[{self.name}]解析服务器消息失败：{e.args[0]}')
+            except ConnectionError as e:
+                logger.error(f'客户端[{self.name}]接受消息失败，即将重连：{e}')
+                receiver = self.register('receiver')
