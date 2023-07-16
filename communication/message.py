@@ -39,7 +39,7 @@ class Message:
         Message.add_message(cmd, self)
 
     def on_receive(self, function):
-        """接受到消息以后的回调函数，函数的第一个参数是发送方的sock，其余参数是解包后的msg_value"""
+        """接受到消息以后的回调函数，函数的参数是按照value_format解包后的msg_value，返回值会作为消息的响应"""
         if self.call_back is not None:
             raise MessageException(f'命令字<{self.cmd}>回调函数已被注册')
         self.call_back = function
@@ -76,24 +76,24 @@ class Message:
 
     @overload
     @staticmethod
-    def parse(sock, s: str):
+    def parse(s: str):
         """使用静态方法调用，会根据命令字找到对应的message对象进行处理"""
         msg = json.loads(s)
         cmd = msg['cmd']
         value = msg['value']
-        return Message.get_message(cmd).solve(sock, value)
+        return Message.get_message(cmd).solve(value)
 
     @overload
-    def parse(self, sock, s: str):
+    def parse(self, s: str):
         """使用成员方法调用，会判断命令字是否跟自己的命令字相同"""
         msg = json.loads(s)
         cmd = msg['cmd']
         value = msg['value']
         if cmd != self.cmd:
             raise MessageException(f'命令字匹配失败：收到{cmd}，目标{self.cmd}')
-        return Message.get_message(cmd).solve(sock, value)
+        return Message.get_message(cmd).solve(value)
 
-    def solve(self, sock, value):
+    def solve(self, value):
         try:
             self.check_format(self.value_format, value)
         except MessageException as e:
@@ -101,9 +101,9 @@ class Message:
 
         if function := self.call_back:
             if isinstance(self.value_format, dict):
-                return function(sock, **value)
+                return function(**value)
             else:
-                return function(sock, value)
+                return function(value)
         else:
             return value
 
@@ -113,7 +113,7 @@ debug_msg = Message('debug', str)
 
 
 @debug_msg.on_receive
-def _debug(_, val):
+def _debug(val):
     print('调测信息：', val)
     return val
 

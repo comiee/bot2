@@ -22,6 +22,11 @@ def get_logger(name, level):
 
 
 @overload
+def get_logger(name, level, file_level):
+    return get_logger(name, level, name + '.txt', file_level)
+
+
+@overload
 def get_logger(name, level, file_name, file_level):
     logger = logging.getLogger(name)
     logger.setLevel(LogLevel.DEBUG)
@@ -32,7 +37,7 @@ def get_logger(name, level, file_name, file_level):
     logger.addHandler(ch)
     if not os.path.exists(LOG_PATH):
         os.makedirs(LOG_PATH)
-    fh = logging.FileHandler(os.path.join(LOG_PATH, file_name))
+    fh = logging.FileHandler(os.path.join(LOG_PATH, file_name), encoding='utf-8')
     fh.setLevel(file_level)
     fh.setFormatter(formatter)
     logger.addHandler(fh)
