@@ -4,7 +4,7 @@ from communication import message
 
 
 class CmdAdmin(Admin):
-    def __init__(self, server:Server):
+    def __init__(self, server: Server):
         super().__init__(server)
         self.cmd_dict = {}
         self.init_cmd_dict()
@@ -24,12 +24,13 @@ class CmdAdmin(Admin):
     def add_cmd(self, cmd):
         def get_function(fun):
             assert cmd not in self.cmd_dict, '命令已被注册'
-            self.cmd_dict[cmd]=fun
+            self.cmd_dict[cmd] = fun
             return fun
+
         return get_function
 
     def init_cmd_dict(self):
         @self.add_cmd('debug')
         def debug(client_name, text):
             self.server.send_to(client_name, message.debug_msg.build(text))
-
+# TODO 主动发消息

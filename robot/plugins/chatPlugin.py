@@ -9,7 +9,7 @@ logger = get_bot_client().logger
 
 
 class ChatPlugin(Session, priority=Priority.Chat):
-    switch = False
+    switch = False  # TODO 这样写的开关是全局的。弄一个Switch或Mode类供继承
 
     async def handle(self) -> None:
         client = get_bot_client()

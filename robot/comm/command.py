@@ -1,12 +1,12 @@
 from robot.comm.session import Session
 from robot.botClient import get_bot_client
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from inspect import iscoroutinefunction
 
 logger = get_bot_client().logger
 
 
-class CommandMeta(type, metaclass=ABCMeta):
+class CommandMeta(type):
     def __init__(cls, name, bases, attrs):
         super().__init__(name, bases, attrs)
         cls.commands: list[Command] = []
@@ -18,7 +18,7 @@ class CommandMeta(type, metaclass=ABCMeta):
 
     def mate(cls, session: Session):
         for command in cls.commands:
-            logger.debug(f'尝试匹配{command}')
+            logger.debug(f'尝试匹配{command}')  # TODO 这个打印太频繁，后续删掉
             if command.judge(session):
                 logger.info(f'匹配到{command}')
                 return command
