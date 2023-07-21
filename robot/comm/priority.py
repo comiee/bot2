@@ -1,9 +1,20 @@
 from itertools import count
-from functools import partial
+from enum import Enum
 
-_produce_priority = partial(next, count())
+_count_iter = count()
 
-# alicebot用type(priority)判断优先级，无法使用IntEnum
-LOG = _produce_priority()  # 第一个插件用来记录事件，不会有任何处理
-REQUEST = _produce_priority()  # 请求的优先级最高，并阻塞其他事件
-CHAT = _produce_priority()  # 聊天的优先级最低，优先处理命令
+
+def _produce_priority(block):
+    return next(_count_iter), block
+
+
+class Priority(Enum):
+    # 不能用直接赋值block，值重复的枚举会合并
+    Log = _produce_priority(False)
+    Request = _produce_priority(True)
+    Command = _produce_priority(True)
+    Chat = _produce_priority(False)
+
+    def __init__(self, priority, block):
+        self.priority = priority
+        self.block = block

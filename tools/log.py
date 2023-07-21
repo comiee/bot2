@@ -1,11 +1,12 @@
 from comiee import overload
 import os
 import logging
+from enum import IntEnum
 
 LOG_PATH = os.path.join(os.getcwd(), 'data/log/')
 
 
-class LogLevel:
+class LogLevel(IntEnum):
     CRITICAL = logging.CRITICAL
     FATAL = logging.FATAL
     ERROR = logging.ERROR
@@ -17,17 +18,17 @@ class LogLevel:
 
 
 @overload
-def get_logger(name, level):
+def get_logger(name, level) -> logging.Logger:
     return get_logger(name, level, name + '.txt', level)
 
 
 @overload
-def get_logger(name, level, file_level):
+def get_logger(name, level, file_level) -> logging.Logger:
     return get_logger(name, level, name + '.txt', file_level)
 
 
 @overload
-def get_logger(name, level, file_name, file_level):
+def get_logger(name, level, file_name, file_level) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(LogLevel.DEBUG)
     formatter = logging.Formatter('[%(asctime)s] %(name)s %(levelname)s: %(message)s')
