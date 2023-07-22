@@ -18,7 +18,6 @@ class CommandMeta(type):
 
     def mate(cls, session: Session):
         for command in cls.commands:
-            logger.debug(f'尝试匹配{command}')  # TODO 这个打印太频繁，后续删掉
             if command.judge(session):
                 logger.info(f'匹配到{command}')
                 return command
@@ -50,7 +49,8 @@ class Command(metaclass=CommandMeta):
     async def run(self, session: Session):
         if iscoroutinefunction(self.fun):
             await self.fun(session, *self.args, **self.kwargs)
-        self.fun(session, *self.args, **self.kwargs)
+        else:
+            self.fun(session, *self.args, **self.kwargs)
 
 
 class FullCommand(Command):
