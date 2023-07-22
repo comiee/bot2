@@ -10,6 +10,7 @@ def _produce_priority(block):
 
 class Priority(Enum):
     # 不能用直接赋值block，值重复的枚举会合并
+    Filter = _produce_priority(True)
     Log = _produce_priority(False)
     Request = _produce_priority(True)
     Command = _produce_priority(True)
