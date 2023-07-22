@@ -1,7 +1,7 @@
+from communication import message
 from robot.comm.priority import Priority
 from robot.botClient import get_bot_client
 from robot.comm.pluginBase import Session
-from communication import message
 from alicebot.adapter.mirai.event import MessageEvent
 
 

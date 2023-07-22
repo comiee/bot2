@@ -2,9 +2,10 @@ from robot.comm import logger
 from robot.comm.pluginBase import Session
 from abc import abstractmethod
 from inspect import iscoroutinefunction
+import re
 
 
-class CommandMeta(type):
+class _CommandMeta(type):
     def __init__(cls, name, bases, attrs):
         super().__init__(name, bases, attrs)
         cls.commands: list[Command] = []
@@ -21,8 +22,9 @@ class CommandMeta(type):
                 return command
 
 
-class Command(metaclass=CommandMeta):
+class Command(metaclass=_CommandMeta):
     def __init__(self, cmd):
+        # 不设置别名系统，多个cmd用嵌套装饰器解决
         self.cmd = cmd
         self.args = ()
         self.kwargs = {}
@@ -58,44 +60,58 @@ class FullCommand(Command):
         return session.text == self.cmd
 
 
-class NormalCommand(Command):
-    """普通命令，用空格分割，分割后的第一项为命令，其余项为参数，参数会被传入回调函数"""
-
-    def __init__(self, cmd, *names):
-        super().__init__(cmd)
-        self.names = (cmd, *names)
+class SplitCommand(Command):
+    """分割命令，用空格分割，分割后的第一项为命令，其余项为参数，参数会被传入回调函数"""
 
     def judge(self, session: Session) -> bool:
         if not session.text:
             return False
         cmd, *args = session.text.strip().split()
-        if all(name != cmd for name in self.names):
+        if cmd != self.cmd:
             return False
         self.set_args(*args)
         return True
 
 
-class SuperCommand(NormalCommand):
-    """管理员命令，除了限定使用者以外和普通命令一样"""
+class NormalCommand(Command):
+    """普通命令，判断是否已命令开头，将其余的部分作为参数传入回调函数"""
 
     def judge(self, session: Session) -> bool:
-        if not session.user.is_super_user():
+        if not session.text.startswith(self.cmd):
             return False
-        return super().judge(session)
+        arg = session.text[len(self.cmd):]
+        self.set_args(arg)
+        return True
 
 
 class RegexCommand(Command):
-    """正则命令"""
+    """正则命令，回调函数的参数为解包后的groups。比较复杂的表达式可以使用re.compile"""
 
     def judge(self, session: Session) -> bool:
-        return False  # TODO
+        m = re.search(self.cmd, session.text)
+        if not m:
+            return False
+        self.set_args(*m.groups())
+        return True
+
+
+def super_command(command: Command):
+    """将命令变为管理员命令，除了限定使用者以外和原命令一样"""
+    command_judge = command.judge
+
+    def judge_wrapper(session: Session) -> bool:
+        if not session.user.is_super_user():
+            return False
+        return command_judge(session)
+
+    command.judge = judge_wrapper
+    return command
 
 
 def get_command_cls_list():
     # 下面的顺序决定了命令匹配的优先级
     return [
         FullCommand,
-        SuperCommand,
         NormalCommand,
         RegexCommand,
     ]
