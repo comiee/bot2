@@ -1,5 +1,5 @@
 from robot.comm.command import get_command_cls_list
-from robot.comm.session import Session
+from robot.comm.pluginBase import Session
 from robot.comm.priority import Priority
 from alicebot.adapter.mirai.event import MessageEvent
 

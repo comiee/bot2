@@ -1,9 +1,7 @@
+from robot.comm import logger
 from robot.comm.priority import Priority
 from robot.comm.pluginBase import PluginBase
-from robot.botClient import get_bot_client
 from inspect import isfunction, ismethod
-
-logger = get_bot_client().logger
 
 
 class LogPlugin(PluginBase, priority=Priority.Log):

@@ -5,12 +5,12 @@ from threading import Thread
 import os
 
 # 用于注册回调函数
-import masterServer.chat
+import masterServer.module.chat  # TODO 改为自动加载
 
 
 def server_main():
     """服务器模块的入口"""
     os.chdir(os.path.dirname(__file__))
     server = get_master_server()
-    Thread(target=server.run).start()
+    Thread(target=server.run, daemon=True).start()
     CmdAdmin(server).run()

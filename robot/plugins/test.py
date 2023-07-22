@@ -1,10 +1,8 @@
 from robot.comm.priority import Priority
 from robot.botClient import get_bot_client
-from robot.comm.session import Session
+from robot.comm.pluginBase import Session
 from communication import message
 from alicebot.adapter.mirai.event import MessageEvent
-
-logger = get_bot_client().logger
 
 
 class TestPlugin(Session, priority=Priority.Chat):

@@ -1,7 +1,7 @@
 [bot]
 plugins = []
 plugin_dirs = ["plugins"]
-adapters = ["alicebot.adapter.mirai"]
+adapters = ["alicebot.adapter.mirai", "alicebot.adapter.apscheduler"]
 
 [bot.log]
 # 这里是 AliceBot 自身日志相关的配置
@@ -9,13 +9,13 @@ level = "DEBUG"
 verbose_exception = true
 
 [adapter.mirai]
-#adapter_type = "ws"
-#host = "127.0.0.1"
-#port = 5080
-#verify_key = "1234567890"
-#qq = 1790218632
-adapter_type = "reverse-ws"
+adapter_type = "ws"
 host = "127.0.0.1"
-port = 5090
+port = 5080
 verify_key = "1234567890"
 qq = 1790218632
+#adapter_type = "reverse-ws"
+#host = "127.0.0.1"
+#port = 5090
+#verify_key = "1234567890"
+#qq = 1790218632

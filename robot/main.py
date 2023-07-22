@@ -4,8 +4,6 @@ from alicebot.log import error_or_exception, logger
 from alicebot.exceptions import LoadModuleError
 import alicebot.utils
 import importlib
-import os
-import alicebot.bot
 
 __all__ = ['run_bot']
 
@@ -56,12 +54,6 @@ def repair_alice():
     repair_load_plugin_class()
 
 
-def run_bot():
+def run_bot(bot: Bot):
     repair_alice()
-    os.chdir(os.path.dirname(__file__))
-    bot = Bot()
     bot.run()
-
-
-if __name__ == '__main__':
-    run_bot()

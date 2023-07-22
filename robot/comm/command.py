@@ -1,9 +1,7 @@
-from robot.comm.session import Session
-from robot.botClient import get_bot_client
+from robot.comm import logger
+from robot.comm.pluginBase import Session
 from abc import abstractmethod
 from inspect import iscoroutinefunction
-
-logger = get_bot_client().logger
 
 
 class CommandMeta(type):

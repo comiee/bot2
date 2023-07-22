@@ -10,11 +10,14 @@ class CmdAdmin(Admin):
         self.init_cmd_dict()
 
     def parse_cmd(self, s):
-        cmd, *args = s.split()
-        if cmd not in self.cmd_dict:
-            print('命令错误')
-            return
-        self.cmd_dict[cmd](*args)
+        try:
+            cmd, *args = s.split()
+            self.cmd_dict[cmd](*args)
+            self.logger.info(f'执行命令{s}')
+        except Exception as e:
+            if isinstance(e, KeyboardInterrupt):
+                raise
+            print(e)
 
     def run(self):
         while True:
@@ -22,6 +25,7 @@ class CmdAdmin(Admin):
             self.parse_cmd(s)
 
     def add_cmd(self, cmd):
+        # 空格分隔后，第一项为命令字，其他的作为参数传给fun
         def get_function(fun):
             assert cmd not in self.cmd_dict, '命令已被注册'
             self.cmd_dict[cmd] = fun
@@ -33,4 +37,10 @@ class CmdAdmin(Admin):
         @self.add_cmd('debug')
         def debug(client_name, text):
             self.server.send_to(client_name, message.debug_msg.build(text))
-# TODO 主动发消息
+
+        @self.add_cmd('send')
+        def send(client_name, user_id, text):
+            self.server.send_to(client_name, message.chat_msg.build(
+                user_id=int(user_id),
+                text=text,
+            ))
