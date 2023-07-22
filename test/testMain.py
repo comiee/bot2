@@ -1,6 +1,6 @@
 import multiprocessing
 
-from communication.server import Server, send_to
+from communication.server import Server
 from communication.client import Client
 from communication import message
 from threading import Thread
@@ -14,7 +14,7 @@ def server_main():
     for i in count(0):
         for name in 'client1', 'client2':
             try:
-                send_to(name, message.debug_msg.build(f'服务器第{i * 7}秒心跳包'))
+                server.send_to(name, message.debug_msg.build(f'服务器第{i * 7}秒心跳包'))
             except Exception as e:
                 print(e.args[0])
         time.sleep(7)

@@ -1,4 +1,4 @@
-class Admin():
+class Admin:
     def __init__(self, server):
         self.server = server
 

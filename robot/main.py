@@ -18,8 +18,7 @@ def repair_get_classes_from_module_name():
         return [(x, module) for x in get_classes_from_module(module, super_class)]
 
     alicebot.utils.get_classes_from_module_name = _get_classes_from_module_name
-    module = importlib.import_module('alicebot.bot')
-    importlib.reload(module)
+    importlib.reload(importlib.import_module('alicebot.bot'))
 
 
 # 解决plugin优先级只能使用int不能使用int的子类的问题
