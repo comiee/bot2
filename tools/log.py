@@ -1,7 +1,7 @@
 from comiee import overload
+from enum import IntEnum
 import os
 import logging
-from enum import IntEnum
 
 LOG_PATH = os.path.join(os.getcwd(), 'data/log/')
 
@@ -45,4 +45,16 @@ def get_logger(name, level, file_name, file_level) -> logging.Logger:
     return logger
 
 
+# 底层的client和server使用logger
+client_logger: logging.Logger = get_logger('client', LogLevel.INFO, LogLevel.DEBUG)
+server_logger: logging.Logger = get_logger('server', LogLevel.INFO, LogLevel.DEBUG)
+
+# 各组件使用的logger
+master_server_logger: logging.Logger = get_logger('masterServer', LogLevel.INFO, LogLevel.DEBUG)
+admin_logger: logging.Logger = get_logger('admin', LogLevel.DEBUG)
+
+bot_client_logger: logging.Logger = get_logger('botClient', LogLevel.DEBUG)
+bot_logger: logging.Logger = get_logger('bot', LogLevel.DEBUG)
+
+# 外层启动器使用的logger
 main_logger: logging.Logger = get_logger('main', LogLevel.DEBUG)

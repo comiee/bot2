@@ -1,4 +1,4 @@
-from robot.comm import logger
+from tools.log import bot_logger
 from robot.comm.pluginBase import Session
 from abc import abstractmethod
 from inspect import iscoroutinefunction
@@ -18,7 +18,7 @@ class _CommandMeta(type):
     def mate(cls, session: Session):
         for command in cls.commands:
             if command.judge(session):
-                logger.info(f'匹配到{command}')
+                bot_logger.info(f'匹配到{command}')
                 return command
 
 

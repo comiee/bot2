@@ -1,12 +1,10 @@
 from communication.comm import *
 from communication import message
-from tools.log import get_logger, LogLevel
+from tools.log import client_logger
 from tools.exception import MessageException
 import socket
 
 __all__ = ['Client']
-
-logger = get_logger('client', LogLevel.INFO, LogLevel.DEBUG)
 
 
 class Client:
@@ -22,18 +20,18 @@ class Client:
             pass
 
         send_msg(sock, message.register_msg.build(name=self.name, client_type=client_type))
-        logger.info(f'客户端[{self.name}] {client_type} 成功连接服务器')
+        client_logger.info(f'客户端[{self.name}] {client_type} 成功连接服务器')
         return sock
 
     def send(self, msg: str):
         try:
             send_msg(self.sender, msg)
-            logger.debug(f'客户端[{self.name}]发送消息到服务器：{msg}')
+            client_logger.debug(f'客户端[{self.name}]发送消息到服务器：{msg}')
             ret = message.result_msg.parse(recv_msg(self.sender))
-            logger.debug(f'客户端[{self.name}]收到服务器回响应：{ret}')
+            client_logger.debug(f'客户端[{self.name}]收到服务器回响应：{ret}')
             return ret
         except ConnectionError as e:
-            logger.error(f'客户端[{self.name}]发送消息失败，即将重连：{e}')
+            client_logger.error(f'客户端[{self.name}]发送消息失败，即将重连：{e}')
             self.sender = self.register('sender')
             self.send(msg)
 
@@ -42,12 +40,12 @@ class Client:
         while True:
             try:
                 msg = recv_msg(receiver)
-                logger.debug(f'客户端[{self.name}]收到服务器的消息：{msg}')
+                client_logger.debug(f'客户端[{self.name}]收到服务器的消息：{msg}')
                 ret = message.Message.parse(msg)
-                logger.debug(f'客户端[{self.name}]向服务器回响应：{ret}')
+                client_logger.debug(f'客户端[{self.name}]向服务器回响应：{ret}')
                 send_msg(receiver, message.result_msg.build(ret))
             except MessageException as e:
-                logger.error(f'客户端[{self.name}]解析服务器消息失败：{e.args[0]}')
+                client_logger.error(f'客户端[{self.name}]解析服务器消息失败：{e.args[0]}')
             except ConnectionError as e:
-                logger.error(f'客户端[{self.name}]接受消息失败，即将重连：{e}')
+                client_logger.error(f'客户端[{self.name}]接受消息失败，即将重连：{e}')
                 receiver = self.register('receiver')

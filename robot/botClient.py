@@ -1,5 +1,4 @@
 from communication.client import Client
-from tools.log import get_logger, LogLevel
 from alicebot import Bot
 from alicebot.adapter.mirai import MiraiAdapter
 from alicebot.adapter.mirai.message import T_MiraiMSG
@@ -34,8 +33,6 @@ class BotProxy:
 
 
 class BotClient(Client):
-    logger = get_logger('botClient', LogLevel.DEBUG)  # TODO bot使用另外的logger
-
     def __init__(self):
         super().__init__('bot')
 

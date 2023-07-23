@@ -1,3 +1,4 @@
+from tools.log import admin_logger
 from masterServer.admin.Admin import Admin
 from communication.server import Server
 from communication import message
@@ -13,7 +14,7 @@ class CmdAdmin(Admin):
         try:
             cmd, *args = s.split()
             self.cmd_dict[cmd](*args)
-            self.logger.info(f'执行命令{s}')
+            admin_logger.info(f'执行命令{s}')
         except Exception as e:
             if isinstance(e, KeyboardInterrupt):
                 raise

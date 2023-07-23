@@ -1,10 +1,8 @@
-import re
-
 from communication import message
 from robot.comm.command import super_command, NormalCommand, RegexCommand
 from robot.comm.pluginBase import Session
 from robot.botClient import get_bot_client
-
+import re
 
 @super_command(RegexCommand(re.compile(r'^exec\s(.*)$',re.S)))
 async def exec_code(session: Session, text: str):
