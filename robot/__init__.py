@@ -1,4 +1,5 @@
 """机器人模块，通过qq和用户交互"""
+from tools.utils import load_module
 from robot.botClient import get_bot_client
 from robot.main import run_bot
 from alicebot import Bot
@@ -6,13 +7,11 @@ from threading import Thread
 import os
 import asyncio
 
-# 用于注册回调函数
-import robot.module.chat  # TODO 改为自动加载
-
 
 def bot_main():
     """bot客户端的入口"""
     os.chdir(os.path.dirname(__file__))
+    load_module('module')
     bot = Bot()
     bot_client = get_bot_client()
 
