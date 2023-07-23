@@ -1,4 +1,5 @@
 from tools.log import admin_logger
+from tools.exception import ActiveExitException
 from masterServer.admin.Admin import Admin
 from communication.server import Server
 from communication import message
@@ -10,20 +11,21 @@ class CmdAdmin(Admin):
         self.cmd_dict = {}
         self.init_cmd_dict()
 
-    def parse_cmd(self, s):
-        try:
-            cmd, *args = s.split()
-            self.cmd_dict[cmd](*args)
-            admin_logger.info(f'执行命令{s}')
-        except Exception as e:
-            if isinstance(e, KeyboardInterrupt):
-                raise
-            print(e)
-
     def run(self):
         while True:
-            s = input()
-            self.parse_cmd(s)
+            try:
+                s = input()
+                cmd, *args = s.split()
+                admin_logger.info(f'即将执行命令：{s}')
+                self.cmd_dict[cmd](*args)
+                admin_logger.info('执行命令成功')
+            except ActiveExitException:
+                for name in self.server.get_client_list():
+                    self.server.send_to(name, message.exit_msg.build())
+                self.server.close()
+                return
+            except Exception as e:
+                admin_logger.warning(f'执行命令失败：{e}')  # TODO 优化打印
 
     def add_cmd(self, cmd):
         # 空格分隔后，第一项为命令字，其他的作为参数传给fun
@@ -38,6 +40,10 @@ class CmdAdmin(Admin):
         @self.add_cmd('debug')
         def debug(client_name, text):
             self.server.send_to(client_name, message.debug_msg.build(text))
+
+        @self.add_cmd('exit')
+        def exit_():
+            raise ActiveExitException('主动退出')
 
         @self.add_cmd('send')
         def send(client_name, user_id, text):

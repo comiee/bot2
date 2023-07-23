@@ -1,21 +1,11 @@
-from tools.log import main_logger
 from masterServer import server_main
 from robot import bot_main
 import multiprocessing
 import time
 
 
-def run_main(main_fun):
-    while True:
-        try:
-            main_fun()
-        except Exception as e:
-            main_logger.exception(f'运行{main_fun.__name__}时出错，将在10秒后重新运行：{e}')
-            time.sleep(10)
-
-
 def start_main(main_fun):
-    multiprocessing.Process(target=run_main, args=(main_fun,)).start()
+    multiprocessing.Process(target=main_fun).start()
 
 
 def main():

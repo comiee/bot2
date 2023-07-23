@@ -13,6 +13,8 @@ def send_msg(sock, s: str) -> None:
 
 
 def recv_msg(sock) -> str:
-    length = int(sock.recv(5).decode(ENCODING))
+    s = sock.recv(5).decode(ENCODING)
+    if s == '':
+        raise ConnectionError()
+    length = int(s)
     return sock.recv(length).decode(ENCODING)
-

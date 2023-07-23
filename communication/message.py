@@ -129,6 +129,9 @@ register_msg = Message('register', {
 # 响应消息，除注册消息外，每次发送消息都会返回此消息
 result_msg = Message('result', None)
 
+# 退出消息，收到此消息后退出程序
+exit_msg = Message('exit', {})
+
 chat_msg = Message('chat', {
     'user_id': int,  # 用户id，比如QQ号
     'text': str,  # 聊天内容

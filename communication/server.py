@@ -69,7 +69,22 @@ class Server:
         if client_type == 'sender':
             self.listen_client(client, name)
 
+    def get_client_list(self):
+        return list(self.client_dict)
+
     def run(self):
         while True:
-            # 建立客户端连接
-            Thread(target=self.accept_client, args=self.sock.accept()).start()
+            try:
+                # 建立客户端连接
+                Thread(target=self.accept_client, args=self.sock.accept()).start()
+            except BlockingIOError:
+                self.sock.close()
+                server_logger.warning('已关闭服务器')
+                break
+
+    def close(self):
+        self.sock.setblocking(False)
+        for client_name in self.client_dict:
+            for client_type, client in self.client_dict[client_name].items():
+                server_logger.warning(f'正在断开与客户端[{client_name}]{client_type}的连接')
+                client.close()
