@@ -1,8 +1,7 @@
 from communication import message
-from masterServer.masterServer import get_master_server
+from masterServer.masterServer import MasterServer
 
-server = get_master_server()
-logger = server.logger
+logger = MasterServer.logger
 
 
 @message.chat_msg.on_receive

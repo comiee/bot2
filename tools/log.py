@@ -43,3 +43,6 @@ def get_logger(name, level, file_name, file_level) -> logging.Logger:
     fh.setFormatter(formatter)
     logger.addHandler(fh)
     return logger
+
+
+main_logger: logging.Logger = get_logger('main', LogLevel.DEBUG)

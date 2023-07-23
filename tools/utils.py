@@ -1,3 +1,4 @@
+from tools.log import main_logger
 import pkgutil
 
 
@@ -7,5 +8,5 @@ def load_module(path):
     pkgutil.extend_path(dirs, path)
     for loader, module_name, is_pkg in pkgutil.iter_modules(dirs):
         if not is_pkg:
-            print(f'正在从{loader.path}加载{module_name}')  # 这个阶段在启动前，报错直接打印，不用记到日志文件里
+            main_logger.info(f'正在从{loader.path}加载{module_name}')  # 这个阶段在启动前，报错直接打印，不用记到日志文件里
             loader.find_module(module_name).load_module()
