@@ -23,8 +23,8 @@ class Message:
 
     def __init__(self, cmd: str, value_format: ValueFormatType):
         """
-        :arg cmd 消息的名称
-        :arg value_format 消息内容的格式定义，用字典的形式表达，字典的值为消息值的类型（None为任意类型），可嵌套，如：
+        :param cmd 消息的名称
+        :param value_format 消息内容的格式定义，用字典的形式表达，字典的值为消息值的类型（None为任意类型），可嵌套，如：
         {
             "name": str,
             "ability": {

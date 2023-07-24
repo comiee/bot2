@@ -2,7 +2,7 @@ from robot.comm.priority import Priority
 from robot.comm.user import User
 from alicebot.plugin import Plugin
 from alicebot.typing import T_Config, T_Event, T_State
-from alicebot.adapter.mirai import MiraiAdapter
+from alicebot.adapter.mirai import MiraiAdapter, MiraiMessage
 from alicebot.adapter.mirai.event import MessageEvent, GroupMemberInfo
 from abc import ABC
 from typing import Generic
@@ -52,11 +52,25 @@ class Session(PluginBase[MessageEvent, None, None], ABC):
         """返回消息中的纯文本内容"""
         return self.event.get_plain_text()
 
+    @staticmethod
+    def to_msg(message: MiraiMessage):
+        return str(message)  # TODO 转换成自己的格式
+
     @property
     def msg(self) -> str:
         """返回转换为字符串的消息"""
-        return str(self.event.message)  # TODO 转换成自己的格式
+        return self.to_msg(self.event.message)
 
     @property
     def reply(self):
         return self.event.reply
+
+    async def ask(self, prompt: str = None, timeout: int | float = None, return_plain_text: bool = True):
+        if prompt:
+            event = await self.event.ask(prompt, timeout=timeout)
+        else:
+            event = await self.event.get(timeout=timeout)
+        if return_plain_text:
+            return event.get_plain_text()
+        else:
+            return self.to_msg(event.message)

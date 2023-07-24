@@ -1,7 +1,8 @@
 from tools.log import bot_logger
 from robot.comm.pluginBase import Session
+from alicebot.exceptions import GetEventTimeout
 from abc import abstractmethod
-from inspect import iscoroutinefunction
+from inspect import iscoroutinefunction, signature
 import re
 
 
@@ -25,6 +26,7 @@ class _CommandMeta(type):
 class Command(metaclass=_CommandMeta):
     def __init__(self, cmd):
         # 不设置别名系统，多个cmd用嵌套装饰器解决
+        # 如果有多个命令匹配，只会执行第一个命令
         self.cmd = cmd
         self.args = ()
         self.kwargs = {}
@@ -46,7 +48,7 @@ class Command(metaclass=_CommandMeta):
         self.args = args
         self.kwargs = kwargs
 
-    async def run(self, session: Session):
+    async def run(self, session: Session) -> None:
         if iscoroutinefunction(self.fun):
             await self.fun(session, *self.args, **self.kwargs)
         else:
@@ -61,7 +63,36 @@ class FullCommand(Command):
 
 
 class SplitCommand(Command):
-    """分割命令，用空格分割，分割后的第一项为命令，其余项为参数，参数会被传入回调函数"""
+    """分割命令，用空格分割，分割后的第一项为命令，其余项为会被set_args设置为参数，参数的个数和回调函数的参数个数不匹配时不会执行，可以通过定义多个的形式重载"""
+
+    def judge(self, session: Session) -> bool:
+        if not session.text:
+            return False
+        cmd, *args = session.text.strip().split()
+        if cmd != self.cmd:
+            return False
+        if len(args) != len(signature(self.fun).parameters) - 1:
+            return False
+        self.set_args(*args)
+        return True
+
+
+class SplitArgCommand(Command):
+    """分割参数命令，与SplitCommand的不同在于如果参数不足会询问"""
+
+    def __init__(self, cmd, prompts: list[str], too_many_arg_reply: str = None,
+                 timeout: int | float = None, timeout_reply: str = '等待参数超时，命令终止。'):
+        """
+        :param prompts: prompts[i]为缺少第i个参数时的询问语句
+        :param too_many_arg_reply: 当参数过多时的回复，如果为None会忽略多余的参数
+        :param timeout: 每次询问的等待时间
+        :param timeout_reply: 超时后的回复
+        """
+        super().__init__(cmd)
+        self.prompts = prompts
+        self.too_many_arg_reply = too_many_arg_reply
+        self.timeout = timeout
+        self.timeout_reply = timeout_reply
 
     def judge(self, session: Session) -> bool:
         if not session.text:
@@ -72,9 +103,24 @@ class SplitCommand(Command):
         self.set_args(*args)
         return True
 
+    async def run(self, session: Session) -> None:
+        args = list(self.args)
+        while len(args) < len(self.prompts):
+            try:
+                text = await session.ask(self.prompts[len(args)], self.timeout)
+                args.extend(text.split())
+            except GetEventTimeout:
+                await session.reply(self.timeout_reply)
+                return
+        if len(args) > len(self.prompts) and self.too_many_arg_reply is not None:
+            await session.reply(self.too_many_arg_reply)
+            return
+        self.set_args(*args[:len(self.prompts)])
+        await super().run(session)
+
 
 class NormalCommand(Command):
-    """普通命令，判断是否已命令开头，将其余的部分作为参数传入回调函数"""
+    """普通命令，判断是否以命令开头，将其余的部分作为参数传入回调函数"""
 
     def judge(self, session: Session) -> bool:
         if not session.text.startswith(self.cmd):
@@ -112,6 +158,8 @@ def get_command_cls_list():
     # 下面的顺序决定了命令匹配的优先级
     return [
         FullCommand,
+        SplitCommand,
         NormalCommand,
+        SplitArgCommand,
         RegexCommand,
     ]
