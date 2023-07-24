@@ -40,6 +40,10 @@ class Server:
             del self.client_dict[client_name]['receiver']
             return ...
 
+    def send_to_all(self, msg: str):
+        for name in self.client_dict:
+            self.send_to(name, msg)
+
     def register_client(self, client_name, client_type, sock):
         self.client_dict.setdefault(client_name, {})[client_type] = sock
         server_logger.info(f'客户端[{client_name}]注册{client_type}')
@@ -68,9 +72,6 @@ class Server:
 
         if client_type == 'sender':
             self.listen_client(client, name)
-
-    def get_client_list(self):
-        return list(self.client_dict)
 
     def run(self):
         while True:

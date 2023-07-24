@@ -20,8 +20,7 @@ class CmdAdmin(Admin):
                 self.cmd_dict[cmd](*args)
                 admin_logger.info('执行命令成功')
             except ActiveExitException:
-                for name in self.server.get_client_list():
-                    self.server.send_to(name, message.exit_msg.build())
+                self.server.send_to_all(message.exit_msg.build())
                 self.server.close()
                 return
             except Exception as e:
