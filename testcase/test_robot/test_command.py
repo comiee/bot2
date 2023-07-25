@@ -1,21 +1,36 @@
 from robot.plugins.commandPlugin import CommandPlugin
-from faker import *
+from robot.plugins.chatPlugin import ChatPlugin
+from robot.comm.user import User
+from faker import spread_event, dummy_friend_message_event
+from unittest import mock
 import unittest
 
 __import__('robot.plugins.test')
 
 
-class CommandClassTestCase(unittest.TestCase):
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-    @async_test_case
+class CommandClassTestCase(unittest.IsolatedAsyncioTestCase):
     async def test_split(self):
-        result = await dummy_friend_text(CommandPlugin, '/split 1 2')
-        self.assertEqual("split x='1', y='2'", result)
+        event = dummy_friend_message_event('/split 1 2')
+        await spread_event(CommandPlugin, event)
+        event.reply.assert_called_once_with("split x='1', y='2'")
+
+    async def test_chat_switch_friend(self):
+        event = dummy_friend_message_event('on')
+        event.sender.id = 12345
+        await spread_event(CommandPlugin, event)
+        self.assertEqual(False, ChatPlugin.switch[12345])
+
+        User.is_super_user = mock.Mock(return_value=True)
+        event = dummy_friend_message_event('on')
+        event.sender.id = 12345
+        await spread_event(CommandPlugin, event)
+        self.assertEqual(True, ChatPlugin.switch[12345])
+        self.assertEqual(False, ChatPlugin.switch[67890])
+
+        event = dummy_friend_message_event('off')
+        event.sender.id = 12345
+        await spread_event(CommandPlugin, event)
+        self.assertEqual(False, ChatPlugin.switch[12345])
 
 
 if __name__ == '__main__':
