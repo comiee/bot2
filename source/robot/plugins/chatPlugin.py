@@ -1,4 +1,4 @@
-import public.messageDefine
+from public import messageDefine
 from public.currency import Currency
 from robot.comm.priority import Priority
 from robot.comm.pluginBase import Session
@@ -14,7 +14,7 @@ class ChatPlugin(Session, priority=Priority.Chat):
     async def handle(self) -> None:
         client = get_bot_client()
         ret = client.send(
-            public.messageDefine.chat_msg.build(user_id=self.qq, text=self.msg))  # TODO 图片等消息如何传递给服务器？计划将其转换为通用的转义格式
+            messageDefine.chat_msg.build(user_id=self.qq, text=self.msg))  # TODO 图片等消息如何传递给服务器？计划将其转换为通用的转义格式
         await self.reply(ret)
 
     async def rule(self) -> bool:

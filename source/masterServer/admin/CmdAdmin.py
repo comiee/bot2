@@ -1,4 +1,4 @@
-import public.messageDefine
+from public import messageDefine
 from public.log import admin_logger
 from public.exception import ActiveExitException
 from masterServer.admin.Admin import Admin
@@ -20,7 +20,7 @@ class CmdAdmin(Admin):
                 self.cmd_dict[cmd](*args)
                 admin_logger.info('执行命令成功')
             except ActiveExitException:
-                self.server.send_to_all(public.messageDefine.exit_msg.build())
+                self.server.send_to_all(messageDefine.exit_msg.build())
                 self.server.close()
                 return
             except Exception as e:
@@ -38,7 +38,7 @@ class CmdAdmin(Admin):
     def init_cmd_dict(self):
         @self.add_cmd('debug')
         def debug(client_name, text):
-            self.server.send_to(client_name, public.messageDefine.debug_msg.build(text))
+            self.server.send_to(client_name, messageDefine.debug_msg.build(text))
 
         @self.add_cmd('exit')
         def exit_():
@@ -46,7 +46,7 @@ class CmdAdmin(Admin):
 
         @self.add_cmd('send')
         def send(client_name, user_id, text):
-            self.server.send_to(client_name, public.messageDefine.chat_msg.build(
+            self.server.send_to(client_name, messageDefine.chat_msg.build(
                 user_id=int(user_id),
                 text=text,
             ))
