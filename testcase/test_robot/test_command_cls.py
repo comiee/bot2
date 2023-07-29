@@ -23,7 +23,7 @@ class CommandClassTestCase(unittest.IsolatedAsyncioTestCase):
         event = dummy_friend_message_event('test_cost_command')
         await spread_event(CommandPlugin, event)
         user_mock.gain.assert_not_called()
-        event.reply.assert_called_once_with('命令取消，原因：货币不足')
+        event.reply.assert_called_once_with('命令取消，原因：货币[金币]不足')
 
         user_mock.query.return_value = 10
         event = dummy_friend_message_event('test_cost_command')

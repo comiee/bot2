@@ -156,18 +156,20 @@ def super_command(command: Command):
     return command
 
 
-def cost_command(command: Command, num: int, currency: Currency):
-    """将命令变为需要花费货币的命令，限制命令在执行时先扣除一定的货币，如果回调函数中抛出CostCurrencyFailedException异常则不会扣钱"""
+def cost_command(command: Command, num: int, currency: Currency, *args):
+    """将命令变为需要花费货币的命令，限制命令在执行时先扣除一定的货币，可同时传入多个num和currency，如cost_command(Command, 1, A, 2, B)。
+    如果回调函数中抛出CostCurrencyFailedException异常则不会扣钱"""
     command_run = command.run
+    currencies = [(num, currency), *((args[i], args[i + 1]) for i in range(0, len(args), 2))]
 
     async def run_wrapper(session: Session) -> None:
         try:
-            await session.check_cost(num, currency)
+            await session.check_cost(currencies)
             await command_run(session)
         except CostCurrencyFailedException as e:
             await session.reply(f'命令取消，原因：{e.args[0]}')
         else:
-            await session.ensure_cost(num, currency)
+            await session.ensure_cost(currencies)
 
     command.run = run_wrapper
     return command
