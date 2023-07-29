@@ -1,4 +1,6 @@
-from tools.log import bot_logger
+from public.currency import Currency
+from public.log import bot_logger
+from public.exception import CostCurrencyFailedException
 from robot.comm.pluginBase import Session
 from alicebot.exceptions import GetEventTimeout
 from abc import abstractmethod
@@ -25,7 +27,7 @@ class _CommandMeta(type):
 
 class Command(metaclass=_CommandMeta):
     def __init__(self, cmd):
-        # 不设置别名系统，多个cmd用嵌套装饰器解决
+        # 不设置别名系统，多个cmd用嵌套装饰器或正则命令解决
         # 如果有多个命令匹配，只会执行第一个命令
         self.cmd = cmd
         self.args = ()
@@ -151,6 +153,23 @@ def super_command(command: Command):
         return command_judge(session)
 
     command.judge = judge_wrapper
+    return command
+
+
+def cost_command(command: Command, num: int, currency: Currency):
+    """将命令变为需要花费货币的命令，限制命令在执行时先扣除一定的货币，如果回调函数中抛出CostCurrencyFailedException异常则不会扣钱"""
+    command_run = command.run
+
+    async def run_wrapper(session: Session) -> None:
+        try:
+            await session.check_cost(num, currency)
+            await command_run(session)
+        except CostCurrencyFailedException as e:
+            await session.reply(f'命令取消，原因：{e.args[0]}')
+        else:
+            await session.ensure_cost(num, currency)
+
+    command.run = run_wrapper
     return command
 
 

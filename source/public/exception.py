@@ -8,3 +8,7 @@ class MessageException(CustomException):
 
 class ActiveExitException(CustomException):
     """主动退出时使用的异常"""
+
+
+class CostCurrencyFailedException(CustomException):
+    """扣除货币失败异常"""

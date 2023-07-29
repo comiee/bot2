@@ -1,4 +1,4 @@
-from tools.log import main_logger
+from public.log import main_logger
 import pkgutil
 
 

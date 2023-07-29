@@ -1,7 +1,8 @@
+import public.messageDefine
 from communication.comm import *
 from communication import message
-from tools.log import client_logger
-from tools.exception import MessageException
+from public.log import client_logger
+from public.exception import MessageException
 import socket
 
 __all__ = ['Client']
@@ -20,7 +21,7 @@ class Client:
         while sock.connect_ex((HOST, PORT)):
             pass
 
-        send_msg(sock, message.register_msg.build(name=self.name, client_type=client_type))
+        send_msg(sock, public.messageDefine.register_msg.build(name=self.name, client_type=client_type))
         client_logger.info(f'客户端[{self.name}] {client_type} 成功连接服务器')
         return sock
 
@@ -28,7 +29,7 @@ class Client:
         try:
             send_msg(self.sender, msg)
             client_logger.debug(f'客户端[{self.name}]发送消息到服务器：{msg}')
-            ret = message.result_msg.parse(recv_msg(self.sender))
+            ret = public.messageDefine.result_msg.parse(recv_msg(self.sender))
             client_logger.debug(f'客户端[{self.name}]收到服务器回响应：{ret}')
             return ret
         except ConnectionError as e:
@@ -44,7 +45,7 @@ class Client:
                 client_logger.debug(f'客户端[{self.name}]收到服务器的消息：{msg}')
                 ret = message.Message.parse(msg)
                 client_logger.debug(f'客户端[{self.name}]向服务器回响应：{ret}')
-                send_msg(self.receiver, message.result_msg.build(ret))
+                send_msg(self.receiver, public.messageDefine.result_msg.build(ret))
             except MessageException as e:
                 client_logger.error(f'客户端[{self.name}]解析服务器消息失败：{e.args[0]}')
             except ConnectionError as e:

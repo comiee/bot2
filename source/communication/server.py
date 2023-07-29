@@ -1,7 +1,8 @@
+import public.messageDefine
 from communication.comm import *
 from communication import message
-from tools.log import server_logger
-from tools.exception import MessageException
+from public.log import server_logger
+from public.exception import MessageException
 import socket
 from threading import Thread
 
@@ -32,7 +33,7 @@ class Server:
         try:
             send_msg(client, msg)
             server_logger.debug(f'服务器发送消息到客户端[{client_name}]：{msg}')
-            ret = message.result_msg.parse(recv_msg(client))
+            ret = public.messageDefine.result_msg.parse(recv_msg(client))
             server_logger.debug(f'服务器收到客户端[{client_name}]回响应：{ret}')
             return ret
         except ConnectionError as e:
@@ -55,7 +56,7 @@ class Server:
                 server_logger.debug(f'服务器收到客户端[{name}]的消息：{msg}')
                 ret = message.Message.parse(msg)
                 server_logger.debug(f'服务器向客户端[{name}]回响应：{ret}')
-                send_msg(client, message.result_msg.build(ret))
+                send_msg(client, public.messageDefine.result_msg.build(ret))
             except MessageException as e:
                 server_logger.error(f'服务器解析客户端[{name}]消息失败：{e.args[0]}')
             except ConnectionError as e:
@@ -66,7 +67,7 @@ class Server:
         server_logger.info("连接地址: %s" % str(addr))
         # 第一条消息为注册消息
         msg = recv_msg(client)
-        msg_dict = message.register_msg.parse(msg)  # 解析消息可能出错，如果在注册阶段出错，此线程抛异常终止，不会影响其他线程
+        msg_dict = public.messageDefine.register_msg.parse(msg)  # 解析消息可能出错，如果在注册阶段出错，此线程抛异常终止，不会影响其他线程
         name, client_type = msg_dict['name'], msg_dict['client_type']
         self.register_client(name, client_type, client)
 

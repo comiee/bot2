@@ -1,4 +1,4 @@
-from tools.log import bot_logger
+from public.log import bot_logger
 from robot.comm.priority import Priority
 from robot.comm.pluginBase import PluginBase
 from inspect import isfunction, ismethod

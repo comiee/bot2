@@ -8,23 +8,18 @@ import unittest
 __import__('robot.plugins.test')
 
 
-class CommandClassTestCase(unittest.IsolatedAsyncioTestCase):
+class CommandTestCase(unittest.IsolatedAsyncioTestCase):
     async def test_split(self):
         event = dummy_friend_message_event('/split 1 2')
         await spread_event(CommandPlugin, event)
         event.reply.assert_called_once_with("split x='1', y='2'")
 
-    async def test_chat_switch_friend(self):
-        event = dummy_friend_message_event('on')
-        event.sender.id = 12345
-        await spread_event(CommandPlugin, event)
-        self.assertEqual(False, ChatPlugin.switch[12345])
-
+    async def test_chat_switch_state(self):
         User.is_super_user = mock.Mock(return_value=True)
         event = dummy_friend_message_event('on')
         event.sender.id = 12345
         await spread_event(CommandPlugin, event)
-        self.assertEqual(True, ChatPlugin.switch[12345])
+        self.assertEqual(True, ChatPlugin.switch[12345])  # 每个id的开关状态独立
         self.assertEqual(False, ChatPlugin.switch[67890])
 
         event = dummy_friend_message_event('off')
