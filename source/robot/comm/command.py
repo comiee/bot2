@@ -70,7 +70,8 @@ class Command(metaclass=_CommandMeta):
 
     def trim_cost(self, num: int, currency: Currency, *args):
         """将命令变为需要花费货币的命令，限制命令在执行时先扣除一定的货币，可同时传入多个num和currency，如cost_command(Command, 1, A, 2, B)。
-        如果回调函数中抛出CostCurrencyFailedException异常或使用了stop、skip等操作则不会扣钱"""
+        如果回调函数中抛出CostCurrencyFailedException异常或使用了stop、skip等中途退出的操作则不会扣钱"""
+        # 也可以嵌套使用，但是分开询问是否扣钱
         run = self.run
         currencies = [(num, currency), *((args[i], args[i + 1]) for i in range(0, len(args), 2))]
 
@@ -125,7 +126,7 @@ class SplitArgCommand(Command):
     """分割参数命令，与SplitCommand的不同在于如果参数不足会询问"""
 
     def __init__(self, cmd, prompts: list[str], too_many_arg_reply: str = None,
-                 timeout: int | float = None, timeout_reply: str = '等待参数超时，命令终止。'):
+                 timeout: int | float = 10 * 60, timeout_reply: str = '等待参数超时，命令终止。'):
         """
         :param prompts: prompts[i]为缺少第i个参数时的询问语句
         :param too_many_arg_reply: 当参数过多时的回复，如果为None会忽略多余的参数

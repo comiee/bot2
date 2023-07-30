@@ -4,6 +4,7 @@ from robot.comm.priority import Priority
 from robot.comm.user import User
 from alicebot.plugin import Plugin
 from alicebot.typing import T_Config, T_Event, T_State
+from alicebot.exceptions import GetEventTimeout
 from alicebot.adapter.mirai import MiraiAdapter
 from alicebot.adapter.mirai.message import MiraiMessage, T_MiraiMSG, MiraiMessageSegment
 from alicebot.adapter.mirai.event import MessageEvent, GroupMemberInfo, GroupMessage
@@ -104,7 +105,11 @@ class Session(PluginBase[MessageEvent, None, None], ABC):
 
     async def check_cost(self, currencies: list[tuple[int, Currency]]) -> None:
         """检查是否能扣除self.user的num个current类型的货币，如果对方取消或货币不足，会抛出CostCurrencyFailedException异常"""
-        if not await self.inquire(f'此操作将花费{"、".join(f"{n}{c.value}" for n, c in currencies)}，是否确认？', 60):
+        try:
+            ret = await self.inquire(f'此操作将花费{"、".join(f"{n}{c.value}" for n, c in currencies)}，是否确认？', 60)
+        except GetEventTimeout:
+            raise CostCurrencyFailedException('等待超时')
+        if not ret:
             raise CostCurrencyFailedException('用户取消')
         for num, currency in currencies:
             if self.user.query(currency) < num:
