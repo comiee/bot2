@@ -1,7 +1,7 @@
 from robot.plugins.commandPlugin import CommandPlugin
 from robot.plugins.chatPlugin import ChatPlugin
 from robot.comm.user import User
-from faker import spread_event, dummy_friend_message_event
+from test_robot.faker import spread_event, dummy_friend_message_event
 from unittest import mock
 import unittest
 
