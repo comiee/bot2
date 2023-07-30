@@ -1,7 +1,7 @@
 """定义组件中通信的消息格式"""
+from comiee import overload
 from public.exception import MessageException
 import json
-from comiee import overload
 
 ValueFormatType = dict | type | None
 
@@ -21,7 +21,7 @@ class Message:
             raise MessageException('未知的消息：' + cmd)
         return Message.message_dict[cmd]
 
-    def __init__(self, cmd: str, value_format: ValueFormatType):
+    def __init__(self, cmd: str, value_format: ValueFormatType, result_format: ValueFormatType = None):
         """
         :param cmd 消息的名称
         :param value_format 消息内容的格式定义，用字典的形式表达，字典的值为消息值的类型（None为任意类型），可嵌套，如：
@@ -32,9 +32,11 @@ class Message:
                 "fly": False,
             }
         }
+        :param result_format 响应消息的格式，只在发送响应消息时校验，格式同value_format
         """
         self.cmd = cmd
         self.value_format = value_format
+        self.result_format = result_format
         self.call_back = None
         Message.add_message(cmd, self)
 
@@ -101,8 +103,13 @@ class Message:
 
         if function := self.call_back:
             if isinstance(self.value_format, dict):
-                return function(**value)
+                result = function(**value)
             else:
-                return function(value)
+                result = function(value)
         else:
-            return value
+            result = value
+        try:
+            self.check_format(self.result_format, result)
+        except MessageException as e:
+            raise MessageException(f'命令字<{self.cmd}>构建响应消息失败：{e.args[0]}')
+        return result
