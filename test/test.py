@@ -1,20 +1,26 @@
-import multiprocessing
-import itertools
-import time
+class CommandMeta(type):
+    def __init__(cls, name, bases, attrs):  # 定义新类的时候执行
+        super().__init__(name, bases, attrs)
+        print('class', CommandMeta, cls, name, bases, attrs)
 
+    def __call__(cls, *args, **kwargs):  # 新类实例化时执行
+        obj = super().__call__(*args, **kwargs)
+        print('new', CommandMeta, cls, obj, args, kwargs)
+        return obj
 
-def f(name):
-    for i in itertools.count():
-        print(name, i)
-        time.sleep(1)
+class Command(metaclass=CommandMeta):
+    def __init__(self):
+        print(Command)
+
+class SuperCommand(Command):
+    def __init__(self):
+        super().__init__()
+        print(SuperCommand)
 
 
 def main():
-    multiprocessing.Process(target=f, args=('a',)).start()
-    multiprocessing.Process(target=f, args=('b',)).start()
-    #time.sleep(1)
-    while True:
-        print('c', input())
+    cmd=SuperCommand()
+    print(type(cmd))
 
 
 if __name__ == '__main__':

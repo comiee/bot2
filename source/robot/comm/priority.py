@@ -13,7 +13,6 @@ class Priority(Enum):
     Filter = _produce_priority(True)
     Log = _produce_priority(False)
     Request = _produce_priority(True)
-    # TODO 通过优先级过滤黑名单用户
     # TODO game类
     Command = _produce_priority(True)
     Chat = _produce_priority(False)

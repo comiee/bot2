@@ -2,7 +2,7 @@ from public import message
 from public.currency import Currency
 from robot.comm.priority import Priority
 from robot.comm.pluginBase import Session
-from robot.comm.command import FullCommand, RegexCommand, super_command, cost_command
+from robot.comm.command import FullCommand, RegexCommand
 from robot.comm.state import State
 from robot.botClient import get_bot_client
 from alicebot.adapter.mirai.event import MessageEvent
@@ -24,8 +24,8 @@ class ChatPlugin(Session, priority=Priority.Chat):
             return False
         return True
 
-    @cost_command(RegexCommand(r'^(?:聊天|开|开启)$'), 10, Currency.coin)
-    @super_command(FullCommand('on'))
+    @RegexCommand(r'^(?:聊天|开|开启)$').trim_cost(10, Currency.coin)
+    @FullCommand('on').trim_super()
     async def chat_on(self):
         if ChatPlugin.switch[self.id] is not True:
             ChatPlugin.switch[self.id] = True
@@ -34,8 +34,8 @@ class ChatPlugin(Session, priority=Priority.Chat):
             await self.reply('聊天功能已经是开启状态了哦。')
             self.stop()  # 提前结束防止扣钱
 
-    @cost_command(RegexCommand(r'^(?:闭嘴|关|关闭)$'), 10, Currency.coin)
-    @super_command(FullCommand('off'))
+    @RegexCommand(r'^(?:闭嘴|关|关闭)$').trim_cost(10, Currency.coin)
+    @FullCommand('off').trim_super()
     async def chat_off(self):
         if ChatPlugin.switch[self.id] is not False:
             ChatPlugin.switch[self.id] = False

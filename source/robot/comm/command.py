@@ -56,6 +56,48 @@ class Command(metaclass=_CommandMeta):
         else:
             self.fun(session, *self.args, **self.kwargs)
 
+    def trim_super(self):
+        """将命令变为管理员命令，除了限定使用者以外和原命令一样"""
+        judge = self.judge
+
+        def judge_wrapper(session: Session) -> bool:
+            if not session.user.is_super_user():
+                return False
+            return judge(session)
+
+        self.judge = judge_wrapper
+        return self
+
+    def trim_cost(self, num: int, currency: Currency, *args):
+        """将命令变为需要花费货币的命令，限制命令在执行时先扣除一定的货币，可同时传入多个num和currency，如cost_command(Command, 1, A, 2, B)。
+        如果回调函数中抛出CostCurrencyFailedException异常或使用了stop、skip等操作则不会扣钱"""
+        run = self.run
+        currencies = [(num, currency), *((args[i], args[i + 1]) for i in range(0, len(args), 2))]
+
+        async def run_wrapper(session: Session) -> None:
+            try:
+                await session.check_cost(currencies)
+                await run(session)
+            except CostCurrencyFailedException as e:
+                await session.reply(f'命令取消，原因：{e.args[0]}')
+            else:
+                await session.ensure_cost(currencies)
+
+        self.run = run_wrapper
+        return self
+
+    def trim_white_list(self, users: set[int], groups: set[int]):
+        """TODO 将命令变为白名单命令"""
+
+    def trim_black_list(self, users: set[int], groups: set[int]):
+        """TODO 将命令变为黑名单命令"""
+
+    def trim_friend(self, tip: str = None):
+        """TODO 将命令变为私聊命令，如果tip不为None，会在非私聊场景下回复tip"""
+
+    def trim_group(self, tip: str = None):
+        """TODO 将命令变为群聊命令，如果tip不为None，会在非群聊场景下回复tip"""
+
 
 class FullCommand(Command):
     """全匹配命令，只有与文本完全匹配才会生效"""
@@ -141,54 +183,6 @@ class RegexCommand(Command):
             return False
         self.set_args(*m.groups())
         return True
-
-
-def super_command(command: Command):
-    """将命令变为管理员命令，除了限定使用者以外和原命令一样"""
-    command_judge = command.judge
-
-    def judge_wrapper(session: Session) -> bool:
-        if not session.user.is_super_user():
-            return False
-        return command_judge(session)
-
-    command.judge = judge_wrapper
-    return command
-
-
-def cost_command(command: Command, num: int, currency: Currency, *args):
-    """将命令变为需要花费货币的命令，限制命令在执行时先扣除一定的货币，可同时传入多个num和currency，如cost_command(Command, 1, A, 2, B)。
-    如果回调函数中抛出CostCurrencyFailedException异常则不会扣钱"""
-    command_run = command.run
-    currencies = [(num, currency), *((args[i], args[i + 1]) for i in range(0, len(args), 2))]
-
-    async def run_wrapper(session: Session) -> None:
-        try:
-            await session.check_cost(currencies)
-            await command_run(session)
-        except CostCurrencyFailedException as e:
-            await session.reply(f'命令取消，原因：{e.args[0]}')
-        else:
-            await session.ensure_cost(currencies)
-
-    command.run = run_wrapper
-    return command
-
-
-def white_list_command(command: Command, users: set[int], groups: set[int]):
-    """TODO 将命令变为白名单命令"""
-
-
-def black_list_command(command: Command, users: set[int], groups: set[int]):
-    """TODO 将命令变为黑名单命令"""
-
-
-def friend_command(command: Command, tip: str = None):
-    """TODO 将命令变为私聊命令，如果tip不为None，会在非私聊场景下回复tip"""
-
-
-def group_command(command: Command, tip: str = None):
-    """TODO 将命令变为群聊命令，如果tip不为None，会在非群聊场景下回复tip"""
 
 
 def get_command_cls_list():

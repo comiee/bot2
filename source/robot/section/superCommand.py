@@ -1,10 +1,10 @@
 from public import message
-from robot.comm.command import super_command, NormalCommand, RegexCommand
+from robot.comm.command import NormalCommand, RegexCommand
 from robot.comm.pluginBase import Session
 from robot.botClient import get_bot_client
 import re
 
-@super_command(RegexCommand(re.compile(r'^exec\s(.*)$',re.S)))
+@RegexCommand(re.compile(r'^exec\s(.*)$',re.S)).trim_super()
 async def exec_code(session: Session, text: str):
     try:
         exec('async def func(session):\n\t' + text.replace('\n', '\n\t'))
@@ -15,7 +15,7 @@ async def exec_code(session: Session, text: str):
         await session.reply(str(e))
 
 
-@super_command(RegexCommand(re.compile(r'^eval\s(.*)$',re.S)))
+@RegexCommand(re.compile(r'^eval\s(.*)$',re.S)).trim_super()
 async def eval_code(session: Session, text: str):
     try:
         ret = eval(text)
@@ -24,7 +24,7 @@ async def eval_code(session: Session, text: str):
         await session.reply(str(e))
 
 
-@super_command(NormalCommand('debug '))
+@NormalCommand('debug ').trim_super()
 def debug(_: Session, text: str):
     get_bot_client().send(message.debug_msg.build(text))
 
