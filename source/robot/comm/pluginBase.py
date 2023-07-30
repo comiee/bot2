@@ -5,8 +5,8 @@ from robot.comm.user import User
 from alicebot.plugin import Plugin
 from alicebot.typing import T_Config, T_Event, T_State
 from alicebot.adapter.mirai import MiraiAdapter
-from alicebot.adapter.mirai.message import MiraiMessage
-from alicebot.adapter.mirai.event import MessageEvent, GroupMemberInfo
+from alicebot.adapter.mirai.message import MiraiMessage, T_MiraiMSG, MiraiMessageSegment
+from alicebot.adapter.mirai.event import MessageEvent, GroupMemberInfo, GroupMessage
 from abc import ABC
 from typing import Generic
 
@@ -64,21 +64,34 @@ class Session(PluginBase[MessageEvent, None, None], ABC):
         """返回转换为字符串的消息"""
         return self.to_msg(self.event.message)
 
-    @property
-    def reply(self):
-        return self.event.reply
+    def is_group(self):
+        return isinstance(self.event, GroupMessage)
 
-    async def ask(self, prompt: str = None, timeout: int | float = None, return_plain_text: bool = True) -> str:
+    def at(self, target: int = None):
+        if not self.is_group():
+            return ''
+        if target is None:
+            target = self.qq
+        return MiraiMessageSegment.at(target)
+
+    async def reply(self, message: T_MiraiMSG, quote: bool = False, at: bool = False) -> dict[str, None]:
+        if at and self.is_group():
+            message = MiraiMessageSegment.at(self.qq) + message
+        return await self.event.reply(message, quote)
+
+    async def ask(self, prompt: T_MiraiMSG = None, quote: bool = False, at: bool = False,
+                  timeout: int | float = None, return_plain_text: bool = True) -> str:
         """
-        像用户询问
+        向用户询问
         :param prompt: 询问的话语，如果为None则直接等待回复
+        :param quote: 是否引用消息
+        :param at: 是否at对方
         :param timeout: 等待回复的时长，超时会抛出GetEventTimeout异常
         :param return_plain_text: 是否返回plain_text
         """
         if prompt:
-            event = await self.event.ask(prompt, timeout=timeout)
-        else:
-            event = await self.event.get(timeout=timeout)
+            await self.reply(prompt, quote, at)
+        event = await self.event.get(timeout=timeout)
         if return_plain_text:
             return event.get_plain_text()
         else:
@@ -86,12 +99,12 @@ class Session(PluginBase[MessageEvent, None, None], ABC):
 
     async def inquire(self, prompt: str, timeout: int | float = None) -> bool:
         """向用户确认，返回用户是否同意"""
-        ret = await self.ask(prompt, timeout)
+        ret = await self.ask(prompt, quote=True, timeout=timeout)
         return ret in {'是', '继续', 'Y', 'y', 'yes', '确认'}
 
     async def check_cost(self, currencies: list[tuple[int, Currency]]) -> None:
         """检查是否能扣除self.user的num个current类型的货币，如果对方取消或货币不足，会抛出CostCurrencyFailedException异常"""
-        if not await self.inquire(f'此操作将花费{"、".join(f"{n}{c}" for n, c in currencies)}，是否确认？', 60):
+        if not await self.inquire(f'此操作将花费{"、".join(f"{n}{c.value}" for n, c in currencies)}，是否确认？', 60):
             raise CostCurrencyFailedException('用户取消')
         for num, currency in currencies:
             if self.user.query(currency) < num:

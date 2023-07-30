@@ -109,7 +109,7 @@ class SplitArgCommand(Command):
         args = list(self.args)
         while len(args) < len(self.prompts):
             try:
-                text = await session.ask(self.prompts[len(args)], self.timeout)
+                text = await session.ask(self.prompts[len(args)], timeout=self.timeout)
                 args.extend(text.split())
             except GetEventTimeout:
                 await session.reply(self.timeout_reply)

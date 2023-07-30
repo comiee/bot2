@@ -1,4 +1,4 @@
-from public import messageDefine
+from public import message
 from public.currency import Currency
 from robot.comm.priority import Priority
 from robot.comm.pluginBase import Session
@@ -14,7 +14,7 @@ class ChatPlugin(Session, priority=Priority.Chat):
     async def handle(self) -> None:
         client = get_bot_client()
         ret = client.send(
-            messageDefine.chat_msg.build(user_id=self.qq, text=self.msg))  # TODO 图片等消息如何传递给服务器？计划将其转换为通用的转义格式
+            message.chat_msg.build(user_id=self.qq, text=self.msg))  # TODO 图片等消息如何传递给服务器？计划将其转换为通用的转义格式
         await self.reply(ret)
 
     async def rule(self) -> bool:
@@ -32,6 +32,7 @@ class ChatPlugin(Session, priority=Priority.Chat):
             await self.reply('聊天功能开启')
         else:
             await self.reply('聊天功能已经是开启状态了哦。')
+            self.stop()  # 提前结束防止扣钱
 
     @cost_command(RegexCommand(r'^(?:闭嘴|关|关闭)$'), 10, Currency.coin)
     @super_command(FullCommand('off'))
@@ -41,3 +42,4 @@ class ChatPlugin(Session, priority=Priority.Chat):
             await self.reply('聊天功能关闭')
         else:
             await self.reply('我已经闭嘴了，你还要我怎样？')
+            self.stop()  # 提前结束防止扣钱

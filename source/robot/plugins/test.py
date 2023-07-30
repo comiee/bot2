@@ -1,4 +1,4 @@
-from public import messageDefine
+from public import message
 from robot.comm.priority import Priority
 from robot.botClient import get_bot_client
 from robot.comm.pluginBase import Session
@@ -17,7 +17,7 @@ class TestPlugin(Session, priority=Priority.Chat):
         else:
             text = args[0]
         user = self.event.sender.id
-        ret = client.send(messageDefine.chat_msg.build(user_id=user, text=text))
+        ret = client.send(message.chat_msg.build(user_id=user, text=text))
         await self.event.reply(ret)
 
     async def rule(self) -> bool:

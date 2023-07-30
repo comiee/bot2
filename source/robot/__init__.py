@@ -12,6 +12,7 @@ def bot_main():
     """bot客户端的入口"""
     os.chdir(os.path.dirname(__file__))
     load_module('module')
+    load_module('section')
     bot = Bot()
     bot_client = get_bot_client()
 

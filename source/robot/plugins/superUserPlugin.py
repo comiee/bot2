@@ -1,4 +1,4 @@
-from public import messageDefine
+from public import message
 from robot.comm.command import super_command, NormalCommand, RegexCommand
 from robot.comm.pluginBase import Session
 from robot.botClient import get_bot_client
@@ -26,6 +26,6 @@ async def eval_code(session: Session, text: str):
 
 @super_command(NormalCommand('debug '))
 def debug(_: Session, text: str):
-    get_bot_client().send(messageDefine.debug_msg.build(text))
+    get_bot_client().send(message.debug_msg.build(text))
 
 # TODO 保存自定义代码
