@@ -9,16 +9,16 @@ import re
 
 
 class _CommandMeta(type):
-    def __init__(cls, name, bases, attrs):
+    def __init__(cls, name, bases, attrs):  # 定义新类的时候执行
         super().__init__(name, bases, attrs)
         cls.commands: list[Command] = []
 
-    def __call__(cls, *args, **kwargs):
+    def __call__(cls, *args, **kwargs):  # 新类实例化时执行
         obj = super().__call__(*args, **kwargs)
         cls.commands.append(obj)
         return obj
 
-    def mate(cls, session: Session):
+    def mate(cls, session: Session):  # 新类的类方法
         for command in cls.commands:
             if command.judge(session):
                 bot_logger.info(f'匹配到{command}')
@@ -173,6 +173,22 @@ def cost_command(command: Command, num: int, currency: Currency, *args):
 
     command.run = run_wrapper
     return command
+
+
+def white_list_command(command: Command, users: set[int], groups: set[int]):
+    """TODO 将命令变为白名单命令"""
+
+
+def black_list_command(command: Command, users: set[int], groups: set[int]):
+    """TODO 将命令变为黑名单命令"""
+
+
+def friend_command(command: Command, tip: str = None):
+    """TODO 将命令变为私聊命令，如果tip不为None，会在非私聊场景下回复tip"""
+
+
+def group_command(command: Command, tip: str = None):
+    """TODO 将命令变为群聊命令，如果tip不为None，会在非群聊场景下回复tip"""
 
 
 def get_command_cls_list():

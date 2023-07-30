@@ -9,11 +9,24 @@ import unittest
 
 class CommandClassTestCase(unittest.IsolatedAsyncioTestCase):
     # TODO 补充其他类型的命令的用例
+    async def test_super_command(self):
+        fun_mock = mock.Mock()
+        super_command(FullCommand('test_super_command'))(fun_mock)
+
+        event=dummy_friend_message_event('test_super_command')
+        await spread_event(CommandPlugin, event)
+        fun_mock.assert_not_called()
+
+        User.is_super_user = mock.Mock(return_value=True)
+        event = dummy_friend_message_event('test_super_command')
+        await spread_event(CommandPlugin, event)
+        fun_mock.assert_called_once()
+
+
     @mock.patch('robot.comm.pluginBase.Session.user', new_callable=mock.PropertyMock)
     async def test_cost_command(self, user_property_mock):
-        @cost_command(FullCommand('test_cost_command'), 10, Currency.coin)
-        def test_fun(_: Session):
-            pass
+        fun_mock=mock.Mock()
+        cost_command(FullCommand('test_cost_command'), 10, Currency.coin)(fun_mock)
 
         user_mock = mock.Mock(User)
         user_property_mock.return_value = user_mock
@@ -23,12 +36,13 @@ class CommandClassTestCase(unittest.IsolatedAsyncioTestCase):
         event = dummy_friend_message_event('test_cost_command')
         await spread_event(CommandPlugin, event)
         user_mock.gain.assert_not_called()
-        event.reply.assert_called_once_with('命令取消，原因：货币[金币]不足')
+        event.reply.assert_called_once_with('命令取消，原因：货币[金币]不足', mock.ANY)
 
         user_mock.query.return_value = 10
         event = dummy_friend_message_event('test_cost_command')
         await spread_event(CommandPlugin, event)
         user_mock.gain.assert_called_with(-10, Currency.coin)
+        fun_mock.assert_called_once()
 
 
 

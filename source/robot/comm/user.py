@@ -8,14 +8,14 @@ class User(int):
     def query(self, currency: Currency) -> int:
         """查询用户的currency货币的数量"""
         assert currency == Currency.coin
-        if not hasattr(self, 'coin'):
-            self.coin = 233
-        return self.coin  # TODO 向服务器发消息查询
+        if not hasattr(User, 'coin'):
+            User.coin = 233
+        return User.coin  # TODO 向服务器发消息查询
 
     def gain(self, num: int, currency: Currency) -> None:
         """给用户num个currency货币"""
         # TODO 向服务器发消息改变货币数量
         assert currency == Currency.coin
-        if not hasattr(self, 'coin'):
-            self.coin = 233
-        self.coin += num
+        if not hasattr(User, 'coin'):
+            User.coin = 233
+        User.coin += num
