@@ -107,9 +107,34 @@ class Message:
             else:
                 result = function(value)
         else:
-            result = value
+            result = None
         try:
             self.check_format(self.result_format, result)
         except MessageException as e:
             raise MessageException(f'命令字<{self.cmd}>构建响应消息失败：{e.args[0]}')
         return result
+
+
+# 注册消息，每个客户端连接上服务器时先发送一条注册消息，此消息不会有响应消息
+register_msg = Message('register', {
+    'name': str,  # 客户端的识别名
+    'client_type': str,  # 客户端的类型，支持的类型有：
+    # sender：发送者，要求服务器长期处于等待接收消息的状态
+    # receiver：接收者，自身长期处于等待接收消息的状态
+})
+
+
+@register_msg.on_receive
+def _register(name, client_type):
+    return name, client_type
+
+
+# 响应消息，除注册消息外，每次发送消息都会返回此消息
+result_msg = Message('result', None)
+
+
+@result_msg.on_receive
+def _result(value):
+    return value
+
+# 特殊消息定义在此文件，其余消息定义在public.message
