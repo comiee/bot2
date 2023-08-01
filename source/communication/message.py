@@ -7,19 +7,19 @@ ValueFormatType = dict | type | None
 
 
 class Message:
-    message_dict = {}  # 存储命令字对应的消息对象
+    __message_dict = {}  # 存储命令字对应的消息对象
 
     @staticmethod
-    def add_message(cmd: str, message: 'Message'):
-        if cmd in Message.message_dict:
+    def __add_message(cmd: str, message: 'Message'):
+        if cmd in Message.__message_dict:
             raise MessageException('消息命令字重复：' + cmd)
-        Message.message_dict[cmd] = message
+        Message.__message_dict[cmd] = message
 
     @staticmethod
-    def get_message(cmd: str) -> 'Message':
-        if cmd not in Message.message_dict:
+    def __get_message(cmd: str) -> 'Message':
+        if cmd not in Message.__message_dict:
             raise MessageException('未知的消息：' + cmd)
-        return Message.message_dict[cmd]
+        return Message.__message_dict[cmd]
 
     def __init__(self, cmd: str, value_format: ValueFormatType, result_format: ValueFormatType = None):
         """
@@ -34,21 +34,21 @@ class Message:
         }
         :param result_format 响应消息的格式，只在发送响应消息时校验，格式同value_format
         """
-        self.cmd = cmd
-        self.value_format = value_format
-        self.result_format = result_format
-        self.call_back = None
-        Message.add_message(cmd, self)
+        self.__cmd = cmd
+        self.__value_format = value_format
+        self.__result_format = result_format
+        self.__call_back = None
+        Message.__add_message(cmd, self)
 
     def on_receive(self, function):
         """接受到消息以后的回调函数，函数的参数是按照value_format解包后的msg_value，返回值会作为消息的响应"""
-        if self.call_back is not None:
-            raise MessageException(f'命令字<{self.cmd}>回调函数已被注册')
-        self.call_back = function
+        if self.__call_back is not None:
+            raise MessageException(f'命令字<{self.__cmd}>回调函数已被注册')
+        self.__call_back = function
         return function
 
     @staticmethod
-    def check_format(value_format: ValueFormatType, msg_value):
+    def __check_format(value_format: ValueFormatType, msg_value):
         if value_format is None:
             return
         elif isinstance(value_format, dict):
@@ -59,7 +59,7 @@ class Message:
             if keys := msg_value.keys() - value_format.keys():
                 raise MessageException(f'多余参数{keys}')
             for k in msg_value:
-                Message.check_format(value_format[k], msg_value[k])
+                Message.__check_format(value_format[k], msg_value[k])
         elif not isinstance(msg_value, value_format):
             raise MessageException(f'参数类型错误：期望{value_format}，实际{type(msg_value)}')
 
@@ -70,10 +70,10 @@ class Message:
     @overload
     def build(self, msg_value) -> str:
         try:
-            self.check_format(self.value_format, msg_value)
+            self.__check_format(self.__value_format, msg_value)
         except MessageException as e:
-            raise MessageException(f'命令字<{self.cmd}>消息构建失败：{e.args[0]}')
-        msg = {'cmd': self.cmd, 'value': msg_value}
+            raise MessageException(f'命令字<{self.__cmd}>消息构建失败：{e.args[0]}')
+        msg = {'cmd': self.__cmd, 'value': msg_value}
         return json.dumps(msg, ensure_ascii=False)
 
     @overload
@@ -83,7 +83,7 @@ class Message:
         msg = json.loads(s)
         cmd = msg['cmd']
         value = msg['value']
-        return Message.get_message(cmd).solve(value)
+        return Message.__get_message(cmd).__solve(value)
 
     @overload
     def parse(self, s: str):
@@ -91,27 +91,27 @@ class Message:
         msg = json.loads(s)
         cmd = msg['cmd']
         value = msg['value']
-        if cmd != self.cmd:
-            raise MessageException(f'命令字匹配失败：收到{cmd}，目标{self.cmd}')
-        return Message.get_message(cmd).solve(value)
+        if cmd != self.__cmd:
+            raise MessageException(f'命令字匹配失败：收到{cmd}，目标{self.__cmd}')
+        return Message.__get_message(cmd).__solve(value)
 
-    def solve(self, value):
+    def __solve(self, value):
         try:
-            self.check_format(self.value_format, value)
+            self.__check_format(self.__value_format, value)
         except MessageException as e:
-            raise MessageException(f'命令字<{self.cmd}>消息解析失败：{e.args[0]}')
+            raise MessageException(f'命令字<{self.__cmd}>消息解析失败：{e.args[0]}')
 
-        if function := self.call_back:
-            if isinstance(self.value_format, dict):
+        if function := self.__call_back:
+            if isinstance(self.__value_format, dict):
                 result = function(**value)
             else:
                 result = function(value)
         else:
             result = None
         try:
-            self.check_format(self.result_format, result)
+            self.__check_format(self.__result_format, result)
         except MessageException as e:
-            raise MessageException(f'命令字<{self.cmd}>构建响应消息失败：{e.args[0]}')
+            raise MessageException(f'命令字<{self.__cmd}>构建响应消息失败：{e.args[0]}')
         return result
 
 
