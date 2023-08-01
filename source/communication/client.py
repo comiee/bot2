@@ -10,7 +10,7 @@ __all__ = ['Client']
 class Client:
     def __init__(self, name):
         self.name = name
-        self.sender = self.register('sender')
+        self.sender = None
         self.receiver = None
 
     def register(self, client_type):
@@ -26,6 +26,8 @@ class Client:
         return sock
 
     def send(self, msg: str):
+        if self.sender is None:
+            self.sender = self.register('sender')
         try:
             send_msg(self.sender, msg)
             client_logger.debug(f'客户端[{self.name}]发送消息到服务器：{msg}')
@@ -53,6 +55,7 @@ class Client:
                 self.receiver = self.register('receiver')
 
     def close(self):
-        self.sender.close()
+        if self.sender is not None:
+            self.sender.close()
         if self.receiver is not None:
             self.receiver.close()
