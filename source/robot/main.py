@@ -8,7 +8,7 @@ import importlib
 __all__ = ['run_bot']
 
 
-# 解决alicebot加载两次plugins目录的问题，同时解决加载插件时报错太难看的问题，强制要求加载所有插件
+# 强制要求加载所有插件
 def repair_get_classes_from_module_name():
     def _get_classes_from_module_name(name, super_class):
         importlib.invalidate_caches()

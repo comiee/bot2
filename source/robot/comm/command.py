@@ -186,7 +186,7 @@ class RegexCommand(Command):
         return True
 
 
-def get_command_cls_list():
+def get_command_cls_list() -> list[type[Command]]:
     # 下面的顺序决定了命令匹配的优先级
     return [
         FullCommand,
