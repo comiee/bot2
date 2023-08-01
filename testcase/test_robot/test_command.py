@@ -26,6 +26,7 @@ class CommandTestCase(unittest.IsolatedAsyncioTestCase):
         event.sender.id = 12345
         await spread_event(CommandPlugin, event)
         self.assertEqual(False, ChatPlugin.switch[12345])
+    # TODO gain命令用例
 
 
 if __name__ == '__main__':

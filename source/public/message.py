@@ -20,8 +20,10 @@ chat_msg = Message('chat', {
 }, str)  # 返回值为聊天内容的回应
 
 ############################## sql类消息 ##############################
-# 通用的sql消息
-sql_msg = Message('sql', str)  # 该消息仅用于管理员命令，sql操作应该尽量在服务器完成
+# 通用的sql消息（该消息仅用于管理员命令，sql操作应该尽量在服务器完成）
+sql_msg = Message('sql',
+                  str,  # sql语句
+                  str)  # 调整好打印格式的结果字符串
 
 # 查询货币数量
 query_currency_msg = Message('query_currency', {
@@ -30,7 +32,7 @@ query_currency_msg = Message('query_currency', {
 }, int)  # 查询到的货币数量
 
 # 增加或减少货币数量
-change_currency_msg = Message('change_currency', {
+increase_currency_msg = Message('change_currency', {
     'user_id': int,  # 用户id，比如QQ号
     'currency': str,  # 货币类型，Currency枚举的name属性
     'num': int,  # 货币的增量

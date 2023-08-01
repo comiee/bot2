@@ -1,5 +1,5 @@
 from public.currency import Currency
-from public.message import query_currency_msg, change_currency_msg
+from public.message import query_currency_msg, increase_currency_msg
 from robot.botClient import get_bot_client
 
 
@@ -13,4 +13,4 @@ class User(int):
 
     def gain(self, num: int, currency: Currency) -> None:
         """给用户num个currency货币"""
-        get_bot_client().send(change_currency_msg.build(user_id=int(self), currency=currency.name, num=num))
+        get_bot_client().send(increase_currency_msg.build(user_id=int(self), currency=currency.name, num=num))

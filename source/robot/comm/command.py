@@ -57,15 +57,23 @@ class Command(metaclass=_CommandMeta):
             self.fun(session, *self.args, **self.kwargs)
 
     def trim_super(self):
-        """将命令变为管理员命令，除了限定使用者以外和原命令一样"""
+        """将命令变为管理员命令，限定使用者为管理员并在执行出错时返回错误"""
         judge = self.judge
+        run = self.run
 
         def judge_wrapper(session: Session) -> bool:
             if not session.user.is_super_user():
                 return False
             return judge(session)
 
+        async def run_wrapper(session: Session) -> None:
+            try:
+                await run(session)
+            except Exception as e:
+                await session.reply(str(e))
+
         self.judge = judge_wrapper
+        self.run = run_wrapper
         return self
 
     def trim_cost(self, num: int, currency: Currency, *args):

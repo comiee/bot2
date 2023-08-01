@@ -4,9 +4,10 @@ from robot.comm.priority import Priority
 from alicebot.adapter.mirai.event import MessageEvent
 
 
-class CommandPlugin(Session,priority=Priority.Command):
+class CommandPlugin(Session, priority=Priority.Command):
     async def handle(self) -> None:
         await self.command.run(self)
+        self.stop()
 
     async def rule(self) -> bool:
         if not isinstance(self.event, MessageEvent):
