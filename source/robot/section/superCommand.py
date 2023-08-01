@@ -1,4 +1,4 @@
-from public import message
+from public.message import debug_msg
 from robot.comm.command import NormalCommand, RegexCommand, FullCommand, get_command_cls_list
 from robot.comm.pluginBase import Session
 from robot.botClient import get_bot_client
@@ -27,7 +27,7 @@ async def eval_code(session: Session, text: str):
 
 @NormalCommand('debug ').trim_super()
 def debug(_: Session, text: str):
-    get_bot_client().send(message.debug_msg.build(text))
+    get_bot_client().send(debug_msg.build(text))
 
 
 @FullCommand('show_cmd').trim_super()

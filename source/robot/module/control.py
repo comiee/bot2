@@ -1,9 +1,9 @@
-from public import message
+from public.message import exit_msg
 from public.log import bot_client_logger, bot_logger
 from robot.botClient import get_bot_client
 
 
-@message.exit_msg.on_receive
+@exit_msg.on_receive
 def exit_():
     bot_client_logger.info('收到服务器的命令，即将退出程序')
     bot_client = get_bot_client()
