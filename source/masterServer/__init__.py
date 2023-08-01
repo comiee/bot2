@@ -1,5 +1,5 @@
 """主服务器模块，与交互解耦"""
-from tools.utils import load_module
+from public.utils import load_module
 from masterServer.masterServer import get_master_server
 from masterServer.admin.CmdAdmin import CmdAdmin
 from threading import Thread

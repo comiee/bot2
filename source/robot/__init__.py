@@ -1,5 +1,5 @@
 """机器人模块，通过qq和用户交互"""
-from tools.utils import load_module
+from public.utils import load_module
 from robot.botClient import get_bot_client
 from robot.main import run_bot
 from alicebot import Bot

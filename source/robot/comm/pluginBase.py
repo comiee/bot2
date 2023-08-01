@@ -1,3 +1,4 @@
+from public.log import bot_logger
 from public.currency import Currency
 from public.exception import CostCurrencyFailedException
 from robot.comm.priority import Priority
@@ -78,6 +79,7 @@ class Session(PluginBase[MessageEvent, None, None], ABC):
     async def reply(self, message: T_MiraiMSG, quote: bool = False, at: bool = False) -> dict[str, None]:
         if at and self.is_group():
             message = MiraiMessageSegment.at(self.qq) + message
+        bot_logger.info(f'回复消息：{message}')
         return await self.event.reply(message, quote)
 
     async def ask(self, prompt: T_MiraiMSG = None, quote: bool = False, at: bool = False,

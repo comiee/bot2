@@ -7,7 +7,7 @@ from alicebot.adapter.mirai.event import MessageEvent
 class CommandPlugin(Session, priority=Priority.Command):
     async def handle(self) -> None:
         await self.command.run(self)
-        self.stop()
+        self.stop()  # 使用stop阻碍其他插件，如果命令中途退出需要继续执行其他插件，使用skip解决
 
     async def rule(self) -> bool:
         if not isinstance(self.event, MessageEvent):
