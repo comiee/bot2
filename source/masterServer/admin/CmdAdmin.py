@@ -3,6 +3,7 @@ from public.log import admin_logger
 from public.exception import ActiveExitException
 from masterServer.admin.Admin import Admin
 from communication.server import Server
+import inspect
 
 
 class CmdAdmin(Admin):
@@ -36,6 +37,11 @@ class CmdAdmin(Admin):
         return get_function
 
     def init_cmd_dict(self):
+        @self.add_cmd('help')
+        def help_():
+            for cmd, fun in self.cmd_dict.items():
+                print(cmd, inspect.getfullargspec(fun).args)
+
         @self.add_cmd('debug')
         def debug(client_name, text):
             self.server.send_to(client_name, debug_msg.build(text))
