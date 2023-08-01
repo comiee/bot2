@@ -1,4 +1,6 @@
 from public.currency import Currency
+from public.message import query_currency_msg, change_currency_msg
+from robot.botClient import get_bot_client
 
 
 class User(int):
@@ -7,15 +9,8 @@ class User(int):
 
     def query(self, currency: Currency) -> int:
         """查询用户的currency货币的数量"""
-        assert currency == Currency.coin
-        if not hasattr(User, 'coin'):
-            User.coin = 233
-        return User.coin  # TODO 向服务器发消息查询
+        return get_bot_client().send(query_currency_msg.build(user_id=int(self), currency=currency.name))
 
     def gain(self, num: int, currency: Currency) -> None:
         """给用户num个currency货币"""
-        # TODO 向服务器发消息改变货币数量
-        assert currency == Currency.coin
-        if not hasattr(User, 'coin'):
-            User.coin = 233
-        User.coin += num
+        get_bot_client().send(change_currency_msg.build(user_id=int(self), currency=currency.name, num=num))

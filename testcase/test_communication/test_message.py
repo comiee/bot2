@@ -40,13 +40,13 @@ class MyTestCase(unittest.TestCase):
         currency_ = Currency.coin.name
         result_ = 666
 
-        @sql_query_currency_msg.on_receive
+        @query_currency_msg.on_receive
         def _(user_id, currency):
             self.assertEqual(user_id_, user_id)
             self.assertEqual(currency_, currency)
             return result_
 
-        result = self.client.send(sql_query_currency_msg.build(
+        result = self.client.send(query_currency_msg.build(
             user_id=user_id_,
             currency=currency_,
         ))

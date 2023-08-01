@@ -32,17 +32,22 @@ chat_msg = Message('chat', {
 
 ############################## sql类消息 ##############################
 # 通用的sql消息
-sql_msg = Message('sql', str)
+sql_msg = Message('sql', str)  # 该消息仅用于管理员命令，sql操作应该尽量在服务器完成
 
 # 查询货币数量
-sql_query_currency_msg = Message('sql_query_currency_msg', {
+query_currency_msg = Message('query_currency', {
     'user_id': int,  # 用户id，比如QQ号
     'currency': str,  # 货币类型，Currency枚举的name属性
 }, int)  # 查询到的货币数量
 
 # 增加或减少货币数量
-sql_gain_currency_msg = Message('sql_gain_currency_msg', {
+change_currency_msg = Message('change_currency', {
     'user_id': int,  # 用户id，比如QQ号
     'currency': str,  # 货币类型，Currency枚举的name属性
     'num': int,  # 货币的增量
+})
+
+# 签到
+sign_in_msg = Message('sign_in', {
+    'user_id': int,  # 用户id，比如QQ号
 })
