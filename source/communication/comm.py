@@ -5,6 +5,8 @@ HOST = socket.gethostname()
 PORT = 9999
 ENCODING = 'utf-8'
 
+RECONNECT_TIME = 3  # 连接失败后的重连等待时间
+
 
 def send_msg(sock, s: str) -> None:
     msg = s.encode(ENCODING)

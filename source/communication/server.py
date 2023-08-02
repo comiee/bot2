@@ -2,8 +2,8 @@ from communication.comm import *
 from communication.message import Message, register_msg, result_msg
 from public.log import server_logger
 from public.exception import MessageException
-import socket
 from threading import Thread
+import socket
 
 __all__ = ['Server']
 
