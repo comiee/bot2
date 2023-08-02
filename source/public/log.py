@@ -1,9 +1,10 @@
 from comiee import overload
+from public.config import data_path
 from enum import IntEnum
 import os
 import logging
 
-LOG_PATH = os.path.join(os.getcwd(), 'data/log/')
+LOG_PATH = data_path('log')
 
 
 class LogLevel(IntEnum):
