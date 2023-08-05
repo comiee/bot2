@@ -15,9 +15,8 @@ exit_msg = Message('exit', {})
 
 chat_msg = Message('chat', {
     'user_id': int,  # 用户id，比如QQ号
-    'text': str,  # 聊天内容
-    # TODO 更多形式的聊天内容
-}, str)  # 返回值为聊天内容的回应
+    'text': str,  # 聊天内容，public.convert中定义的internal格式
+}, str)  # 返回值为聊天内容的回应，如果不答复则返回空字符串
 
 ############################## sql类消息 ##############################
 # 通用的sql消息（该消息仅用于管理员命令，sql操作应该尽量在服务器完成）

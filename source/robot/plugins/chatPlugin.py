@@ -1,9 +1,9 @@
 from public.message import chat_msg
 from public.currency import Currency
+from public.state import State
 from robot.comm.priority import Priority
 from robot.comm.pluginBase import Session
 from robot.comm.command import FullCommand, RegexCommand
-from robot.comm.state import State
 from robot.botClient import get_bot_client
 from alicebot.adapter.mirai.event import MessageEvent
 
@@ -12,9 +12,10 @@ class ChatPlugin(Session, priority=Priority.Chat):
     switch = State(False)
 
     async def handle(self) -> None:
+        # TODO 防复读
         client = get_bot_client()
         ret = client.send(
-            chat_msg.build(user_id=self.qq, text=self.msg))  # TODO 图片等消息如何传递给服务器？计划将其转换为通用的转义格式
+            chat_msg.build(user_id=self.qq, text=self.internal))
         if ret:
             await self.reply(ret)
 
