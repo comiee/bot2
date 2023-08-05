@@ -8,7 +8,7 @@ from alicebot.plugin import Plugin
 from alicebot.typing import T_Config, T_Event, T_State
 from alicebot.exceptions import GetEventTimeout
 from alicebot.adapter.mirai import MiraiAdapter
-from alicebot.adapter.mirai.message import MiraiMessage, T_MiraiMSG, MiraiMessageSegment
+from alicebot.adapter.mirai.message import T_MiraiMSG, MiraiMessageSegment
 from alicebot.adapter.mirai.event import MessageEvent, GroupMemberInfo, GroupMessage
 from abc import ABC
 from typing import Generic
@@ -118,3 +118,82 @@ class Session(PluginBase[MessageEvent, None, None], ABC):
         """实际的扣钱操作，与check_cost配合使用"""
         for num, currency in currencies:
             self.user.gain(-num, currency)
+
+"""api
+object Paths {
+
+    // about
+    const val about = "about"
+    const val sessionInfo = "sessionInfo"
+    const val botList = "botList"
+
+    // event
+    const val newFriend = "resp_newFriendRequestEvent"
+    const val memberJoin = "resp_memberJoinRequestEvent"
+    const val botInvited = "resp_botInvitedJoinGroupRequestEvent"
+
+    // friend
+    const val deleteFriend = "deleteFriend"
+
+    // group
+    const val muteAll = "muteAll"
+    const val unmuteAll = "unmuteAll"
+    const val mute = "mute"
+    const val unmute = "unmute"
+    const val kick = "kick"
+    const val quit = "quit"
+    const val essence = "setEssence"
+    const val groupConfig = "groupConfig"
+    const val memberInfo = "memberInfo"
+    const val memberAdmin = "memberAdmin"
+
+    // base info
+    const val friendList = "friendList"
+    const val groupList = "groupList"
+    const val memberList = "memberList"
+    const val latestMemberList = "latestMemberList"
+    const val botProfile = "botProfile"
+    const val friendProfile = "friendProfile"
+    const val memberProfile = "memberProfile"
+    const val userProfile = "userProfile"
+
+    // message
+    const val messageFromId = "messageFromId"
+    const val sendFriendMessage = "sendFriendMessage"
+    const val sendGroupMessage = "sendGroupMessage"
+    const val sendTempMessage = "sendTempMessage"
+    const val sendOtherClientMessage = "sendOtherClientMessage"
+    const val sendImageMessage = "sendImageMessage"
+    const val sendNudge = "sendNudge"
+    const val uploadImage = "uploadImage"
+    const val uploadVoice = "uploadVoice"
+    const val recall = "recall"
+    const val roamingMessages = "roamingMessages"
+
+    // file
+    const val fileList = "file_list"
+    const val fileInfo = "file_info"
+    const val fileMkdir = "file_mkdir"
+    const val uploadFile = "file_upload"
+    const val fileDelete = "file_delete"
+    const val fileMove = "file_move"
+    const val fileRename = "file_rename"
+
+    // command
+    const val commandExecute = "cmd_execute"
+    const val commandRegister = "cmd_register"
+    
+    // announcement
+    const val announcementList = "anno_list"
+    const val announcementPublish = "anno_publish"
+    const val announcementDelete = "anno_delete"
+
+    fun httpPath(s: String): String {
+        val t = s.replace("_", "/")
+        if (t.startsWith('/')) {
+            return t
+        }
+        return "/$t"
+    }
+}
+"""
