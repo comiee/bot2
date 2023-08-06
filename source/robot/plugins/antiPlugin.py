@@ -1,6 +1,6 @@
 from robot.comm.priority import Priority
 from robot.comm.pluginBase import PluginBase, Session
-from alicebot.adapter.mirai.event import FriendRecallEvent, GroupRecallEvent
+from alicebot.adapter.mirai.event import FriendRecallEvent, GroupRecallEvent, MessageEvent
 from alicebot.adapter.mirai.message import MiraiMessage, MiraiMessageSegment
 
 
@@ -50,6 +50,8 @@ class AntiFlashPlugin(Session[str, None], priority=Priority.Anti):
         await self.reply('发闪照太见外了，我帮你直接发出来吧\n' + MiraiMessageSegment.image(self.state), at=True)
 
     async def rule(self) -> bool:
+        if not isinstance(self.event, MessageEvent):
+            return False
         for msg_seg in self.event.message:
             if msg_seg.type == 'FlashImage':
                 self.state = msg_seg['imageId']
