@@ -73,11 +73,13 @@ class Session(PluginBase[MessageEvent, T_State, T_Config], ABC, Generic[T_State,
             target = self.qq
         return MiraiMessageSegment.at(target)
 
-    async def reply(self, message: T_MiraiMSG, quote: bool = False, at: bool = False) -> dict[str, None]:
+    async def reply(self, message: T_MiraiMSG, quote: bool = False, at: bool = False) -> None:
         if at and self.is_group():
             message = MiraiMessageSegment.at(self.qq) + message
         bot_logger.info(f'回复消息：{message}')
-        return await self.event.reply(message, quote)
+        ret = await self.event.reply(message, quote)
+        if ret['code'] != 0 or ret['messageId'] == -1 or ret['msg'] != 'success':
+            bot_logger.warning(f'回复消息失败：{ret}')
 
     async def ask(self, prompt: T_MiraiMSG = None, quote: bool = False, at: bool = False,
                   timeout: int | float = None, return_plain_text: bool = True) -> str:
