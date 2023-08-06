@@ -1,5 +1,5 @@
 from public.convert import convert_to
-from alicebot.adapter.mirai.message import MiraiMessage,MiraiMessageSegment
+from alicebot.adapter.mirai.message import MiraiMessage, MiraiMessageSegment
 import unittest
 
 
@@ -15,9 +15,16 @@ class ConvertTestCase(unittest.TestCase):
             convert_to('internal', MiraiMessageSegment.plain('abc'))
         )
         self.assertEqual(
-            '[[at:12345]]',
+            '[left]at:12345[right]',
             convert_to('internal', MiraiMessageSegment.plain('[at:12345]'))
         )
+        self.assertEqual(
+            '[left][at:12345][right]',
+            convert_to('internal', MiraiMessageSegment.plain('[') +
+                       MiraiMessageSegment.at(12345) +
+                       MiraiMessageSegment.plain(']'))
+        )
+
     def test_internal_to_mirai(self):
         self.assertEqual(
             MiraiMessage(MiraiMessageSegment.at(12345)),
@@ -26,8 +33,9 @@ class ConvertTestCase(unittest.TestCase):
         # TODO 补充其他type
         self.assertEqual(
             MiraiMessage(MiraiMessageSegment.plain('[at:12345]')),
-            convert_to('mirai', '[[at:12345]]')
+            convert_to('mirai', '[left]at:12345[right]')
         )
+
 
 if __name__ == '__main__':
     unittest.main()

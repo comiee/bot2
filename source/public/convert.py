@@ -1,12 +1,13 @@
 """消息格式转换"""
 from alicebot.adapter.mirai.message import MiraiMessage, MiraiMessageSegment, T_MiraiMSG
 from typing import Literal
+import re
 
 """
 internal格式：
 [类型:主要值,键:其他值...]
 类型使用小驼峰命名
-原文的[]用[[和]]表示
+原文的[]用[left]和[right]表示
 """
 
 
@@ -60,9 +61,8 @@ def convert_internal_part_to_mirai_seg(s: str) -> MiraiMessageSegment:
 
 
 def convert_internal_to_mirai(msg: str) -> MiraiMessage:
-    s = msg.replace('[[', '[left]').replace(']]', '[right]')
     stack = []
-    for c in s:
+    for c in msg:
         match c:
             case '[':
                 stack.append('')
@@ -115,7 +115,7 @@ def convert_dict_to_internal(d: dict) -> str:
             return f'[musicShare:{d["title"]},kind:{d["kind"]},title:{d["title"]},summary:{d["summary"]},' \
                    f'jumpUrl:{d["jumpUrl"]},pictureUrl:{d["pictureUrl"]},musicUrl:{d["musicUrl"]},brief:{d["brief"]}]'
         case 'Plain':
-            return d["text"].replace('[', '[[').replace(']', ']]')
+            return re.sub(r'[\[\]]', lambda m: {'[': '[left]', ']': '[right]'}[m.group()], d["text"])
 
 
 def convert_data_to_internal(data: list[dict]) -> str:
