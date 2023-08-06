@@ -1,10 +1,10 @@
 from robot.comm.priority import Priority
-from robot.comm.pluginBase import PluginBase
+from robot.comm.pluginBase import PluginBase, Session
 from alicebot.adapter.mirai.event import FriendRecallEvent, GroupRecallEvent
 from alicebot.adapter.mirai.message import MiraiMessage, MiraiMessageSegment
 
 
-class AntiFriendRecallPlugin(PluginBase, priority=Priority.AntiRecall):
+class AntiFriendRecallPlugin(PluginBase, priority=Priority.Anti):
     async def handle(self) -> None:
         target = self.event.authorId
         try:
@@ -21,7 +21,7 @@ class AntiFriendRecallPlugin(PluginBase, priority=Priority.AntiRecall):
             return True
 
 
-class AntiGroupRecallPlugin(PluginBase, priority=Priority.AntiRecall):
+class AntiGroupRecallPlugin(PluginBase, priority=Priority.Anti):
     async def handle(self) -> None:
         group = self.event.group.id
         try:
@@ -43,3 +43,15 @@ class AntiGroupRecallPlugin(PluginBase, priority=Priority.AntiRecall):
     async def rule(self) -> bool:
         if isinstance(self.event, GroupRecallEvent):
             return True
+
+
+class AntiFlashPlugin(Session[str, None], priority=Priority.Anti):
+    async def handle(self) -> None:
+        await self.reply('发闪照太见外了，我帮你直接发出来吧\n' + MiraiMessageSegment.image(self.state), at=True)
+
+    async def rule(self) -> bool:
+        for msg_seg in self.event.message:
+            if msg_seg.type == 'FlashImage':
+                self.state = msg_seg['imageId']
+                return True
+        return False

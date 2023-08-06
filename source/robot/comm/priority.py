@@ -13,7 +13,7 @@ class Priority(Enum):
     Filter = _produce_priority(True)
     Log = _produce_priority(False)
     Request = _produce_priority(True)
-    AntiRecall = _produce_priority(True)
+    Anti = _produce_priority(True)
     # TODO game类
     Command = _produce_priority(False)  # Command插件使用stop来阻塞其他插件执行
     Chat = _produce_priority(False)

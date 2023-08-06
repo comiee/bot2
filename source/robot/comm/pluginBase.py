@@ -35,7 +35,7 @@ class PluginBase(Plugin[T_Event, T_State, T_Config], ABC, Generic[T_Event, T_Sta
         return self.bot.get_adapter(MiraiAdapter).send
 
 
-class Session(PluginBase[MessageEvent, None, None], ABC):
+class Session(PluginBase[MessageEvent, T_State, T_Config], ABC, Generic[T_State, T_Config]):
     @property
     def user(self) -> User:
         """返回qq号对应的User对象"""
@@ -118,6 +118,7 @@ class Session(PluginBase[MessageEvent, None, None], ABC):
         """实际的扣钱操作，与check_cost配合使用"""
         for num, currency in currencies:
             self.user.gain(-num, currency)
+
 
 """api
 object Paths {
