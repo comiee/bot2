@@ -12,6 +12,7 @@ from alicebot.adapter.mirai.message import T_MiraiMSG, MiraiMessageSegment
 from alicebot.adapter.mirai.event import MessageEvent, GroupMemberInfo, GroupMessage
 from abc import ABC
 from typing import Generic
+import asyncio
 
 __all__ = ['PluginBase', 'Session']
 
@@ -80,6 +81,7 @@ class Session(PluginBase[MessageEvent, T_State, T_Config], ABC, Generic[T_State,
         ret = await self.event.reply(message, quote)
         if ret['code'] != 0 or ret['messageId'] == -1 or ret['msg'] != 'success':
             bot_logger.warning(f'回复消息失败：{ret}')
+        await asyncio.sleep(3)  # 防止发消息太快被风控
 
     async def ask(self, prompt: T_MiraiMSG = None, quote: bool = False, at: bool = False,
                   timeout: int | float = None, return_plain_text: bool = True) -> str:

@@ -6,6 +6,7 @@ from alicebot.exceptions import GetEventTimeout
 from abc import abstractmethod
 from inspect import iscoroutinefunction, signature
 import re
+import asyncio
 
 
 class _CommandMeta(type):
@@ -62,9 +63,11 @@ class Command(metaclass=_CommandMeta):
         run = self.run
 
         def judge_wrapper(session: Session) -> bool:
+            if not judge(session):
+                return False
             if not session.user.is_super_user():
                 return False
-            return judge(session)
+            return True
 
         async def run_wrapper(session: Session) -> None:
             try:
@@ -102,10 +105,58 @@ class Command(metaclass=_CommandMeta):
         """TODO 将命令变为黑名单命令"""
 
     def trim_friend(self, tip: str = None):
-        """TODO 将命令变为私聊命令，如果tip不为None，会在非私聊场景下回复tip"""
+        """将命令变为私聊命令，如果tip不为None，会在非私聊场景下回复tip"""
+        judge = self.judge
+
+        def judge_wrapper(session: Session) -> bool:
+            if not judge(session):
+                return False
+            if session.is_group():
+                if tip is not None:
+                    asyncio.create_task(session.reply(tip))
+                return False
+            return True
+
+        self.judge = judge_wrapper
+        return self
 
     def trim_group(self, tip: str = None):
-        """TODO 将命令变为群聊命令，如果tip不为None，会在非群聊场景下回复tip"""
+        """将命令变为群聊命令，如果tip不为None，会在非群聊场景下回复tip"""
+        judge = self.judge
+
+        def judge_wrapper(session: Session) -> bool:
+            if not judge(session):
+                return False
+            if not session.is_group():
+                if tip is not None:
+                    asyncio.create_task(session.reply(tip))
+                return False
+            return True
+
+        self.judge = judge_wrapper
+        return self
+
+    def trim_administrator(self, tip: str = None):
+        """限制命令的使用条件为只有机器人是群管理或群主时才能使用，如果tip不为None，会在不满足条件时回复tip"""
+        judge = self.judge
+
+        def judge_wrapper(session: Session) -> bool:
+            if not judge(session):
+                return False
+            if not session.is_group() or session.event.sender.group.permission not in {"OWNER", "ADMINISTRATOR"}:
+                if tip is not None:
+                    asyncio.create_task(session.reply(tip))
+                return False
+            return True
+
+        self.judge = judge_wrapper
+        return self
+
+    def trim_friend_times(self, times: int):
+        """TODO 限制私聊中使用命令的次数"""
+
+    def trim_group_times(self, times: int):
+        """TODO 限制群聊中使用命令的次数"""
 
 
 class FullCommand(Command):

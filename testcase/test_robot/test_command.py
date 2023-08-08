@@ -27,6 +27,7 @@ class CommandTestCase(unittest.IsolatedAsyncioTestCase):
         await spread_event(CommandPlugin, event)
         self.assertEqual(False, ChatPlugin.switch[12345])
     # TODO gain命令用例
+    # TODO 禁言功能用例
 
 
 if __name__ == '__main__':

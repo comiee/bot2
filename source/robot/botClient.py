@@ -40,11 +40,11 @@ class BotClient(Client):
         self.bot_proxy = BotProxy(bot, event_loop)
 
 
-bot_client = None  # 不能在这里实例化对象，不然导入这个包就会实例化
+_bot_client = None  # 不能在这里实例化对象，不然导入这个包就会实例化
 
 
 def get_bot_client() -> BotClient:
-    global bot_client
-    if bot_client is None:
-        bot_client = BotClient()
-    return bot_client  # TODO 离线版
+    global _bot_client
+    if _bot_client is None:
+        _bot_client = BotClient()
+    return _bot_client  # TODO 离线版
