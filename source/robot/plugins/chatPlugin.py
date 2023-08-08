@@ -15,7 +15,7 @@ class ChatPlugin(Session, priority=Priority.Chat):
         # TODO 防复读
         client = get_bot_client()
         ret = client.send(
-            chat_msg.build(user_id=self.qq, text=self.internal))
+            chat_msg.build(user_id=self.qq, text=self.text))
         if ret:
             await self.reply(ret)
 

@@ -119,7 +119,7 @@ class SplitCommand(Command):
     """分割命令，用空格分割，分割后的第一项为命令，其余项为会被set_args设置为参数，参数的个数和回调函数的参数个数不匹配时不会执行，可以通过定义多个的形式重载"""
 
     def judge(self, session: Session) -> bool:
-        if not session.text:
+        if not session.text.strip():
             return False
         cmd, *args = session.text.strip().split()
         if cmd != self.cmd:
@@ -148,7 +148,7 @@ class SplitArgCommand(Command):
         self.timeout_reply = timeout_reply
 
     def judge(self, session: Session) -> bool:
-        if not session.text:
+        if not session.text.strip():
             return False
         cmd, *args = session.text.strip().split()
         if cmd != self.cmd:

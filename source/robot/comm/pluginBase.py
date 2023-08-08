@@ -54,12 +54,12 @@ class Session(PluginBase[MessageEvent, T_State, T_Config], ABC, Generic[T_State,
         return self.event.sender.id
 
     @property
-    def text(self) -> str:
+    def plain(self) -> str:
         """返回消息中的纯文本内容"""
         return self.event.get_plain_text()
 
     @property
-    def internal(self) -> str:
+    def text(self) -> str:
         """返回转换为internal格式的消息"""
         return convert_to('internal', self.event.message)
 
