@@ -23,7 +23,7 @@ def to_int(s: Union[int, str]):
     if isinstance(s, int):
         return s
     if re.search(r'\d', s):
-        return int(re.sub(r'[^\d]', '', s))
+        return int(re.sub(r'\D', '', s))
     if s and s[0] in '-负':
         return -to_int(s[1:])
     nums = {**dict(zip('〇一二三四五六七八九', range(10))),
@@ -111,6 +111,7 @@ def analyse_time(s):
             hour = to_int(hour) + 12
         if half:
             minute = 30
+        (lambda *args: 0)(hour, minute)  # 消告警
         for x in ['day', 'hour', 'minute', 'second']:
             if eval(x):
                 res += timedelta(**{x + 's': to_int(eval(x))})
