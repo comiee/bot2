@@ -1,7 +1,5 @@
 """服务端和客户端共用的东西"""
-import socket
-
-HOST = socket.gethostname()
+HOST = '127.0.0.1'
 PORT = 9999
 ENCODING = 'utf-8'
 

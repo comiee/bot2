@@ -158,6 +158,12 @@ class Command(metaclass=_CommandMeta):
     def trim_group_times(self, times: int):
         """TODO 限制群聊中使用命令的次数"""
 
+    def trim_user_cd(self, second: int):
+        """TODO 限制单用户使用间隔时间"""
+
+    def trim_group_cd(self, second: int):
+        """TODO 限制群组使用间隔时间"""
+
 
 class FullCommand(Command):
     """全匹配命令，只有与文本完全匹配才会生效"""

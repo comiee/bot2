@@ -45,3 +45,4 @@ class ChatPlugin(Session, priority=Priority.Chat):
         else:
             await self.reply('我已经闭嘴了，你还要我怎样？')
             self.stop()  # 提前结束防止扣钱
+    # TODO 模式切换（开、关、艾特）
