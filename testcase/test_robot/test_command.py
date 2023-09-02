@@ -1,7 +1,7 @@
 from robot.plugins.commandPlugin import CommandPlugin
 from robot.plugins.chatPlugin import ChatPlugin
 from robot.comm.user import User
-from faker import spread_event, dummy_friend_message_event
+from test_robot.faker import spread_event, dummy_friend_message_event
 from unittest import mock
 import unittest
 
@@ -12,7 +12,7 @@ class CommandTestCase(unittest.IsolatedAsyncioTestCase):
     async def test_split(self):
         event = dummy_friend_message_event('/split 1 2')
         await spread_event(CommandPlugin, event)
-        event.reply.assert_called_once_with("split x='1', y='2'", mock.ANY)
+        event.reply.assert_called_once_with("split x='1', y='2'")
 
     async def test_chat_switch_state(self):
         User.is_super_user = mock.Mock(return_value=True)

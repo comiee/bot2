@@ -1,6 +1,7 @@
 from public.currency import Currency
 from public.log import bot_logger
 from public.exception import CostCurrencyFailedException
+from public.state import State
 from robot.comm.pluginBase import Session
 from alicebot.exceptions import GetEventTimeout
 from abc import abstractmethod
@@ -30,17 +31,17 @@ class Command(metaclass=_CommandMeta):
     def __init__(self, cmd):
         # 不设置别名系统，多个cmd用嵌套装饰器或正则命令解决
         # 如果有多个命令匹配，只会执行第一个命令
-        self.cmd = cmd
-        self.args = ()
-        self.kwargs = {}
+        self._cmd = cmd
+        self._args = ()
+        self._kwargs = {}
 
     def __call__(self, fun):
         """fun的类型为函数或异步函数，第一个参数为session，其余参数为set_args设置的参数"""
-        self.fun = fun
+        self._fun = fun
         return fun
 
     def __repr__(self):
-        return f'{type(self).__name__}<{self.cmd}>'
+        return f'{type(self).__name__}<{self._cmd}>'
 
     @abstractmethod
     def judge(self, session: Session) -> bool:
@@ -48,14 +49,14 @@ class Command(metaclass=_CommandMeta):
         pass
 
     def set_args(self, *args, **kwargs):
-        self.args = args
-        self.kwargs = kwargs
+        self._args = args
+        self._kwargs = kwargs
 
     async def run(self, session: Session) -> None:
-        if iscoroutinefunction(self.fun):
-            await self.fun(session, *self.args, **self.kwargs)
+        if iscoroutinefunction(self._fun):
+            await self._fun(session, *self._args, **self._kwargs)
         else:
-            self.fun(session, *self.args, **self.kwargs)
+            self._fun(session, *self._args, **self._kwargs)
 
     def trim_super(self):
         """将命令变为管理员命令，限定使用者为管理员并在执行出错时返回错误"""
@@ -164,12 +165,53 @@ class Command(metaclass=_CommandMeta):
     def trim_group_cd(self, second: int):
         """TODO 限制群组使用间隔时间"""
 
+    def trim_switch(self, default_state: bool, cmd_on: str, cmd_off: str = '', cmd_name: str = ''):
+        """
+        使该命令可被开关（只有管理员才能操作开关）
+        :param default_state: 开关的默认状态
+        :param cmd_on: 开启用的命令
+        :param cmd_off: 关闭用的命令，如果为空字符串，则和cmd_on相同
+        :param cmd_name: 对外显示开关状态时使用的名字，如果为空字符串则使用self.cmd
+        :return: 装饰后的command
+        """
+        switch = State(default_state)
+        if not cmd_name:
+            cmd_name = self._cmd
+
+        async def switch_change(session: Session, switch_state: bool):
+            switch[session.id] = switch_state
+            await session.reply(f'{cmd_name}命令开关：' + '关开'[switch_state])
+
+        if cmd_off:
+            @FullCommand(cmd_on).trim_super()
+            async def switch_on(session: Session):
+                await switch_change(session, True)
+
+            @FullCommand(cmd_off).trim_super()
+            async def switch_off(session: Session):
+                await switch_change(session, False)
+        else:
+            @FullCommand(cmd_on).trim_super()
+            async def switch_turn(session: Session):
+                await switch_change(session, not switch[session.id])
+
+        judge = self.judge
+
+        def judge_wrapper(session: Session) -> bool:
+            # 开关的优先级优于原来的judge
+            if switch[session.id] is False:
+                return False
+            return judge(session)
+
+        self.judge = judge_wrapper
+        return self
+
 
 class FullCommand(Command):
     """全匹配命令，只有与文本完全匹配才会生效"""
 
     def judge(self, session: Session) -> bool:
-        return session.text == self.cmd
+        return session.text == self._cmd
 
 
 class SplitCommand(Command):
@@ -179,9 +221,9 @@ class SplitCommand(Command):
         if not session.text.strip():
             return False
         cmd, *args = session.text.strip().split()
-        if cmd != self.cmd:
+        if cmd != self._cmd:
             return False
-        if len(args) != len(signature(self.fun).parameters) - 1:
+        if len(args) != len(signature(self._fun).parameters) - 1:
             return False
         self.set_args(*args)
         return True
@@ -208,13 +250,13 @@ class SplitArgCommand(Command):
         if not session.text.strip():
             return False
         cmd, *args = session.text.strip().split()
-        if cmd != self.cmd:
+        if cmd != self._cmd:
             return False
         self.set_args(*args)
         return True
 
     async def run(self, session: Session) -> None:
-        args = list(self.args)
+        args = list(self._args)
         while len(args) < len(self.prompts):
             try:
                 text = await session.ask(self.prompts[len(args)], timeout=self.timeout)
@@ -233,9 +275,9 @@ class NormalCommand(Command):
     """普通命令，判断是否以命令开头，将其余的部分作为参数传入回调函数"""
 
     def judge(self, session: Session) -> bool:
-        if not session.text.startswith(self.cmd):
+        if not session.text.startswith(self._cmd):
             return False
-        arg = session.text[len(self.cmd):]
+        arg = session.text[len(self._cmd):]
         self.set_args(arg)
         return True
 
@@ -244,7 +286,7 @@ class RegexCommand(Command):
     """正则命令，回调函数的参数为解包后的groups。比较复杂的表达式可以使用re.compile"""
 
     def judge(self, session: Session) -> bool:
-        m = re.search(self.cmd, session.text)
+        m = re.search(self._cmd, session.text)
         if not m:
             return False
         self.set_args(*m.groups())
