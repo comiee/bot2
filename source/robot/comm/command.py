@@ -153,6 +153,9 @@ class Command(metaclass=_CommandMeta):
         self.judge = judge_wrapper
         return self
 
+    def trim_user_times(self, times: int):
+        """TODO 限制单用户使用命令的次数"""
+
     def trim_friend_times(self, times: int):
         """TODO 限制私聊中使用命令的次数"""
 
