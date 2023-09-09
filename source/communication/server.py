@@ -28,7 +28,7 @@ class Server:
         if 'receiver' not in self.__client_dict[client_name]:
             server_logger.error(f'服务器向客户端[{client_name}]发送消息失败：客户端无接收器')
             return ...
-        client = self.__client_dict[client_name]['receiver']
+        client = self.__client_dict[client_name]['receiver'] # TODO 这一段单独提一个函数，能否向客户端发送消息，供外部调用
         try:
             send_msg(client, msg)
             server_logger.debug(f'服务器发送消息到客户端[{client_name}]：{msg}')
