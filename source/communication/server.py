@@ -20,15 +20,19 @@ class Server:
         # 保存注册的客户端
         self.__client_dict = {}
 
+    def has_client(self, client_name: str) -> bool:
+        if client_name not in self.__client_dict:
+            return False
+        if 'receiver' not in self.__client_dict[client_name]:
+            return False
+        return True
+
     def send_to(self, client_name: str, msg: str):
         # json格式不能传输Ellipsis对象，用Ellipsis对象表示发送失败
-        if client_name not in self.__client_dict:
-            server_logger.error(f'服务器向客户端[{client_name}]发送消息失败：未注册的客户端')
+        if not self.has_client(client_name):
+            server_logger.error(f'服务器向客户端[{client_name}]发送消息失败：客户端未注册接收器')
             return ...
-        if 'receiver' not in self.__client_dict[client_name]:
-            server_logger.error(f'服务器向客户端[{client_name}]发送消息失败：客户端无接收器')
-            return ...
-        client = self.__client_dict[client_name]['receiver'] # TODO 这一段单独提一个函数，能否向客户端发送消息，供外部调用
+        client = self.__client_dict[client_name]['receiver']
         try:
             send_msg(client, msg)
             server_logger.debug(f'服务器发送消息到客户端[{client_name}]：{msg}')

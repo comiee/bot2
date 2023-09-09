@@ -48,7 +48,7 @@ def get_logger(name, level, file_name, file_level) -> logging.Logger:
 
 # 底层的client和server使用logger
 client_logger: logging.Logger = get_logger('client', LogLevel.INFO, LogLevel.DEBUG)
-server_logger: logging.Logger = get_logger('server', LogLevel.INFO, LogLevel.DEBUG)
+server_logger: logging.Logger = get_logger('server', LogLevel.DEBUG)
 
 # 各组件使用的logger
 master_server_logger: logging.Logger = get_logger('masterServer', LogLevel.INFO, LogLevel.DEBUG)
