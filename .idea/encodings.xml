@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/source/robot/data/log/client.txt" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/test/data/log/client.txt" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/test/data/log/masterServer.txt" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/test/data/log/server.txt" charset="GBK" />
+  </component>
+</project>
