@@ -177,7 +177,7 @@ class Command(metaclass=_CommandMeta):
         :param cmd_name: 对外显示开关状态时使用的名字，如果为空字符串则使用self.cmd
         :return: 装饰后的command
         """
-        switch = State(default_state)
+        switch = State(default_value=default_state)
         if not cmd_name:
             cmd_name = self._cmd
 

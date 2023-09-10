@@ -13,6 +13,7 @@ from alicebot.adapter.mirai.event import MessageEvent, GroupMemberInfo, GroupMes
 from abc import ABC
 from typing import Generic
 import asyncio
+import re
 
 __all__ = ['PluginBase', 'Session']
 
@@ -73,6 +74,20 @@ class Session(PluginBase[MessageEvent, T_State, T_Config], ABC, Generic[T_State,
         if target is None:
             target = self.qq
         return MiraiMessageSegment.at(target)
+
+    @property
+    def bot_qq(self):
+        return getattr(self.bot.config.adapter, 'mirai').qq
+
+    def is_at_bot(self):
+        if not self.is_group():
+            return True
+        return f'[at:{self.bot_qq}]' in self.text
+
+    def exclude_at_bot_text(self):
+        if not self.is_group():
+            return self.text
+        return re.sub(rf'\[at:{self.bot_qq}]\s*', '', self.text)
 
     async def reply(self, message: T_MiraiMSG, quote: bool = False, at: bool = False) -> None:
         if at and self.is_group():

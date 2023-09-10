@@ -1,3 +1,4 @@
+from comiee import overload
 from collections import defaultdict
 from typing import Generic, TypeVar
 
@@ -7,8 +8,13 @@ T_Value = TypeVar('T_Value')
 
 
 class State(Generic[T_Value]):
-    def __init__(self, default: T_Value):
-        self.data: dict[int, T_Value] = defaultdict(lambda: default)
+    @overload
+    def __init__(self, *, default_value: T_Value):
+        self.__init__(default_factory=lambda: default_value)
+
+    @overload
+    def __init__(self, *, default_factory):
+        self.data: dict[int, T_Value] = defaultdict(default_factory)
 
     def __setitem__(self, key: int, value: T_Value):
         self.data[key] = value

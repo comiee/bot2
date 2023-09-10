@@ -122,15 +122,31 @@ def convert_data_to_internal(data: list[dict]) -> str:
     return ''.join(map(convert_dict_to_internal, data))
 
 
-MsgType = Literal['internal', 'mirai', 'data']
+def convert_mirai_to_plain(message: T_MiraiMSG) -> str:
+    return MiraiMessage(message).get_plain_text()
+
+
+def convert_plain_to_mirai(text: str) -> MiraiMessage:
+    return MiraiMessage(MiraiMessageSegment.plain(text))
+
+
+MsgType = Literal['internal', 'mirai', 'data', 'plain']
 
 
 def convert(type_a: MsgType, type_b: MsgType, msg):
+    # 直接转换
     fun_name = f'convert_{type_a}_to_{type_b}'
     if fun_name in globals():
         return globals()[fun_name](msg)
+    # 通过data格式转换
     fun_name_a = f'convert_{type_a}_to_data'
     fun_name_b = f'convert_data_to_{type_b}'
+    if fun_name_a in globals() and fun_name_b in globals():
+        temp = globals()[fun_name_a](msg)
+        return globals()[fun_name_b](temp)
+    # 通过mirai格式转换
+    fun_name_a = f'convert_{type_a}_to_mirai'
+    fun_name_b = f'convert_mirai_to_{type_b}'
     if fun_name_a in globals() and fun_name_b in globals():
         temp = globals()[fun_name_a](msg)
         return globals()[fun_name_b](temp)
