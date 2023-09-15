@@ -1,4 +1,5 @@
 from public.message import chat_msg
+from public.convert import convert_to
 from robot.comm.priority import Priority
 from robot.comm.pluginBase import Session
 from robot.comm.sessionStatus import ChatStatus
@@ -20,10 +21,9 @@ class ChatPlugin(Session, priority=Priority.Chat):
 
         text = self.exclude_at_bot_text() if self.chat_status.at_switch else self.text
         client = get_bot_client()
-        ret = client.send(
-            chat_msg.build(user_id=self.qq, text=text))
+        ret = client.send(chat_msg.build(user_id=self.qq, text=text))
         if ret:
-            await self.reply(ret)
+            await self.reply(convert_to('mirai',ret))
 
     async def rule(self) -> bool:
         if not isinstance(self.event, MessageEvent):

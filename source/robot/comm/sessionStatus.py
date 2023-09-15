@@ -1,3 +1,4 @@
+from comiee import singletonMeta
 from public.log import bot_logger
 from public.status import Status
 from collections import deque
@@ -5,7 +6,7 @@ import time
 import asyncio
 
 
-class SessionStatusBase(Status):
+class SessionStatusBase(Status, metaclass=singletonMeta):
     options: tuple[str] = ()
 
     def __get__(self, instance, owner):
