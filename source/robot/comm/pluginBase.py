@@ -4,6 +4,7 @@ from public.exception import CostCurrencyFailedException
 from public.convert import convert_to
 from robot.comm.priority import Priority
 from robot.comm.user import User
+from robot.comm.sessionStatus import SessionStatus
 from alicebot.plugin import Plugin
 from alicebot.typing import T_Config, T_Event, T_State
 from alicebot.exceptions import GetEventTimeout
@@ -12,7 +13,6 @@ from alicebot.adapter.mirai.message import T_MiraiMSG, MiraiMessageSegment
 from alicebot.adapter.mirai.event import MessageEvent, GroupMemberInfo, GroupMessage
 from abc import ABC
 from typing import Generic
-import asyncio
 import re
 
 __all__ = ['PluginBase', 'Session']
@@ -38,6 +38,8 @@ class PluginBase(Plugin[T_Event, T_State, T_Config], ABC, Generic[T_Event, T_Sta
 
 
 class Session(PluginBase[MessageEvent, T_State, T_Config], ABC, Generic[T_State, T_Config]):
+    session_status = SessionStatus()
+
     @property
     def user(self) -> User:
         """返回qq号对应的User对象"""
@@ -93,10 +95,14 @@ class Session(PluginBase[MessageEvent, T_State, T_Config], ABC, Generic[T_State,
         if at and self.is_group():
             message = MiraiMessageSegment.at(self.qq) + message
         bot_logger.info(f'回复消息：{message}')
+
+        if not await self.session_status.can_reply():
+            return
         ret = await self.event.reply(message, quote)
         if ret['code'] != 0 or ret['messageId'] == -1 or ret['msg'] != 'success':
             bot_logger.warning(f'回复消息失败：{ret}')
-        await asyncio.sleep(3)  # 防止发消息太快被风控 TODO 后续删掉，这个限制只对单session有效
+        else:
+            self.session_status.record_reply()
 
     async def ask(self, prompt: T_MiraiMSG = None, quote: bool = False, at: bool = False,
                   timeout: int | float = None, return_plain_text: bool = True) -> str:
