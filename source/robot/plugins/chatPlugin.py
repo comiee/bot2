@@ -16,7 +16,9 @@ class ChatStatus:
     def __init__(self):
         self.switch: bool = True  # 总开关
         self.at_switch: bool = True  # 是否只有艾特才会回应
-        self.interval: float = 2  # 两次回复间间隔的秒数
+        self.interval: float = 3  # 两次回复间间隔的秒数
+        # TODO 最大回复次数
+        # TODO 回复间隔和回复次数改为所有回复均适用
 
         self._last_reply_timestamp: float = 0  # 上次处理的时间戳，用于间隔回复
         self._history: deque = deque(maxlen=10)  # 聊天记录

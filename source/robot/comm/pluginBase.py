@@ -96,7 +96,7 @@ class Session(PluginBase[MessageEvent, T_State, T_Config], ABC, Generic[T_State,
         ret = await self.event.reply(message, quote)
         if ret['code'] != 0 or ret['messageId'] == -1 or ret['msg'] != 'success':
             bot_logger.warning(f'回复消息失败：{ret}')
-        await asyncio.sleep(3)  # 防止发消息太快被风控
+        await asyncio.sleep(3)  # 防止发消息太快被风控 TODO 后续删掉，这个限制只对单session有效
 
     async def ask(self, prompt: T_MiraiMSG = None, quote: bool = False, at: bool = False,
                   timeout: int | float = None, return_plain_text: bool = True) -> str:

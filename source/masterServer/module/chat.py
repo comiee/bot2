@@ -9,6 +9,7 @@ import random
 def chat(user_id, text):
     master_server_logger.info(f'{user_id}发来的聊天请求：{text}')
     # TODO 其他的处理
+	# TODO 分多档位
     ret = ''
     with open(data_path('teach.json'), 'r', encoding='utf-8') as f:
         data = json.load(f)

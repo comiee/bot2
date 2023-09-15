@@ -99,10 +99,10 @@ class Command(metaclass=_CommandMeta):
         self.run = run_wrapper
         return self
 
-    def trim_white_list(self, users: set[int], groups: set[int]):
+    def trim_white_list(self, users: set[int] = (), groups: set[int] = (), friends: set[int] = ()):
         """TODO 将命令变为白名单命令"""
 
-    def trim_black_list(self, users: set[int], groups: set[int]):
+    def trim_black_list(self, users: set[int] = (), groups: set[int] = (), friends: set[int] = ()):
         """TODO 将命令变为黑名单命令"""
 
     def trim_friend(self, tip: str = None):
