@@ -4,6 +4,7 @@ from public.exception import ActiveExitException
 from masterServer.admin.Admin import Admin
 from communication.server import Server
 import inspect
+import traceback
 
 
 class CmdAdmin(Admin):
@@ -49,6 +50,20 @@ class CmdAdmin(Admin):
         @self.add_cmd('exit')
         def exit_():
             raise ActiveExitException('主动退出')
+
+        @self.add_cmd('eval')
+        def eval_(*args):
+            try:
+                print(eval(' '.join(args)))
+            except Exception:
+                traceback.print_exc()
+
+        @self.add_cmd('exec')
+        def exec_(*args):
+            try:
+                exec(' '.join(args))
+            except Exception:
+                traceback.print_exc()
 
         @self.add_cmd('send')
         def send(client_name, user_id, text):

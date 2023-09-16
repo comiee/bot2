@@ -16,7 +16,7 @@ def sql_(s):
 
 @query_currency_msg.on_receive
 def query_currency(user_id: int, currency: str):
-    return sql.query(f'select {currency} from info where qq={user_id};')
+    return sql.query(f'select {currency} from info where qq={user_id};', 0)
 
 
 @increase_currency_msg.on_receive

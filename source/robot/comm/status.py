@@ -7,6 +7,7 @@ import asyncio
 
 class Status:
     options: tuple[str] = ()
+    # TODO 写文件
 
 
 class SessionStatus(Status):
