@@ -9,7 +9,7 @@ T_Value = TypeVar('T_Value')
 
 class Status(Generic[T_Value]):
     @overload
-    def __init__(self, *, default_value: T_Value):
+    def __init__(self, *, default_value):
         self.__init__(default_factory=lambda: default_value)
 
     @overload
