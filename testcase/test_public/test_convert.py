@@ -30,6 +30,10 @@ class ConvertTestCase(unittest.TestCase):
             MiraiMessage(MiraiMessageSegment.at(12345)),
             convert_to('mirai', '[at:12345]')
         )
+        self.assertEqual(
+            MiraiMessage(MiraiMessageSegment('File', name="text.txt")),
+            convert_to('mirai', '[file:text.txt]')
+        )
         # TODO 补充其他type
         self.assertEqual(
             MiraiMessage(MiraiMessageSegment.plain('abc')),

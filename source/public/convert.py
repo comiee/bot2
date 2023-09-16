@@ -57,6 +57,8 @@ def convert_internal_part_to_mirai_seg(s: str) -> MiraiMessageSegment:
                 music_url=temp['music_url'],
                 brief=temp['brief'],
             )
+        case 'file':
+            return MiraiMessageSegment(type='File',name=value)
         case _:
             return MiraiMessageSegment.plain(value)
 
@@ -122,6 +124,8 @@ def convert_dict_to_internal(d: dict) -> str:
         case 'MusicShare':
             return f'[musicShare:{d["title"]},kind:{d["kind"]},title:{d["title"]},summary:{d["summary"]},' \
                    f'jumpUrl:{d["jumpUrl"]},pictureUrl:{d["pictureUrl"]},musicUrl:{d["musicUrl"]},brief:{d["brief"]}]'
+        case 'File':
+            return f'[file:{d["name"]}]'
         case 'Plain':
             return re.sub(r'[\[\]]', lambda m: {'[': '[left]', ']': '[right]'}[m.group()], d["text"])
 
