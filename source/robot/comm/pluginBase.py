@@ -39,7 +39,7 @@ class PluginBase(Plugin[EventT, StateT, ConfigT], ABC, Generic[EventT, StateT, C
 
 
 class Session(PluginBase[MessageEvent, StateT, ConfigT], ABC, Generic[StateT, ConfigT]):
-    session_status = session_state
+    session_state = session_state
 
     @property
     def user(self) -> User:
@@ -92,25 +92,27 @@ class Session(PluginBase[MessageEvent, StateT, ConfigT], ABC, Generic[StateT, Co
             return self.text
         return re.sub(rf'\[at:{self.bot_qq}]\s*', '', self.text)
 
-    async def reply(self, message: BuildMessageType, quote: bool = False, at: bool = False) -> None:
+    async def reply(self, message: BuildMessageType, quote: bool = None, at: bool = False) -> None:
+        if quote is None:
+            quote=self.is_group()
         if at and self.is_group():
             message = MiraiMessageSegment.at(self.qq) + message
         bot_logger.info(f'回复消息：{message}')
 
-        if not await self.session_status.can_reply():
+        if not await self.session_state.can_reply():
             return
         ret = await self.event.reply(message, quote)
         if ret['code'] != 0 or ret['messageId'] == -1 or ret['msg'] != 'success':
             bot_logger.warning(f'回复消息失败：{ret}')
         else:
-            self.session_status.record_reply()
+            self.session_state.record_reply()
 
-    async def ask(self, prompt: BuildMessageType = None, quote: bool = False, at: bool = False,
+    async def ask(self, prompt: BuildMessageType = None, quote: bool = None, at: bool = False,
                   timeout: int | float = None, return_plain_text: bool = True) -> str:
         """
         向用户询问
         :param prompt: 询问的话语，如果为None则直接等待回复
-        :param quote: 是否引用消息
+        :param quote: 是否引用消息，None为群聊引用，私聊不引用
         :param at: 是否at对方
         :param timeout: 等待回复的时长，超时会抛出GetEventTimeout异常
         :param return_plain_text: 是否返回plain_text
