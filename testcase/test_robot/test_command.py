@@ -6,7 +6,7 @@ from unittest import mock
 import unittest
 
 __import__('robot.plugins.test')
-__import__('robot.section.sessionConfig')
+__import__('robot.section.config')
 
 
 class CommandTestCase(unittest.IsolatedAsyncioTestCase):

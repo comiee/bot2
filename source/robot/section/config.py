@@ -2,15 +2,15 @@ from public.currency import Currency
 from public.log import bot_logger
 from robot.comm.status import SessionState
 from robot.comm.pluginBase import Session
-from robot.plugins.chatPlugin import ChatPlugin
+from robot.comm.status import session_state, chat_state
 from robot.comm.command import FullCommand, RegexCommand, SplitCommand
 
 
 @RegexCommand(r'^(?:聊天|开|开启)$').trim_cost(10, Currency.coin)
 @FullCommand('on').trim_super()
 async def chat_on(session: Session):
-    if ChatPlugin.chat_state[session.id].switch is not True:
-        ChatPlugin.chat_state[session.id].switch = True
+    if chat_state[session.id].switch is not True:
+        chat_state[session.id].switch = True
         await session.reply('聊天功能开启')
     else:
         await session.reply('聊天功能已经是开启状态了哦。')
@@ -20,8 +20,8 @@ async def chat_on(session: Session):
 @RegexCommand(r'^(?:闭嘴|关|关闭)$').trim_cost(10, Currency.coin)
 @FullCommand('off').trim_super()
 async def chat_off(session: Session):
-    if ChatPlugin.chat_state[session.id].switch is not False:
-        ChatPlugin.chat_state[session.id].switch = False
+    if chat_state[session.id].switch is not False:
+        chat_state[session.id].switch = False
         await session.reply('聊天功能关闭')
     else:
         await session.reply('我已经闭嘴了，你还要我怎样？')
@@ -29,8 +29,8 @@ async def chat_off(session: Session):
 
 
 status_dict: dict[str, SessionState] = {
-    'session': Session.session_status,
-    'chat': ChatPlugin.chat_state,
+    'session': session_state,
+    'chat': chat_state,
 }
 
 
