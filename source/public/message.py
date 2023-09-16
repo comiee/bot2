@@ -15,6 +15,7 @@ exit_msg = Message('exit', {})
 
 chat_msg = Message('chat', {
     'user_id': int,  # 用户id，比如QQ号
+    'group_id': int, # 群号，没有就填0
     'text': str,  # 聊天内容，public.convert中定义的internal格式
 }, str)  # 返回值为聊天内容的回应，如果不答复则返回空字符串
 

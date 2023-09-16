@@ -54,5 +54,6 @@ class CmdAdmin(Admin):
         def send(client_name, user_id, text):
             self.server.send_to(client_name, chat_msg.build(
                 user_id=int(user_id),
+                group_id=0,
                 text=text,
             ))

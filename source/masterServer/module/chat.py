@@ -8,14 +8,15 @@ import re
 exec('from datetime import datetime;'
      'from public.tools import to_int,to_num;')
 
-def get_report(user, text):
+
+def get_report(user, group, text):
     # 处理艾特自己
     if '[at:1790218632]' in text:
         return '有什么事你倒是说啊'
 
     # 匹配模板
-    f=lambda *args:None
-    f(user,)
+    f = lambda *args: None
+    f(user, group)
 
     with open(data_path('chat.txt'), encoding='utf-8') as f:
         for line in f.readlines():
@@ -34,12 +35,13 @@ def get_report(user, text):
 
     return ''
 
+
 @chat_msg.on_receive
-def chat(user_id, text):
-    master_server_logger.info(f'{user_id}发来的聊天请求：{text}')
+def chat(user_id, group_id, text):
+    master_server_logger.info(f'{group_id}@{user_id}发来的聊天请求：{text}')
     # TODO 其他的处理
     # TODO 分多档位
-    ret = get_report(user_id, text)
+    ret = get_report(user_id, group_id, text)
     if ret:
-        master_server_logger.info(f'对{user_id}答复：{ret}')
+        master_server_logger.info(f'对{group_id}@{user_id}答复：{ret}')
     return ret

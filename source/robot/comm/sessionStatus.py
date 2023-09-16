@@ -30,7 +30,7 @@ class SessionStatus(SessionStatusBase):
     def __init__(self):
         super().__init__(default_factory=SessionStatus)
 
-        self.interval: float = 3  # 两次回复间间隔的秒数
+        self.interval: float = 10  # 两次回复间间隔的秒数
         self.max_times: int = 100  # 最大回复次数
 
         self._last_reply_timestamp: float = 0  # 上次处理的时间戳，用于间隔回复

@@ -21,9 +21,13 @@ class ChatPlugin(Session, priority=Priority.Chat):
 
         text = self.exclude_at_bot_text() if self.chat_status.at_switch else self.text
         client = get_bot_client()
-        ret = client.send(chat_msg.build(user_id=self.qq, text=text))
+        ret = client.send(chat_msg.build(
+            user_id=self.qq,
+            group_id=self.id if self.is_group() else 0,
+            text=text
+        ))
         if ret:
-            await self.reply(convert_to('mirai',ret))
+            await self.reply(convert_to('mirai', ret))
 
     async def rule(self) -> bool:
         if not isinstance(self.event, MessageEvent):
