@@ -72,14 +72,21 @@ def convert_internal_to_mirai(msg: str) -> MiraiMessage:
                     k = stack.pop()
                     if not stack:
                         stack.append('')
-                    stack[-1] += {'left': '[', 'right': ']'}[k]
+                    v = {'left': '[', 'right': ']'}[k]
+                    if isinstance(stack[-1], str):
+                        stack[-1] += v
+                    else:
+                        stack.append(v)
                 else:
                     stack[-1] = convert_internal_part_to_mirai_seg(stack[-1])
             case _:
                 if not stack:
                     stack.append('')
-                stack[-1] += c
-    return MiraiMessage(stack)
+                if isinstance(stack[-1], str):
+                    stack[-1] += c
+                else:
+                    stack.append(c)
+    return MiraiMessage([MiraiMessageSegment.plain(x) if isinstance(x, str) else x for x in stack])
 
 
 def convert_internal_to_data(msg: str) -> list[dict]:
