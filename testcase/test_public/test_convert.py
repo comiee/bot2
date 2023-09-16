@@ -9,6 +9,18 @@ class ConvertTestCase(unittest.TestCase):
             '[at:12345]',
             convert_to('internal', MiraiMessageSegment.at(12345))
         )
+        self.assertEqual(
+            '[file:text.txt]',
+            convert_to('internal', MiraiMessage(MiraiMessageSegment('File', name="text.txt"))),
+        )
+        self.assertEqual(
+            '[marketFace:123]',
+            convert_to('internal', MiraiMessage(MiraiMessageSegment('MarketFace', id=123)))
+        )
+        self.assertEqual(
+            '[unknown:xxx,a:1,b:2]',
+            convert_to('internal', MiraiMessage(MiraiMessageSegment('xxx', a=1, b=2)))
+        )
         # TODO 补充其他type
         self.assertEqual(
             'abc',
@@ -30,17 +42,13 @@ class ConvertTestCase(unittest.TestCase):
             MiraiMessage(MiraiMessageSegment.at(12345)),
             convert_to('mirai', '[at:12345]')
         )
-        self.assertEqual(
-            MiraiMessage(MiraiMessageSegment('File', name="text.txt")),
-            convert_to('mirai', '[file:text.txt]')
-        )
         # TODO 补充其他type
         self.assertEqual(
             MiraiMessage(MiraiMessageSegment.plain('abc')),
             convert_to('mirai', 'abc')
         )
         self.assertEqual(
-            MiraiMessage(MiraiMessageSegment.at(12345)+
+            MiraiMessage(MiraiMessageSegment.at(12345) +
                          MiraiMessageSegment.plain('a[b]c')),
             convert_to('mirai', '[at:12345]a[left]b[right]c')
         )

@@ -1,4 +1,5 @@
 """消息格式转换"""
+from public.log import public_logger
 from alicebot.message import BuildMessageType
 from alicebot.adapter.mirai.message import MiraiMessage, MiraiMessageSegment
 from typing import Literal
@@ -58,7 +59,9 @@ def convert_internal_part_to_mirai_seg(s: str) -> MiraiMessageSegment:
                 brief=temp['brief'],
             )
         case 'file':
-            return MiraiMessageSegment(type='File',name=value)
+            return MiraiMessageSegment('File', name=value)
+        case 'marketFace':
+            return MiraiMessageSegment('MarketFace', id=value)
         case _:
             return MiraiMessageSegment.plain(value)
 
@@ -126,8 +129,14 @@ def convert_dict_to_internal(d: dict) -> str:
                    f'jumpUrl:{d["jumpUrl"]},pictureUrl:{d["pictureUrl"]},musicUrl:{d["musicUrl"]},brief:{d["brief"]}]'
         case 'File':
             return f'[file:{d["name"]}]'
+        case 'MarketFace':
+            return f'[marketFace:{d["id"]}]'
         case 'Plain':
             return re.sub(r'[\[\]]', lambda m: {'[': '[left]', ']': '[right]'}[m.group()], d["text"])
+        case _:
+            public_logger.error(f'未知的类型的消息：{d}')
+            s = ','.join(f'{k}:{v}' for k, v in d.items() if k != 'type')
+            return f'[unknown:{d["type"]},{s}]'
 
 
 def convert_data_to_internal(data: list[dict]) -> str:
