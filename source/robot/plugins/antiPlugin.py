@@ -13,7 +13,7 @@ class AntiFriendRecallPlugin(PluginBase, priority=Priority.Anti):
                                       target=target)
         except:
             return
-        reply_message = MiraiMessage(['撤回也没用，我已经看见了，你刚才发送的是：\n'] + ret['data']['messageChain'])
+        reply_message = MiraiMessage('撤回也没用，我已经看见了，你刚才发送的是：\n', ret['data']['messageChain'])
         await self.send(reply_message, 'friend', target)
 
     async def rule(self) -> bool:
@@ -37,7 +37,7 @@ class AntiGroupRecallPlugin(PluginBase, priority=Priority.Anti):
         else:
             head_message = MiraiMessageSegment.at(operator) + '撤回也没用，我已经看见了，' + \
                            MiraiMessageSegment.at(author) + '刚才发送的是：\n'
-        reply_message = MiraiMessage([head_message] + ret['data']['messageChain'])
+        reply_message = MiraiMessage(head_message, ret['data']['messageChain'])
         await self.send(reply_message, 'group', group)
 
     async def rule(self) -> bool:
