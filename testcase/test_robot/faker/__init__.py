@@ -1,6 +1,7 @@
 from robot.comm.pluginBase import Session
 from alicebot.plugin import Plugin
-from alicebot.adapter.mirai.message import T_MiraiMSG, MiraiMessage
+from alicebot.message import BuildMessageType
+from alicebot.adapter.mirai.message import MiraiMessage
 from alicebot.adapter.mirai.event import FriendMessage, FriendInfo
 from alicebot.exceptions import EventException
 from unittest.mock import Mock
@@ -18,7 +19,7 @@ async def spread_event(plugin_cls: type[Plugin], event):
         pass
 
 
-def dummy_friend_message_event(message: T_MiraiMSG):
+def dummy_friend_message_event(message: BuildMessageType):
     event = Mock(FriendMessage)
     event.sender = FriendInfo(id=1234567890, nickname='test_nick_name', remark='test_remark')
     event.message = MiraiMessage(message)

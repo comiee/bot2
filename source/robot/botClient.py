@@ -1,7 +1,7 @@
 from communication.client import Client
 from alicebot import Bot
+from alicebot.message import BuildMessageType
 from alicebot.adapter.mirai import MiraiAdapter
-from alicebot.adapter.mirai.message import T_MiraiMSG
 import asyncio
 
 __all__ = ['get_bot_client']
@@ -16,12 +16,12 @@ class BotProxy:
         # 不可用self.__event_loop.create_task(coro).result()，这种写法的result不会等待结果，会报错
         return asyncio.run_coroutine_threadsafe(coro, self.event_loop).result()
 
-    def send_friend(self, message: T_MiraiMSG, target: int, quote: int = None):
+    def send_friend(self, message: BuildMessageType, target: int, quote: int = None):
         return self.__run_in_bot_event_loop(
             self.bot.get_adapter(MiraiAdapter).send(message, 'friend', target, quote)
         )
 
-    def send_group(self, message: T_MiraiMSG, target: int, quote: int = None):
+    def send_group(self, message: BuildMessageType, target: int, quote: int = None):
         return self.__run_in_bot_event_loop(
             self.bot.get_adapter(MiraiAdapter).send(message, 'group', target, quote)
         )

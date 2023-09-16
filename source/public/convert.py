@@ -1,5 +1,6 @@
 """消息格式转换"""
-from alicebot.adapter.mirai.message import MiraiMessage, MiraiMessageSegment, T_MiraiMSG
+from alicebot.message import BuildMessageType
+from alicebot.adapter.mirai.message import MiraiMessage, MiraiMessageSegment
 from typing import Literal
 import re
 
@@ -11,12 +12,12 @@ internal格式：
 """
 
 
-def convert_mirai_to_data(message: T_MiraiMSG) -> list[dict]:
+def convert_mirai_to_data(message: BuildMessageType) -> list[dict]:
     return MiraiMessage(message).as_message_chain()
 
 
 def convert_data_to_mirai(data: list[dict]) -> MiraiMessage:
-    return MiraiMessage(MiraiMessageSegment(**x) for x in data)
+    return MiraiMessage([MiraiMessageSegment(**x) for x in data])
 
 
 def convert_internal_part_to_mirai_seg(s: str) -> MiraiMessageSegment:
@@ -122,7 +123,7 @@ def convert_data_to_internal(data: list[dict]) -> str:
     return ''.join(map(convert_dict_to_internal, data))
 
 
-def convert_mirai_to_plain(message: T_MiraiMSG) -> str:
+def convert_mirai_to_plain(message: BuildMessageType) -> str:
     return MiraiMessage(message).get_plain_text()
 
 

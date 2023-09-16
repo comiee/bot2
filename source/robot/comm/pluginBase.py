@@ -6,10 +6,11 @@ from robot.comm.priority import Priority
 from robot.comm.user import User
 from robot.comm.sessionStatus import SessionStatus
 from alicebot.plugin import Plugin
-from alicebot.typing import T_Config, T_Event, T_State
+from alicebot.typing import ConfigT, EventT, StateT
 from alicebot.exceptions import GetEventTimeout
+from alicebot.message import BuildMessageType
 from alicebot.adapter.mirai import MiraiAdapter
-from alicebot.adapter.mirai.message import T_MiraiMSG, MiraiMessageSegment
+from alicebot.adapter.mirai.message import MiraiMessageSegment
 from alicebot.adapter.mirai.event import MessageEvent, GroupMemberInfo, GroupMessage
 from abc import ABC
 from typing import Generic
@@ -18,7 +19,7 @@ import re
 __all__ = ['PluginBase', 'Session']
 
 
-class PluginBase(Plugin[T_Event, T_State, T_Config], ABC, Generic[T_Event, T_State, T_Config]):
+class PluginBase(Plugin[EventT, StateT, ConfigT], ABC, Generic[EventT, StateT, ConfigT]):
     priority = -1  # 用无效的priority强制子类定义自己的priority
     block = False
 
@@ -37,7 +38,7 @@ class PluginBase(Plugin[T_Event, T_State, T_Config], ABC, Generic[T_Event, T_Sta
         return self.bot.get_adapter(MiraiAdapter).send
 
 
-class Session(PluginBase[MessageEvent, T_State, T_Config], ABC, Generic[T_State, T_Config]):
+class Session(PluginBase[MessageEvent, StateT, ConfigT], ABC, Generic[StateT, ConfigT]):
     session_status = SessionStatus()
 
     @property
@@ -91,7 +92,7 @@ class Session(PluginBase[MessageEvent, T_State, T_Config], ABC, Generic[T_State,
             return self.text
         return re.sub(rf'\[at:{self.bot_qq}]\s*', '', self.text)
 
-    async def reply(self, message: T_MiraiMSG, quote: bool = False, at: bool = False) -> None:
+    async def reply(self, message: BuildMessageType, quote: bool = False, at: bool = False) -> None:
         if at and self.is_group():
             message = MiraiMessageSegment.at(self.qq) + message
         bot_logger.info(f'回复消息：{message}')
@@ -104,7 +105,7 @@ class Session(PluginBase[MessageEvent, T_State, T_Config], ABC, Generic[T_State,
         else:
             self.session_status.record_reply()
 
-    async def ask(self, prompt: T_MiraiMSG = None, quote: bool = False, at: bool = False,
+    async def ask(self, prompt: BuildMessageType = None, quote: bool = False, at: bool = False,
                   timeout: int | float = None, return_plain_text: bool = True) -> str:
         """
         向用户询问
