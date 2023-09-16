@@ -56,6 +56,7 @@ class Client:
                 send_msg(self.__receiver, result_msg.build(ret))
             except MessageException as e:
                 client_logger.error(f'客户端[{self.__name}]解析服务器消息失败：{e.args[0]}')
+                send_msg(self.__receiver, result_msg.build({'error':e.args[0]}))  # 出异常也要返回一个result，不然对端会一直处于接受态
             except ConnectionError as e:
                 client_logger.error(f'客户端[{self.__name}]接受消息失败，将在{RECONNECT_TIME}秒后重连：{e}')
                 time.sleep(RECONNECT_TIME)
