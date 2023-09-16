@@ -2,12 +2,12 @@ from comiee import overload
 from collections import defaultdict
 from typing import Generic, TypeVar
 
-__all__ = ['Status']
+__all__ = ['State']
 
 T_Value = TypeVar('T_Value')
 
 
-class Status(Generic[T_Value]):
+class State(Generic[T_Value]):
     @overload
     def __init__(self, *, default_value):
         self.__init__(default_factory=lambda: default_value)

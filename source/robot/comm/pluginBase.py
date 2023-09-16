@@ -4,7 +4,7 @@ from public.exception import CostCurrencyFailedException
 from public.convert import convert_to
 from robot.comm.priority import Priority
 from robot.comm.user import User
-from robot.comm.sessionStatus import SessionStatus
+from robot.comm.status import session_state
 from alicebot.plugin import Plugin
 from alicebot.typing import ConfigT, EventT, StateT
 from alicebot.exceptions import GetEventTimeout
@@ -39,7 +39,7 @@ class PluginBase(Plugin[EventT, StateT, ConfigT], ABC, Generic[EventT, StateT, C
 
 
 class Session(PluginBase[MessageEvent, StateT, ConfigT], ABC, Generic[StateT, ConfigT]):
-    session_status = SessionStatus()
+    session_status = session_state
 
     @property
     def user(self) -> User:

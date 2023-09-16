@@ -1,7 +1,7 @@
 from public.currency import Currency
 from public.log import bot_logger
 from public.exception import CostCurrencyFailedException
-from public.status import Status
+from public.state import State
 from robot.comm.pluginBase import Session
 from alicebot.exceptions import GetEventTimeout
 from abc import abstractmethod
@@ -179,7 +179,7 @@ class Command(metaclass=_CommandMeta):
         :param cmd_name: 对外显示开关状态时使用的名字，如果为空字符串则使用self.cmd
         :return: 装饰后的command
         """
-        switch = Status(default_value=default_state)
+        switch = State(default_value=default_state)
         if not cmd_name:
             cmd_name = self._cmd
 

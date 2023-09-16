@@ -32,6 +32,15 @@ class ConvertTestCase(unittest.TestCase):
         )
         # TODO 补充其他type
         self.assertEqual(
+            MiraiMessage(MiraiMessageSegment.plain('abc')),
+            convert_to('mirai', 'abc')
+        )
+        self.assertEqual(
+            MiraiMessage(MiraiMessageSegment.at(12345)+
+                         MiraiMessageSegment.plain('a[b]c')),
+            convert_to('mirai', '[at:12345]a[left]b[right]c')
+        )
+        self.assertEqual(
             MiraiMessage(MiraiMessageSegment.plain('[at:12345]')),
             convert_to('mirai', '[left]at:12345[right]')
         )

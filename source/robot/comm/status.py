@@ -1,34 +1,21 @@
 from public.log import bot_logger
-from public.status import Status
+from public.state import State
 from collections import deque
 import time
 import asyncio
 
 
-class SessionStatusBase(Status):
+class Status:
     options: tuple[str] = ()
 
-    def __get__(self, instance, owner):
-        if instance is None:
-            return self
-        return self[instance.id]
 
-    def __set__(self, instance, value):
-        self[instance.id] = value
-
-    def __delete__(self, instance):
-        del self[instance.id]
-
-
-class SessionStatus(SessionStatusBase):
+class SessionStatus(Status):
     options = (
         'interval',
         'max_times',
     )
 
     def __init__(self):
-        super().__init__(default_factory=SessionStatus)
-
         self.interval: float = 10  # 两次回复间间隔的秒数
         self.max_times: int = 100  # 最大回复次数
 
@@ -54,14 +41,13 @@ class SessionStatus(SessionStatusBase):
         return True
 
 
-class ChatStatus(SessionStatusBase):
+class ChatStatus(Status):
     options = (
         'switch',
         'at_switch'
     )
 
     def __init__(self):
-        super().__init__(default_factory=ChatStatus)
         self.switch: bool = True  # 总开关
         self.at_switch: bool = True  # 是否只有艾特才会回应
 
@@ -78,3 +64,25 @@ class ChatStatus(SessionStatusBase):
             else:
                 break
         return n
+
+
+class SessionState(State):
+    def __init__(self, status_cls: type[Status]):
+        super().__init__(default_factory=status_cls)
+        self.options = status_cls.options
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+        return self[instance.id]
+
+    def __set__(self, instance, value):
+        self[instance.id] = value
+
+    def __delete__(self, instance):
+        del self[instance.id]
+
+
+# Plugin加载会导致类成员被重新实例化，为保证全局唯一，SessionState类的变量统一在这里定义
+session_state = SessionState(SessionStatus)
+chat_state = SessionState(ChatStatus)
