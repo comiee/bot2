@@ -15,7 +15,7 @@ exit_msg = Message('exit', {})
 
 chat_msg = Message('chat', {
     'user_id': int,  # 用户id，比如QQ号
-    'group_id': int, # 群号，没有就填0
+    'group_id': int,  # 群号，没有就填0
     'text': str,  # 聊天内容，public.convert中定义的internal格式
 }, str)  # 返回值为聊天内容的回应，如果不答复则返回空字符串
 
@@ -42,3 +42,10 @@ increase_currency_msg = Message('change_currency', {
 sign_in_msg = Message('sign_in', {
     'user_id': int,  # 用户id，比如QQ号
 })
+
+# 色图
+h_pic_msg = Message('h_pic', {
+    'post_json': dict,  # 请求json
+}, [str,  # 错误信息，没有发生错误则为空字符串
+    list,  # 查找到的url列表
+    ])

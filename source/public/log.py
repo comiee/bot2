@@ -37,8 +37,7 @@ def get_logger(name, level, file_name, file_level) -> logging.Logger:
     ch.setLevel(level)
     ch.setFormatter(formatter)
     logger.addHandler(ch)
-    if not os.path.exists(LOG_PATH):
-        os.makedirs(LOG_PATH)
+
     fh = logging.FileHandler(os.path.join(LOG_PATH, file_name), encoding='utf-8')
     fh.setLevel(file_level)
     fh.setFormatter(formatter)
