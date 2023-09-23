@@ -10,6 +10,7 @@ import json
 
 
 def img_save(url):  # 从url保存图片
+	# TODO 保存失败时记日志，已知Image.open可能会报PIL.UnidentifiedImageError: cannot identify image file
     resp = requests.get(url)
     img = Image.open(BytesIO(resp.content))
     name = re.search(r'^.*/(.*?)$', url).group(1)
