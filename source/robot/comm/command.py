@@ -102,10 +102,34 @@ class Command(metaclass=_CommandMeta):
         return self
 
     def trim_white_list(self, users: set[int] = (), groups: set[int] = (), friends: set[int] = ()):
-        """TODO 将命令变为白名单命令"""
+        """将命令变为白名单命令"""
+        judge = self.judge
+
+        def judge_wrapper(session: Session) -> bool:
+            if not judge(session):
+                return False
+            if session.is_group():
+                return session.qq in users or session.id in groups
+            else:
+                return session.qq in users or session.id in friends
+
+        self.judge = judge_wrapper
+        return self
 
     def trim_black_list(self, users: set[int] = (), groups: set[int] = (), friends: set[int] = ()):
-        """TODO 将命令变为黑名单命令"""
+        """将命令变为黑名单命令"""
+        judge = self.judge
+
+        def judge_wrapper(session: Session) -> bool:
+            if not judge(session):
+                return False
+            if session.is_group():
+                return session.qq not in users and session.id not in groups
+            else:
+                return session.qq not in users and session.id not in friends
+
+        self.judge = judge_wrapper
+        return self
 
     def trim_friend(self, tip: str = None):
         """将命令变为私聊命令，如果tip不为None，会在非私聊场景下回复tip"""
