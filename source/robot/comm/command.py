@@ -219,6 +219,28 @@ class FullCommand(Command):
         return session.text == self._cmd
 
 
+class NormalCommand(Command):
+    """普通命令，判断是否以命令开头，将其余的部分作为参数传入回调函数"""
+
+    def judge(self, session: Session) -> bool:
+        if not session.text.startswith(self._cmd):
+            return False
+        arg = session.text[len(self._cmd):]
+        self.set_args(arg)
+        return True
+
+
+class RegexCommand(Command):
+    """正则命令，回调函数的参数为解包后的groups。比较复杂的表达式可以使用re.compile"""
+
+    def judge(self, session: Session) -> bool:
+        m = re.search(self._cmd, session.text)
+        if not m:
+            return False
+        self.set_args(*m.groups())
+        return True
+
+
 class SplitCommand(Command):
     """分割命令，用空格分割，分割后的第一项为命令，其余项为会被set_args设置为参数，参数的个数和回调函数的参数个数不匹配时不会执行，可以通过定义多个的形式重载"""
 
@@ -276,25 +298,25 @@ class SplitArgCommand(Command):
         await super().run(session)
 
 
-class NormalCommand(Command):
-    """普通命令，判断是否以命令开头，将其余的部分作为参数传入回调函数"""
+class KeywordCommand(Command):
+    """关键字命令，用空格每个参数，用冒号或等号分割k和v，结果会用关键字传参传到回调函数里"""
 
     def judge(self, session: Session) -> bool:
-        if not session.text.startswith(self._cmd):
+        cmd, *args = session.text.strip().split()
+        if cmd != self._cmd:
             return False
-        arg = session.text[len(self._cmd):]
-        self.set_args(arg)
-        return True
-
-
-class RegexCommand(Command):
-    """正则命令，回调函数的参数为解包后的groups。比较复杂的表达式可以使用re.compile"""
-
-    def judge(self, session: Session) -> bool:
-        m = re.search(self._cmd, session.text)
-        if not m:
+        kwargs = {}
+        for s in args:
+            if m := re.search(r'^(.+?)[=:：](.+?)$', s):
+                k, v = m.groups()
+                kwargs[k] = v
+            else:
+                return False
+        try:
+            signature(self._fun).bind(session, **kwargs)
+        except TypeError:
             return False
-        self.set_args(*m.groups())
+        self.set_args(**kwargs)
         return True
 
 
@@ -305,5 +327,6 @@ def get_command_cls_list() -> list[type[Command]]:
         SplitCommand,
         NormalCommand,
         SplitArgCommand,
+        KeywordCommand,
         RegexCommand,
     ]
