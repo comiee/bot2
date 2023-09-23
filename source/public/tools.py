@@ -22,10 +22,10 @@ def to_int(s: Union[int, str]):
     """汉字转为数字"""
     if isinstance(s, int):
         return s
-    if re.search(r'\d', s):
-        return int(re.sub(r'\D', '', s))
     if s and s[0] in '-负':
         return -to_int(s[1:])
+    if re.search(r'\d', s):
+        return int(re.sub(r'\D', '', s))
     nums = {**dict(zip('〇一二三四五六七八九', range(10))),
             **dict(zip('零壹贰叁肆伍陆柒捌玖', range(10))),
             **dict(zip(map(str, range(10)), range(10))),
