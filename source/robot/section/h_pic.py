@@ -109,4 +109,11 @@ def get_h_pic(
 @RegexCommand(r'来([\d\-负〇一二三四五六七八九十百千万亿零壹贰叁肆伍陆柒捌玖拾佰仟億两貮兆]*)[张点](.*)色图') \
         .trim_white_list(groups=white_groups, friends=white_friends)
 async def h_pic_regex(session: Session, num, keyword):
-    await h_pic(session, 数量=to_int(num) if num else 1, 关键字=keyword)
+    num = to_int(num) if num else 1
+    if num > 20:
+        await session.reply('你要的太多了，小心樯橹灰飞烟灭哦')
+        return
+    elif num <= 0:
+        await session.reply('不买就不要来打扰我，我可是很忙的')
+        return
+    await h_pic(session, 数量=num, 关键字=keyword)
