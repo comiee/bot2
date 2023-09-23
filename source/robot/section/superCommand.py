@@ -1,16 +1,15 @@
 from public.currency import Currency
 from public.message import debug_msg, sql_msg
 from public.convert import convert_to
-from robot.comm.command import get_command_cls_list, NormalCommand, RegexCommand, FullCommand, SplitCommand
+from robot.comm.command import get_command_cls_list, NormalCommand, FullCommand, SplitCommand
 from robot.comm.pluginBase import Session
 from robot.comm.user import User
 from robot.botClient import get_bot_client
-import re
 
 __all__ = []
 
 
-@RegexCommand(re.compile(r'^exec\s(.*)$', re.S)).trim_super()
+@NormalCommand('exec').trim_super()
 async def exec_code(session: Session, text: str):
     text = convert_to('plain', text)
     exec('async def func(session):\n\t' + text.replace('\n', '\n\t'))
@@ -19,14 +18,14 @@ async def exec_code(session: Session, text: str):
         await session.reply(str(ret))
 
 
-@RegexCommand(re.compile(r'^eval\s(.*)$', re.S)).trim_super()
+@NormalCommand('eval').trim_super()
 async def eval_code(session: Session, text: str):
     text = convert_to('plain', text)
     ret = eval(text)
     await session.reply(str(ret))
 
 
-@RegexCommand(re.compile(r'^sql\s(.*)$', re.S)).trim_super()
+@NormalCommand('sql').trim_super()
 async def exec_sql(session: Session, sql: str):
     sql = convert_to('plain', sql)
     res = get_bot_client().send(sql_msg.build(sql))
