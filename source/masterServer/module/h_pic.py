@@ -13,7 +13,7 @@ def img_save(url):  # 从url保存图片
     resp = requests.get(url)
     img = Image.open(BytesIO(resp.content))
     name = re.search(r'^.*/(.*?)$', url).group(1)
-    img.save(data_path('pic',name))
+    img.save(data_path('pic', name))
 
 
 @h_pic_msg.on_receive
@@ -34,6 +34,7 @@ def h_pic(post_json):
     if err := ret_json.get('error', ''):
         master_server_logger.warning(f'h_pic 返回错误：{ret_json}')
         return err, []
+    master_server_logger.info(f'h_pic 收到请求：{post_json}，爬取结果：{ret_json}')
     res = []
     for x in ret_json.get('data', []):
         url = x.get('urls', {}).get('original', '')
