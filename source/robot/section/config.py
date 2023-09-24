@@ -6,7 +6,7 @@ from robot.comm.status import session_state, chat_state
 from robot.comm.command import FullCommand, RegexCommand, SplitCommand
 
 
-@RegexCommand(r'^(?:聊天|开|开启)$').trim_cost(10, Currency.coin)
+@RegexCommand(r'^(?:聊天|开|开启)$').trim_cost((10, Currency.coin))
 @FullCommand('on').trim_super()
 async def chat_on(session: Session):
     if chat_state[session.id].switch is not True:
@@ -17,7 +17,7 @@ async def chat_on(session: Session):
         session.stop()  # 提前结束防止扣钱
 
 
-@RegexCommand(r'^(?:闭嘴|关|关闭)$').trim_cost(10, Currency.coin)
+@RegexCommand(r'^(?:闭嘴|关|关闭)$').trim_cost((10, Currency.coin))
 @FullCommand('off').trim_super()
 async def chat_off(session: Session):
     if chat_state[session.id].switch is not False:

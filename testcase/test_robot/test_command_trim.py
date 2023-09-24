@@ -25,7 +25,7 @@ class CommandTrimTestCase(unittest.IsolatedAsyncioTestCase):
     @mock.patch('robot.comm.pluginBase.Session.user', new_callable=mock.PropertyMock)
     async def test_cost_command(self, user_property_mock):
         fun_mock = mock.Mock()
-        FullCommand('test_cost_command').trim_cost(10, Currency.coin)(fun_mock)
+        FullCommand('test_cost_command').trim_cost((10, Currency.coin))(fun_mock)
 
         user_mock = mock.Mock(User)
         user_property_mock.return_value = user_mock

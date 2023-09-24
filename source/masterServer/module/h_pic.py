@@ -7,14 +7,17 @@ from io import BytesIO
 import re
 import requests
 import json
+import traceback
 
 
 def img_save(url):  # 从url保存图片
-	# TODO 保存失败时记日志，已知Image.open可能会报PIL.UnidentifiedImageError: cannot identify image file
-    resp = requests.get(url)
-    img = Image.open(BytesIO(resp.content))
-    name = re.search(r'^.*/(.*?)$', url).group(1)
-    img.save(data_path('pic', name))
+    try:
+        resp = requests.get(url)
+        img = Image.open(BytesIO(resp.content))
+        name = re.search(r'^.*/(.*?)$', url).group(1)
+        img.save(data_path('pic', name))
+    except:
+        master_server_logger.warning(f'h_pic 保存图片{url}时出错：{traceback.format_exc()}')
 
 
 @h_pic_msg.on_receive

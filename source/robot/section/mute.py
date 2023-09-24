@@ -1,7 +1,6 @@
 from public.tools import to_int
 from public.log import bot_logger
 from public.currency import Currency
-from public.exception import CostCurrencyFailedException
 from robot.comm.pluginBase import Session
 from robot.comm.command import SplitArgCommand, RegexCommand
 from alicebot.adapter.mirai.exceptions import ActionFailed
@@ -24,12 +23,7 @@ async def mute_other(session: Session, qq: str, time: str):
         await session.reply('时长无效')
         return
 
-    try:
-        currencies = [(time, Currency.coin)]
-        await session.check_cost(currencies)
-    except CostCurrencyFailedException as e:
-        await session.reply(f'命令取消，原因：{e.args[0]}')
-        return
+    await session.check_cost((time, Currency.coin))
 
     try:
         await session.call_api('mute', target=session.id, memberId=qq, time=time)
@@ -39,7 +33,7 @@ async def mute_other(session: Session, qq: str, time: str):
         await session.reply(text)
         return
 
-    await session.ensure_cost(currencies)
+    await session.ensure_cost((time, Currency.coin))
     await session.reply(f'禁言{qq}成功')
 
 

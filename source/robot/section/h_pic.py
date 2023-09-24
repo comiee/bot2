@@ -54,7 +54,7 @@ async def h_pic(session: Session,
     r18 = {0: 0, 1: 2, 2: 1}[level]
     unit_price = 10 + 10 * (level + bool(keyword) + bool(tag) + bool(uid))
     max_price = unit_price * num
-    await session.check_cost([(max_price, Currency.coin)])
+    await session.check_cost((max_price, Currency.coin))
 
     err, res = get_h_pic(r18, num, uid, keyword, tag, excludeAI=excludeAI)
     if err:
@@ -72,7 +72,7 @@ async def h_pic(session: Session,
     for url in res:
         text += '\n' + url
     await session.reply(text)
-    await session.ensure_cost([(coin, Currency.coin)])
+    await session.ensure_cost((coin, Currency.coin))
 
 
 # noinspection PyPep8Naming

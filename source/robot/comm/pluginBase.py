@@ -130,7 +130,7 @@ class Session(PluginBase[MessageEvent, StateT, ConfigT], ABC, Generic[StateT, Co
         ret = await self.ask(prompt, quote=True, timeout=timeout)
         return ret in {'是', '继续', 'Y', 'y', 'yes', '确认'}
 
-    async def check_cost(self, currencies: list[tuple[int, Currency]]) -> None:
+    async def __check_cost(self, *currencies: list[tuple[int, Currency]]) -> None:
         """检查是否能扣除self.user的num个current类型的货币，如果对方取消或货币不足，会抛出CostCurrencyFailedException异常"""
         try:
             ret = await self.inquire(f'此操作将花费{"、".join(f"{n}{c.value}" for n, c in currencies)}，是否确认？', 60)
@@ -142,7 +142,14 @@ class Session(PluginBase[MessageEvent, StateT, ConfigT], ABC, Generic[StateT, Co
             if self.user.query(currency) < num:
                 raise CostCurrencyFailedException(f'货币[{currency.value}]不足')
 
-    async def ensure_cost(self, currencies: list[tuple[int, Currency]]):
+    async def check_cost(self, *currencies: tuple[int, Currency]) -> None:
+        try:
+            await self.__check_cost(*currencies)
+        except CostCurrencyFailedException as e:
+            await self.reply(f'命令取消，原因：{e.args[0]}')
+            self.skip()
+
+    async def ensure_cost(self, currencies: tuple[int, Currency]):
         """实际的扣钱操作，与check_cost配合使用"""
         for num, currency in currencies:
             self.user.gain(-num, currency)

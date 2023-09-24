@@ -28,6 +28,7 @@ class ChatPlugin(Session, priority=Priority.Chat):
         ))
         if ret:
             await self.reply(convert_to('mirai', ret))
+            self.stop()
 
     async def rule(self) -> bool:
         if not isinstance(self.event, MessageEvent):

@@ -1,6 +1,5 @@
 from public.currency import Currency
 from public.log import bot_logger
-from public.exception import CostCurrencyFailedException
 from public.state import State
 from robot.comm.pluginBase import Session
 from alicebot.exceptions import GetEventTimeout
@@ -82,21 +81,16 @@ class Command(metaclass=_CommandMeta):
         self.run = run_wrapper
         return self
 
-    def trim_cost(self, num: int, currency: Currency, *args):
-        """将命令变为需要花费货币的命令，限制命令在执行时先扣除一定的货币，可同时传入多个num和currency，如cost_command(Command, 1, A, 2, B)。
-        如果回调函数中抛出CostCurrencyFailedException异常或使用了stop、skip等中途退出的操作则不会扣钱"""
+    def trim_cost(self, *currencies: tuple[int, Currency]):
+        """将命令变为需要花费货币的命令，限制命令在执行时先扣除一定的货币。
+        如果回调函数中使用了stop、skip等中途退出的操作则不会扣钱"""
         # 也可以嵌套使用，但是分开询问是否扣钱
         run = self.run
-        currencies = [(num, currency), *((args[i], args[i + 1]) for i in range(0, len(args), 2))]
 
         async def run_wrapper(session: Session) -> None:
-            try:
-                await session.check_cost(currencies)
-                await run(session)
-            except CostCurrencyFailedException as e:
-                await session.reply(f'命令取消，原因：{e.args[0]}')
-            else:
-                await session.ensure_cost(currencies)
+            await session.check_cost(*currencies)
+            await run(session)
+            await session.ensure_cost(*currencies)
 
         self.run = run_wrapper
         return self
