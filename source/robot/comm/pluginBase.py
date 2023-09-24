@@ -149,7 +149,7 @@ class Session(PluginBase[MessageEvent, StateT, ConfigT], ABC, Generic[StateT, Co
             await self.reply(f'命令取消，原因：{e.args[0]}')
             self.skip()
 
-    async def ensure_cost(self, currencies: tuple[int, Currency]):
+    async def ensure_cost(self, *currencies: tuple[int, Currency]):
         """实际的扣钱操作，与check_cost配合使用"""
         for num, currency in currencies:
             self.user.gain(-num, currency)

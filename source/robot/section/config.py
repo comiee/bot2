@@ -6,23 +6,23 @@ from robot.comm.status import session_state, chat_state
 from robot.comm.command import FullCommand, RegexCommand, SplitCommand
 
 
-@RegexCommand(r'^(?:聊天|开|开启)$').trim_cost((10, Currency.coin))
+@RegexCommand(r'^(?:聊天|开|开启)$').trim_group('聊天开关只在群聊中有效哦').trim_cost((10, Currency.coin))
 @FullCommand('on').trim_super()
 async def chat_on(session: Session):
-    if chat_state[session.id].switch is not True:
-        chat_state[session.id].switch = True
-        await session.reply('聊天功能开启')
+    if chat_state[session.id].at_switch is not False:
+        chat_state[session.id].at_switch = False
+        await session.reply('聊天功能开启，快来和小魅聊天吧！')
     else:
         await session.reply('聊天功能已经是开启状态了哦。')
         session.stop()  # 提前结束防止扣钱
 
 
-@RegexCommand(r'^(?:闭嘴|关|关闭)$').trim_cost((10, Currency.coin))
+@RegexCommand(r'^(?:闭嘴|关|关闭)$').trim_group('聊天开关只在群聊中有效哦').trim_cost((10, Currency.coin))
 @FullCommand('off').trim_super()
 async def chat_off(session: Session):
-    if chat_state[session.id].switch is not False:
-        chat_state[session.id].switch = False
-        await session.reply('聊天功能关闭')
+    if chat_state[session.id].at_switch is not True:
+        chat_state[session.id].at_switch = True
+        await session.reply('聊天功能关闭，不过艾特小魅的话，小魅还是会回复的。')
     else:
         await session.reply('我已经闭嘴了，你还要我怎样？')
         session.stop()  # 提前结束防止扣钱
