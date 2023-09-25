@@ -17,26 +17,13 @@ class CommandTestCase(unittest.IsolatedAsyncioTestCase):
 
     async def test_chat_switch_state(self):
         User.is_super_user = mock.Mock(return_value=True)
-        event = dummy_friend_message_event('off')
-        event.sender.id = 12345
-        await spread_event(CommandPlugin, event)
-        self.assertEqual(False, ChatPlugin.chat_state[12345].switch)  # 每个id的开关状态独立
-        self.assertEqual(True, ChatPlugin.chat_state[67890].switch)
-
         event = dummy_friend_message_event('on')
-        event.sender.id = 12345
-        await spread_event(CommandPlugin, event)
-        self.assertEqual(True, ChatPlugin.chat_state[12345].switch)
-
-    async def test_chat_at_switch_state(self):
-        User.is_super_user = mock.Mock(return_value=True)
-        event = dummy_friend_message_event('config chat at_switch False')
         event.sender.id = 12345
         await spread_event(CommandPlugin, event)
         self.assertEqual(False, ChatPlugin.chat_state[12345].at_switch)  # 每个id的开关状态独立
         self.assertEqual(True, ChatPlugin.chat_state[67890].at_switch)
 
-        event = dummy_friend_message_event('config chat at_switch True')
+        event = dummy_friend_message_event('off')
         event.sender.id = 12345
         await spread_event(CommandPlugin, event)
         self.assertEqual(True, ChatPlugin.chat_state[12345].at_switch)

@@ -5,6 +5,7 @@ from robot.comm.pluginBase import Session
 from alicebot.exceptions import GetEventTimeout
 from abc import abstractmethod
 from inspect import iscoroutinefunction, signature
+from typing import Callable, Awaitable
 import re
 import asyncio
 import traceback
@@ -28,6 +29,9 @@ class _CommandMeta(type):
 
 
 class Command(metaclass=_CommandMeta):
+    JudgeFun = Callable[[Session], bool]
+    RunFun = Callable[[Session], Awaitable[None]]
+
     def __init__(self, cmd):
         # 不设置别名系统，多个cmd用嵌套装饰器或正则命令解决
         # 如果有多个命令匹配，只会执行第一个命令
@@ -58,119 +62,153 @@ class Command(metaclass=_CommandMeta):
         else:
             self._fun(session, *self._args, **self._kwargs)
 
-    def trim_super(self):
-        """将命令变为管理员命令，限定使用者为管理员并在执行出错时返回错误"""
+    def _before_judge(self, judge_fun: JudgeFun):
         judge = self.judge
+
+        def new_judge(session: Session):
+            return judge_fun(session) and judge(session)
+
+        self.judge = new_judge
+        return judge_fun
+
+    def _after_judge(self, judge_fun: JudgeFun):
+        judge = self.judge
+
+        def new_judge(session: Session):
+            return judge(session) and judge_fun(session)
+
+        self.judge = new_judge
+        return judge_fun
+
+    def _replace_judge(self, judge_fun: Callable[[JudgeFun, Session], bool]):
+        judge = self.judge
+
+        def new_judge(session: Session):
+            return judge_fun(judge, session)
+
+        self.judge = new_judge
+        return judge_fun
+
+    def _before_run(self, run_fun: RunFun):
         run = self.run
 
-        def judge_wrapper(session: Session) -> bool:
-            if not judge(session):
-                return False
-            if not session.user.is_super_user():
-                return False
-            return True
+        async def new_run(session: Session):
+            await run_fun(session)
+            await run(session)
 
-        async def run_wrapper(session: Session) -> None:
+        self.run = new_run
+        return run_fun
+
+    def _after_run(self, run_fun: RunFun):
+        run = self.run
+
+        async def new_run(session: Session):
+            await run(session)
+            await run_fun(session)
+
+        self.run = new_run
+        return run_fun
+
+    def _replace_run(self, run_fun: Callable[[RunFun, Session], Awaitable[None]]):
+        run = self.run
+
+        async def new_run(session: Session):
+            await run_fun(run, session)
+
+        self.run = new_run
+        return run_fun
+
+    def trim_super(self):
+        """将命令变为管理员命令，限定使用者为管理员并在执行出错时返回错误"""
+
+        @self._after_judge
+        def judge_super(session: Session) -> bool:
+            return session.user.is_super_user()
+
+        @self._replace_run
+        async def run_super(run: Command.RunFun, session: Session) -> None:
             try:
                 await run(session)
             except Exception as e:
                 await session.reply(str(e))
                 traceback.print_exc()
 
-        self.judge = judge_wrapper
-        self.run = run_wrapper
         return self
 
     def trim_cost(self, *currencies: tuple[int, Currency]):
         """将命令变为需要花费货币的命令，限制命令在执行时先扣除一定的货币。
         如果回调函数中使用了stop、skip等中途退出的操作则不会扣钱"""
-        # 也可以嵌套使用，但是分开询问是否扣钱
-        run = self.run
 
-        async def run_wrapper(session: Session) -> None:
+        # 也可以嵌套使用，但是分开询问是否扣钱
+        @self._replace_run
+        async def run_cost(run: Command.RunFun, session: Session) -> None:
             await session.check_cost(*currencies)
             await run(session)
             await session.ensure_cost(*currencies)
 
-        self.run = run_wrapper
         return self
 
     def trim_white_list(self, users: set[int] = (), groups: set[int] = (), friends: set[int] = ()):
         """将命令变为白名单命令"""
-        judge = self.judge
 
-        def judge_wrapper(session: Session) -> bool:
-            if not judge(session):
-                return False
+        @self._after_judge
+        def judge_white_list(session: Session) -> bool:
             if session.is_group():
                 return session.qq in users or session.id in groups
             else:
                 return session.qq in users or session.id in friends
 
-        self.judge = judge_wrapper
         return self
 
     def trim_black_list(self, users: set[int] = (), groups: set[int] = (), friends: set[int] = ()):
         """将命令变为黑名单命令"""
-        judge = self.judge
 
-        def judge_wrapper(session: Session) -> bool:
-            if not judge(session):
-                return False
+        @self._after_judge
+        def judge_black_list(session: Session) -> bool:
             if session.is_group():
                 return session.qq not in users and session.id not in groups
             else:
                 return session.qq not in users and session.id not in friends
 
-        self.judge = judge_wrapper
         return self
 
     def trim_friend(self, tip: str = None):
         """将命令变为私聊命令，如果tip不为None，会在非私聊场景下回复tip"""
-        judge = self.judge
 
-        def judge_wrapper(session: Session) -> bool:
-            if not judge(session):
-                return False
+        @self._after_judge
+        def judge_friend(session: Session) -> bool:
             if session.is_group():
                 if tip is not None:
                     asyncio.create_task(session.reply(tip))
                 return False
             return True
 
-        self.judge = judge_wrapper
         return self
 
     def trim_group(self, tip: str = None):
         """将命令变为群聊命令，如果tip不为None，会在非群聊场景下回复tip"""
-        judge = self.judge
 
-        def judge_wrapper(session: Session) -> bool:
-            if not judge(session):
-                return False
+        @self._after_judge
+        def judge_group(session: Session) -> bool:
             if not session.is_group():
                 if tip is not None:
                     asyncio.create_task(session.reply(tip))
                 return False
             return True
 
-        self.judge = judge_wrapper
         return self
 
     def trim_administrator(self, tip: str = None):
         """限制命令的使用条件为只有机器人是群管理或群主时才能使用，如果tip不为None，会在不满足条件时回复tip"""
-        judge = self.judge
 
-        def judge_wrapper(session: Session) -> bool:
-            if not judge(session):
-                return False
+        @self._after_judge
+        def judge_administrator(session: Session) -> bool:
             if not session.is_group() or session.event.sender.group.permission not in {"OWNER", "ADMINISTRATOR"}:
                 if tip is not None:
                     asyncio.create_task(session.reply(tip))
                 return False
             return True
 
-        self.judge = judge_wrapper
         return self
 
     def trim_user_times(self, times: int):
@@ -218,15 +256,10 @@ class Command(metaclass=_CommandMeta):
             async def switch_turn(session: Session):
                 await switch_change(session, not switch[session.id])
 
-        judge = self.judge
+        @self._before_judge  # 开关的优先级优于原来的judge
+        def judge_switch(session: Session) -> bool:
+            return switch[session.id]
 
-        def judge_wrapper(session: Session) -> bool:
-            # 开关的优先级优于原来的judge
-            if switch[session.id] is False:
-                return False
-            return judge(session)
-
-        self.judge = judge_wrapper
         return self
 
 
