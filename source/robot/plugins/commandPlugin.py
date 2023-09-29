@@ -12,6 +12,8 @@ class CommandPlugin(Session, priority=Priority.Command):
     async def rule(self) -> bool:
         if not isinstance(self.event, MessageEvent):
             return False
+        if not self.text.strip():
+            return False
 
         for command_cls in get_command_cls_list():
             if command := command_cls.mate(self):
