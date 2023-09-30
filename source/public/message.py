@@ -92,3 +92,6 @@ p24_game_msg = Message('p24_game', {
 p24_over_msg = Message('p24_over', {
     'group_id': int,  # 不同的group题目不同
 }, list)  # [[user, score],]的排行榜
+
+# momo日历
+momo_calendar_msg = Message('momo_calendar', {}, str)  # 返回ics文件中的内容，如果出错则返回空字符串
