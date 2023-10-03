@@ -29,6 +29,7 @@ class CommandTestCase(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(True, ChatPlugin.chat_state[12345].at_switch)
     # TODO gain命令用例
     # TODO 禁言功能用例
+    # TODO 每个功能单独分一个文件
 
 
 if __name__ == '__main__':

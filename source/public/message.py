@@ -49,3 +49,10 @@ h_pic_msg = Message('h_pic', {
 }, [str,  # 错误信息，没有发生错误则为空字符串
     list,  # 查找到的url列表
     ])
+
+# 翻译
+translate_msg = Message('translate', {
+    'from_': str,  # 源语言
+    'to_': str,  # 目标语言
+    'text': str,  # 要翻译的文本
+}, str)  # 翻译的结果
