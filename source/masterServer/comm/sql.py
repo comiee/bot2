@@ -4,19 +4,23 @@ import pymysql
 
 class _Sql:
     def __init__(self):
-        self.__db = self.__connect()
+        self.__db = None
 
     def __connect(self):
-        return pymysql.connect(
-            host='localhost',
-            user='comiee',
-            password='19980722',
-            database='mei',  # TODO是否需要使用新的数据库
-            autocommit=True,
-        )
+        try:
+            return pymysql.connect(
+                host='192.168.1.102',  # TODO 换成配置文件
+                user='comiee',
+                password='19980722',
+                database='mei',  # TODO是否需要使用新的数据库
+                autocommit=True,
+            )
+        except:
+            public_logger.error('连接数据库失败！')
+            raise
 
     def cursor(self):
-        if not self.__db.open:
+        if self.__db is None or not self.__db.open:
             self.__db = self.__connect()
         return self.__db.cursor()
 

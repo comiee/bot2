@@ -1,6 +1,6 @@
 import os
 
-DATA_PATH = os.path.join(os.getcwd(), 'data')
+DATA_PATH = os.path.join(os.getcwd(), 'data') # TODO 换成配置文件
 
 
 def data_path(*paths):

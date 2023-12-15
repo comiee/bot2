@@ -4,14 +4,14 @@ from masterServer.comm.sql import sql
 
 @sql_msg.on_receive
 def sql_(s):
-    with sql.cursor() as cur:
-        try:
+    try:
+        with sql.cursor() as cur:
             cur.execute(s)
-        except Exception as e:
-            return str(e)
-        else:
-            return '\t'.join(next(zip(*cur.description))) + '\n' + \
-                '\n'.join('\t'.join(map(str, i)) for i in cur.fetchall())
+    except Exception as e:
+        return str(e)
+    else:
+        return '\t'.join(next(zip(*cur.description))) + '\n' + \
+            '\n'.join('\t'.join(map(str, i)) for i in cur.fetchall())
 
 
 @query_currency_msg.on_receive
