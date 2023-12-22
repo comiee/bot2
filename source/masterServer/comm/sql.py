@@ -6,22 +6,34 @@ class _Sql:
     def __init__(self):
         self.__db = None
 
-    def __connect(self):
+    def connect(self):
         try:
-            return pymysql.connect(
+            self.__db = pymysql.connect(
                 host='192.168.1.102',  # TODO 换成配置文件
                 user='comiee',
                 password='19980722',
                 database='mei',  # TODO是否需要使用新的数据库
                 autocommit=True,
             )
-        except:
-            public_logger.error('连接数据库失败！')
+        except pymysql.Error as e:
+            public_logger.error(f'连接数据库失败：{e!r}')
             raise
 
+    def is_connected(self):
+        return self.__db is not None and self.__db.open
+
+    def check_connect(self):
+        if self.is_connected():
+            return True
+        try:
+            self.connect()
+            return True
+        except pymysql.Error:
+            return False
+
     def cursor(self):
-        if self.__db is None or not self.__db.open:
-            self.__db = self.__connect()
+        if not self.is_connected():
+            self.connect()
         return self.__db.cursor()
 
     def execute(self, query):

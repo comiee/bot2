@@ -41,7 +41,7 @@ increase_currency_msg = Message('change_currency', {
 # 签到
 sign_in_msg = Message('sign_in', {
     'user_id': int,  # 用户id，比如QQ号
-}, bool)  # 是否成功
+}, int)  # 错误码：0 成功；1 已签到过；2 数据库未连接
 
 # 色图
 h_pic_msg = Message('h_pic', {
