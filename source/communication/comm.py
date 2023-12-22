@@ -1,5 +1,7 @@
 """服务端和客户端共用的东西"""
-HOST = '192.168.1.101'  # '127.0.0.1'
+import socket
+
+HOST = socket.gethostbyname(socket.gethostname())  # '127.0.0.1'
 PORT = 9999
 ENCODING = 'utf-8'
 

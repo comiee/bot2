@@ -376,8 +376,8 @@ def get_command_cls_list() -> list[type[Command]]:
     return [
         FullCommand,
         SplitCommand,
-        NormalCommand,
         SplitArgCommand,
+        NormalCommand,
         KeywordCommand,
         RegexCommand,
     ]

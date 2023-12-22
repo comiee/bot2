@@ -1,9 +1,10 @@
 from public.message import sql_msg, query_currency_msg, increase_currency_msg
 from masterServer.comm.sql import sql
+from masterServer.comm.sql_cmd import query_currency, increase_currency
 
 
 @sql_msg.on_receive
-def sql_(s):
+def _sql(s):
     try:
         with sql.cursor() as cur:
             cur.execute(s)
@@ -15,11 +16,10 @@ def sql_(s):
 
 
 @query_currency_msg.on_receive
-def query_currency(user_id: int, currency: str):
-    return sql.query(f'select {currency} from info where qq={user_id};', 0)
+def _query_currency(user_id: int, currency: str):
+    return query_currency(user_id, currency)
 
 
 @increase_currency_msg.on_receive
-def increase_currency(user_id: int, currency: str, num: int):
-    sql.execute(f'insert into info(qq,{currency}) values({user_id},{num}) '
-                f'on duplicate key update {currency}={currency}+{num};')
+def _increase_currency(user_id: int, currency: str, num: int):
+    increase_currency(user_id, currency, num)
