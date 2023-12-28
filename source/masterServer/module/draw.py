@@ -8,6 +8,8 @@ import random
 def draw(user_id, count):
     if count <= 0:
         return 1, []
+    # TODO 连接数据库失败错误码
+    # TODO errorCode定义放public下
     if count > query_currency(user_id, Currency.coin.name):
         return 2, []
     if count > query_currency(user_id, Currency.stamina.name):

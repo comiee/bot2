@@ -16,7 +16,7 @@ class _Sql:
                 autocommit=True,
             )
         except pymysql.Error as e:
-            public_logger.error(f'连接数据库失败：{e!r}')
+            public_logger.exception(f'连接数据库失败：{e!r}')
             raise
 
     def is_connected(self):
@@ -41,7 +41,7 @@ class _Sql:
             with self.cursor() as cur:
                 return cur.execute(query)
         except pymysql.Error as e:
-            public_logger.error(f'sql执行execute出错：{e!r}')
+            public_logger.exception(f'sql执行execute出错：{e!r}')
 
     def query(self, query, default=None):
         try:
@@ -55,7 +55,7 @@ class _Sql:
                 else:
                     return default
         except pymysql.Error as e:
-            public_logger.error(f'sql执行query出错：{e!r}')
+            public_logger.exception(f'sql执行query出错：{e!r}')
             return default
 
     def query_all(self, query):
@@ -64,7 +64,7 @@ class _Sql:
                 cur.execute(query)
                 return cur.fetchall()
         except pymysql.Error as e:
-            public_logger.error(f'sql执行query_all出错：{e!r}')
+            public_logger.exception(f'sql执行query_all出错：{e!r}')
             return []
 
 
