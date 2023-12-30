@@ -1,4 +1,6 @@
 from public.message import draw_msg
+from public.error_code import ErrorCode
+from public.log import bot_logger
 from robot.comm.pluginBase import Session
 from robot.comm.command import SplitArgCommand, NormalCommand
 from robot.botClient import get_bot_client
@@ -24,15 +26,20 @@ async def draw(session: Session, count: str):
 
     ret, result = get_bot_client().send(draw_msg.build(user_id=session.qq, count=count))
     match ret:
-        case 0:
+        case ErrorCode.success:
             await session.reply(f'''\
 已消耗{count}体力和{count}金币进行{count}次抽奖。
 抽奖结果如下，欢迎下次再来。
 {result}
 共{sum(result)}金币''')
-        case 1:
+        case ErrorCode.invalid_input:
             await session.reply('错误的次数，命令已取消')
-        case 2:
+        case ErrorCode.sql_disconnected:
+            await session.reply('数据库连接失败，请联系小魅的主人。')
+        case ErrorCode.insufficient_coin:
             await session.reply('金币不足！\n签到和玩游戏可以获得金币哦。')
-        case 3:
+        case ErrorCode.insufficient_stamina:
             await session.reply('体力不足！\n签到可以获得体力哦。')
+        case _:
+            bot_logger.error(f'预期外的错误码：{ret}')
+            await session.reply(f'遇到了预期外的错误，请联系小魅的主人，错误码：{ret}')

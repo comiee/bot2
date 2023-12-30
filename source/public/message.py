@@ -42,13 +42,13 @@ increase_currency_msg = Message('change_currency', {
 # 签到
 sign_in_msg = Message('sign_in', {
     'user_id': int,  # 用户id，比如QQ号
-}, int)  # 错误码：0 成功；1 已签到过；2 数据库未连接
+}, int)  # 错误码，详见error_code.py
 
 # 抽奖
 draw_msg = Message('draw', {
     'user_id': int,  # 用户id，比如QQ号
     'count': int,  # 抽奖的次数
-}, [int,  # 错误码：0 成功；1输入非法；2金币不足；3体力不足
+}, [int,  # 错误码，详见error_code.py
     list,  # 抽奖的结果，如果失败则为空列表
     ])
 
