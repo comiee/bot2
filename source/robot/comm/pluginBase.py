@@ -2,6 +2,7 @@ from public.log import bot_logger
 from public.currency import Currency
 from public.exception import CostCurrencyFailedException
 from public.convert import convert_to
+from public.error_code import ErrorCode
 from robot.comm.priority import Priority
 from robot.comm.user import User
 from robot.comm.status import session_state
@@ -94,12 +95,12 @@ class Session(PluginBase[MessageEvent, StateT, ConfigT], ABC, Generic[StateT, Co
 
     async def reply(self, message: BuildMessageType, quote: bool = None, at: bool = False) -> None:
         if quote is None:
-            quote=self.is_group()
+            quote = self.is_group()
         if at and self.is_group():
             message = MiraiMessageSegment.at(self.qq) + message
         bot_logger.info(f'回复消息：{message}')
 
-        if not await self.session_state.can_reply():
+        if not await self.session_state.wait_can_reply():
             return
         ret = await self.event.reply(message, quote)
         if ret['code'] != 0 or ret['messageId'] == -1 or ret['msg'] != 'success':
@@ -153,6 +154,23 @@ class Session(PluginBase[MessageEvent, StateT, ConfigT], ABC, Generic[StateT, Co
         """实际的扣钱操作，与check_cost配合使用"""
         for num, currency in currencies:
             self.user.gain(-num, currency)
+
+    async def handle_error(self, error_code: ErrorCode):
+        """处理一些通用错误码，如果错误码不在这里面或者不希望用这种方式处理，需要在外层用别的分支处理"""
+        match error_code:
+            case ErrorCode.success:
+                return
+            case ErrorCode.sql_disconnected:
+                await self.reply('数据库连接失败，请联系小魅的主人。')
+            case ErrorCode.insufficient_coin:
+                await self.reply('金币不足！\n签到和玩游戏可以获得金币哦。')
+            case ErrorCode.insufficient_stamina:
+                await self.reply('体力不足！\n签到可以获得体力哦。')
+            case ErrorCode.insufficient_stock:
+                await self.reply('持有的股份不足！')
+            case _:
+                bot_logger.error(f'预期外的错误码：{error_code}')
+                await self.reply(f'遇到了预期外的错误，请联系小魅的主人，错误码：{error_code}')
 
 
 """api

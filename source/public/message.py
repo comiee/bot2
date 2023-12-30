@@ -37,6 +37,10 @@ increase_currency_msg = Message('change_currency', {
     'currency': str,  # 货币类型，Currency枚举的name属性
     'num': int,  # 货币的增量
 })
+
+# 查询股价
+query_stock_price_msg = Message('query_stock_price', {},
+                                float)  # 当前的股价
 ############################## sql类消息 end ##############################
 
 # 签到
@@ -51,6 +55,12 @@ draw_msg = Message('draw', {
 }, [int,  # 错误码，详见error_code.py
     list,  # 抽奖的结果，如果失败则为空列表
     ])
+
+# 股票
+stock_msg = Message('stock', {
+    'user_id': int,  # 用户id，比如QQ号
+    'count': int,  # 买入的数量，如果为负数则为卖出
+}, int)  # 错误码，详见error_code.py
 
 # 色图  色图的扣钱在客户端执行
 h_pic_msg = Message('h_pic', {

@@ -27,7 +27,7 @@ class SessionStatus(Status):
         self._last_reply_timestamp = time.time()
         self._reply_times += 1
 
-    async def can_reply(self):
+    async def wait_can_reply(self):
         # 最大回复次数限制
         if self._reply_times > self.max_times:
             bot_logger.info('回复次数已达上限，将不再回复')

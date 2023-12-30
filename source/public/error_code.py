@@ -17,6 +17,7 @@ class ErrorCode(IntEnum):
     # 货币相关
     insufficient_coin = 21  # 金币不足
     insufficient_stamina = 22  # 体力不足
+    insufficient_stock = 23  # 股份不足
 
     # 签到功能
     already_signed = 101  # 已签到过
