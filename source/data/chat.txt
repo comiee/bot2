@@ -3,8 +3,8 @@
 ^(search|搜索|百度)(一下| )?(.*)$	https://baidu.com/s?wd={''.join(map('%%%x'.__mod__,bytes(match.group(3),encoding='utf-8')))}
 (傻逼|智障)	不可以说脏话哦。	骂人是不对的。	做人要讲文明。
 你.*主人	{'我的主人是你' if user==1440667228 else '我的主人是[at:1440667228]'}
-我是谁	你是{'我的伟大的主人' if user==1440667228 else user.name}！
-^小魅，(.*)$	{'主人' if user==1440667228 else user.name}，{match.group(1)}
+我是谁	你是{'我的伟大的主人' if user==1440667228 else '[at:%d]'%user}！
+^小魅，(.*)$	{'主人' if user==1440667228 else '[at:%d]'%user}，{match.group(1)}
 魅	{random.choice([['我在！','有什么事吗？'],['遵从召唤而来，master，有何吩咐？','主人，请指示！']][user==1440667228])}
 \[at:1440667228\]	找我的主人有什么事吗？
 \[atAll:\]	叫大家出来有什么事吗？
