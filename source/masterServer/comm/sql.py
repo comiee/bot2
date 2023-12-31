@@ -1,4 +1,5 @@
 from public.log import public_logger
+from public.config import get_config
 import pymysql
 
 
@@ -7,14 +8,9 @@ class _Sql:
         self.__db = None
 
     def connect(self):
+        sql_config = get_config('sql')
         try:
-            self.__db = pymysql.connect(
-                host='192.168.1.102',  # TODO 换成配置文件
-                user='comiee',
-                password='19980722',
-                database='mei',  # TODO是否需要使用新的数据库
-                autocommit=True,
-            )
+            self.__db = pymysql.connect(**sql_config)
         except pymysql.Error as e:
             public_logger.exception(f'连接数据库失败：{e!r}')
             raise

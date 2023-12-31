@@ -1,6 +1,14 @@
+from functools import reduce
+import operator as op
 import os
+import sys
 
-DATA_PATH = os.path.join(os.getcwd(), 'data') # TODO 换成配置文件
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
+
+DATA_PATH = os.path.join(os.getcwd(), 'data')
 
 
 def data_path(*paths):
@@ -10,3 +18,10 @@ def data_path(*paths):
             os.makedirs(p)
         p = os.path.join(p, path)
     return p
+
+
+def get_config(*keys):
+    with open(data_path('config.toml'), 'rb') as f:
+        config = tomllib.load(f)
+
+    return reduce(op.getitem, keys, config)

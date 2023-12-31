@@ -1,22 +1,16 @@
 from public.message import translate_msg
 from public.log import master_server_logger
-from public.config import data_path
+from public.config import get_config
 import requests
 import random
 from hashlib import md5
-
-import sys
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
 
 
 def _map_language(name):
     language_map = {
         '自动检测': 'auto',
         '中': 'zh',
+        '汉': 'zh',
         '英': 'en',
         '粤': 'yue',
         '文言': 'wyw',
@@ -53,10 +47,8 @@ def translate(from_, to_, text):
     from_ = _map_language(from_)
     to_ = _map_language(to_)
 
-    with open(data_path('config.toml'), 'rb') as f:
-        config = tomllib.load(f)
-    app_key = config['translate']['app_key']
-    app_secret = config['translate']['app_secret']
+    app_key = get_config('translate', 'app_key')
+    app_secret = get_config('translate', 'app_secret')
 
     salt = random.randint(32768, 65536)
     sign = app_key + text + str(salt) + app_secret
