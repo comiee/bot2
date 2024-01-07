@@ -75,3 +75,20 @@ translate_msg = Message('translate', {
     'to_': str,  # 目标语言
     'text': str,  # 要翻译的文本
 }, str)  # 翻译的结果
+
+# 24点
+p24_start_msg = Message('p24_start', {
+    'group_id': int,  # 不同的group题目不同
+}, list)  # 题目
+
+p24_game_msg = Message('p24_game', {
+    'group_id': int,  # 不同的group题目不同
+    'user_id': int,  # 玩家id，用于计分
+    'answer': str,  # 答案的算式
+}, [int,  # 错误码（是否答对以错误码的形式返回）
+    list,  # 题目，重开或答对时更新，否则传回原来的题目
+    ])
+
+p24_over_msg = Message('p24_over', {
+    'group_id': int,  # 不同的group题目不同
+}, list)  # [[user, score],]的排行榜

@@ -6,7 +6,7 @@ import asyncio
 
 
 class Status:
-    options: tuple[str] = ()
+    options: tuple[str] = ()  # options中的变量可以用config命令修改，注意需要同时在status_dict里面注册
     # TODO 写文件
 
 
@@ -45,7 +45,7 @@ class SessionStatus(Status):
 class ChatStatus(Status):
     options = (
         'switch',
-        'at_switch'
+        'at_switch',
     )
 
     def __init__(self):
@@ -65,6 +65,18 @@ class ChatStatus(Status):
             else:
                 break
         return n
+
+
+class P24GameStatus(Status):
+    def __init__(self):
+        self.in_game: bool = False  # 是否在游戏中
+        self.question: list = []  # 存储当前的问题
+        self.wrong_count: int = 0  # 答错的次数
+        self.MAX_COUNT = 5  # 最大可以答错的次数
+
+    def add_count_and_check_has_limited(self):
+        self.wrong_count += 1
+        return self.wrong_count > self.MAX_COUNT
 
 
 class SessionState(State):
@@ -87,3 +99,4 @@ class SessionState(State):
 # Plugin加载会导致类成员被重新实例化，为保证全局唯一，SessionState类的变量统一在这里定义
 session_state = SessionState(SessionStatus)
 chat_state = SessionState(ChatStatus)
+p24_game_state = SessionState(P24GameStatus)
