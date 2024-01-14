@@ -20,25 +20,30 @@ class SessionStatus(Status):
         self.interval: float = 10  # 两次回复间间隔的秒数
         self.max_times: int = 100  # 最大回复次数
 
+        self._reply_lock: asyncio.Lock = asyncio.Lock()
         self._last_reply_timestamp: float = 0  # 上次处理的时间戳，用于间隔回复
         self._reply_times: int = 0  # 当前回复次数
 
-    def record_reply(self):
+    def _record_reply(self):
         self._last_reply_timestamp = time.time()
         self._reply_times += 1
 
-    async def wait_can_reply(self):
+    async def __aenter__(self):
+        await self._reply_lock.acquire()
+        # 回复间隔时长限制
+        while (t := self._last_reply_timestamp + self.interval - time.time()) > 0:  # 需要等待的时长
+            bot_logger.info(f'间隔时间不足，将等待{t}秒后回复')
+            await asyncio.sleep(t)
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        self._record_reply()
+        self._reply_lock.release()
+
+    def can_reply(self):
         # 最大回复次数限制
         if self._reply_times > self.max_times:
             bot_logger.info('回复次数已达上限，将不再回复')
             return False
-
-        # 回复间隔时长限制
-        t = self._last_reply_timestamp + self.interval - time.time()  # 需要等待的时长
-        if t > 0:
-            bot_logger.info(f'间隔时间不足，将等待{t}秒后回复')
-            await asyncio.sleep(t)
-
         return True
 
 

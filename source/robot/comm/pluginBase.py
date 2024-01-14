@@ -5,7 +5,7 @@ from public.convert import convert_to
 from public.error_code import ErrorCode
 from robot.comm.priority import Priority
 from robot.comm.user import User
-from robot.comm.status import session_state
+from robot.comm.status import session_state, SessionStatus
 from alicebot.plugin import Plugin
 from alicebot.typing import ConfigT, EventT, StateT
 from alicebot.exceptions import GetEventTimeout
@@ -40,7 +40,7 @@ class PluginBase(Plugin[EventT, StateT, ConfigT], ABC, Generic[EventT, StateT, C
 
 
 class Session(PluginBase[MessageEvent, StateT, ConfigT], ABC, Generic[StateT, ConfigT]):
-    session_state = session_state
+    session_state: SessionStatus = session_state
 
     @property
     def user(self) -> User:
@@ -100,13 +100,12 @@ class Session(PluginBase[MessageEvent, StateT, ConfigT], ABC, Generic[StateT, Co
             message = MiraiMessageSegment.at(self.qq) + message
         bot_logger.info(f'回复消息：{message}')
 
-        if not await self.session_state.wait_can_reply():
+        if not self.session_state.can_reply():
             return
-        ret = await self.event.reply(message, quote)
-        if ret['code'] != 0 or ret['messageId'] == -1 or ret['msg'] != 'success':
-            bot_logger.warning(f'回复消息失败：{ret}')
-        else:
-            self.session_state.record_reply()
+        async with self.session_state:
+            ret = await self.event.reply(message, quote)
+            if ret['code'] != 0 or ret['messageId'] == -1 or ret['msg'] != 'success':
+                bot_logger.warning(f'回复消息失败：{ret}')
 
     async def ask(self, prompt: BuildMessageType = None, quote: bool = None, at: bool = False,
                   timeout: int | float = None, return_plain_text: bool = True) -> str:
