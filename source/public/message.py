@@ -13,11 +13,39 @@ def _debug(val):
 # 退出消息，收到此消息后退出程序
 exit_msg = Message('exit', {})
 
+# 聊天
 chat_msg = Message('chat', {
     'user_id': int,  # 用户id，比如QQ号
     'group_id': int,  # 群号，没有就填0
     'text': str,  # 聊天内容，public.convert中定义的internal格式
 }, str)  # 返回值为聊天内容的回应，如果不答复则返回空字符串
+
+# 调教
+teach_msg = Message('teach', {
+    'user_id': int,  # 用户id，比如QQ号
+    'group_id': int,  # 群号，没有就填0
+    'question': str,  # 问题
+    'answer': str,  # 回答
+}, int)  # 错误码
+
+# 洗脑
+forget_msg = Message('forget', {
+    'user_id': int,  # 用户id，比如QQ号
+    'group_id': int,  # 群号，没有就填0
+    'question': str,  # 问题
+    'answer': str,  # 回答，空字符串为删除该问题的所有回答
+}, int)  # 错误码
+
+# 日记
+diary_msg = Message('diary', {
+    'start': int,
+    'end': int,
+}, list)  # #从第start次记录到第end次记录
+
+# 显示
+show_answer_msg = Message('show_answer', {
+    'question': str,  # 问题
+}, list)  # 回答列表
 
 ############################## sql类消息 start ##############################
 # 通用的sql消息（该消息仅用于管理员命令，sql操作应该尽量在服务器完成）

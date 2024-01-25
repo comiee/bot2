@@ -371,6 +371,33 @@ class KeywordCommand(Command):
         return True
 
 
+class ArgCommand(Command):
+    """参数命令，仿python原生函数调用，除原生语法外，还支持空格分割和冒号指定关键字参数"""
+
+    def judge(self, session: Session) -> bool:
+        text = session.text.strip()
+        if not text.startswith(self._cmd):
+            return False
+        arg_str = text[len(self._cmd):].strip()
+        if len(arg_str)>=2 and arg_str[0] == '(' and arg_str[-1] == ')':
+            arg_str = arg_str[1:-1].strip()
+
+        args = []
+        kwargs = {}
+        for arg in re.split(r'\s+|,|，', arg_str):
+            if m := re.search(r'^(.+?)[=:：](.+?)$', arg):
+                k, v = m.groups()
+                kwargs[k] = v
+            elif arg:
+                args.append(arg)
+        try:
+            signature(self._fun).bind(session, *args, **kwargs)
+        except TypeError:
+            return False
+        self.set_args(*args, **kwargs)
+        return True
+
+
 def get_command_cls_list() -> list[type[Command]]:
     # 下面的顺序决定了命令匹配的优先级
     return [
@@ -380,4 +407,5 @@ def get_command_cls_list() -> list[type[Command]]:
         NormalCommand,
         KeywordCommand,
         RegexCommand,
+        ArgCommand,
     ]

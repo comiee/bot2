@@ -159,6 +159,10 @@ class Session(PluginBase[MessageEvent, StateT, ConfigT], ABC, Generic[StateT, Co
         match error_code:
             case ErrorCode.success:
                 return
+            case ErrorCode.black_list_user:
+                await self.reply('你已被列入黑名单，无法使用此命令')
+            case ErrorCode.not_super_user:
+                await self.reply('权限不足，只有管理员才能使用此命令')
             case ErrorCode.sql_disconnected:
                 await self.reply('数据库连接失败，请联系小魅的主人。')
             case ErrorCode.insufficient_coin:
