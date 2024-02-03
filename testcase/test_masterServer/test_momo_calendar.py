@@ -4,9 +4,9 @@ import unittest
 
 class MomoCalendarTestCase(unittest.TestCase):
     def test_generate(self):
-        result = momo_calendar()
-        print(result)
-        self.assertNotEquals('', result)
+        path = momo_calendar()
+        with open(path, encoding='utf-8') as f:
+            self.assertNotEqual('', f.read())
 
 
 if __name__ == '__main__':

@@ -1,5 +1,3 @@
-import os
-
 from public.log import master_server_logger
 from public.message import momo_calendar_msg
 from public.config import data_path
@@ -9,134 +7,132 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
-from datetime import datetime
-from ics import Calendar, Event
+from selenium.common.exceptions import NoSuchElementException
+from datetime import datetime, timedelta
 import traceback
 import re
+import json
+import os
 
 
 class CalendarBrowser(Firefox):
     __SERVICE_PATH = "D:/geckodriver.exe"
-    __MONTH_DICT = {
-        'January': 1,
-        'February': 2,
-        'March': 3,
-        'April': 4,
-        'May': 5,
-        'June': 6,
-        'July': 7,
-        'August': 8,
-        'September': 9,
-        'October': 10,
-        'November': 11,
-        'December': 12
-    }
+
+    JSON_PATH = data_path('momo.json')
+    ICS_PATH = data_path('momo.ics')
 
     def __init__(self):
         super().__init__(service=Service(CalendarBrowser.__SERVICE_PATH))
         self.__waiter = WebDriverWait(self, 60)
 
+        self.event_dict_list = []
+
     def __del__(self):
-        self.close() # TODO 可能与外部的close冲突
+        self.close()
 
-    def __wait_element(self, *args) -> WebElement:
-        return self.__waiter.until(EC.presence_of_element_located(args))
+    def __wait_element(self, by, val) -> WebElement:
+        return self.__waiter.until(EC.presence_of_element_located((by, val)))
 
-    def __parse_one_date(self, s: str, d: datetime) -> datetime:
-        m = re.search(r'(\w+) (\d+), (\d+)', s)
-        return d.replace(
-            month=self.__MONTH_DICT[m.group(1)],
-            day=int(m.group(2)),
-            year=int(m.group(3)),
-        )
+    def _generate_dict_one_day(self, day):
+        day_str = day.strftime('%Y-%m-%d')
+        self.get(f'https://timetreeapp.com/public_calendars/momomitsuki/daily/{day_str}')
+        main = self.__wait_element(By.TAG_NAME, 'main')
+        self.__wait_element(By.TAG_NAME, 'h2')
+        try:
+            ul = main.find_element(By.XPATH, '//ul[@data-date]')
+        except NoSuchElementException:
+            return
 
-    def __parse_date(self, s: str, begin: datetime, end: datetime) -> tuple[datetime, datetime]:
-        if '-' in s:
-            a, b = s.split('-')
-            return (
-                self.__parse_one_date(a, begin),
-                self.__parse_one_date(b, end),
-            )
-        else:
-            return (
-                self.__parse_one_date(s, begin),
-                self.__parse_one_date(s, end),
-            )
+        for a in ul.find_elements(By.TAG_NAME, 'a'):
+            title, time_str = a.text.split('\n')
+            hour, minute = map(int, re.search(r'(\d+):(\d+)', time_str).groups())
+            time = day.replace(hour=hour, minute=minute)
+            self.event_dict_list.append({'title': title, 'time': time.strftime('%Y%m%dT%H%M%S')})
 
-    def __parse_one_time(self, s: str, d: datetime) -> datetime:
-        m = re.search(r'(\d+):(\d+) ([AP])M', s)
-        return d.replace(
-            hour=m.group(1) + 12 * (m.group(3) == 'P'),
-            minute=m.group(2),
-        )
+    def _generate_json(self):
+        now = datetime.now()
+        day = datetime(year=now.year, month=now.month, day=1)
+        while day.month == now.month:
+            self._generate_dict_one_day(day)
+            day += timedelta(days=1)
 
-    def __parse_time(self, s: str, begin: datetime, end: datetime) -> tuple[datetime, datetime]:
-        if '-' in s:
-            a, b = s.split('-')
-            return (
-                self.__parse_one_time(a, begin),
-                self.__parse_one_time(b, end),
-            )
-        else:
-            return (
-                self.__parse_one_time(s, begin),
-                self.__parse_one_time(s, end),
-            )
+        # 保存中间件，方便拆分步骤
+        with open(self.JSON_PATH, 'w', encoding='utf-8') as f:
+            json.dump({'list': self.event_dict_list}, f, ensure_ascii=False)
 
-    def __get_event_info(self, event: Event, url: str) -> None:
-        self.get(url)
-        main = self.__wait_element(By.CLASS_NAME, 'main')
-        if description_elements := main.find_elements(By.CLASS_NAME, 'description'):
-            event.description = description_elements[0].text
+    def _generate_ics(self):
+        with open(self.JSON_PATH, encoding='utf-8') as f:
+            event_json = json.load(f)
+            self.event_dict_list = event_json['list']
 
-        begin = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        end = datetime.now().replace(hour=23, minute=59, second=59, microsecond=0)
-        for dl in main.find_elements(By.TAG_NAME, 'dl'):
-            dt = dl.find_element(By.TAG_NAME, 'dt').text
-            dd = dl.find_element(By.TAG_NAME, 'dd').text
-            match dt:
-                case 'Date':
-                    begin, end = self.__parse_date(dd, begin, end)
-                case 'Time':
-                    begin, end = self.__parse_time(dd, begin, end)
-                case 'URL':
-                    event.location = dd
-        event.begin = begin
-        event.end = end
+        event_list = []
+        for event_dict in self.event_dict_list:
+            title = event_dict['title']
+            time = event_dict['time']
+            # noinspection SpellCheckingInspection
+            event_list.append(f'''\
+BEGIN:VEVENT
+DTSTAMP;TZID=Asia/Dongjing:{time}
+UID:美月momo{time}@bilibili.com
+DTSTART;TZID=Asia/Dongjing:{time}
+DURATION:PT0M
+SUMMARY:{title}
+URL:null
+DESCRIPTION:null\n点击上方链接打开哔哩哔哩，进入直播间
+LOCATION:@美月もも 直播间
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:直播即将开始
+TRIGGER:-PT10M
+END:VALARM
+END:VEVENT''')
+        event_list_str = '\n\n'.join(event_list)
+        # noinspection SpellCheckingInspection
+        result = f'''\
+BEGIN:VCALENDAR
+PRODID:-//美月momo//美月momo 直播日程表//CN
+VERSION:2.0
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:美月momo 直播日程表
+X-WR-TIMEZONE:Asia/Dongjing
+X-WR-CALDESC:美月momo 直播日程表，由 comiee 制作
+BEGIN:VTIMEZONE
+TZID:Asia/Dongjing
+X-LIC-LOCATION:Asia/Dongjing
+BEGIN:STANDARD
+TZOFFSETFROM:+0900
+TZOFFSETTO:+0900
+TZNAME:CST
+DTSTART:19700101T000000
+END:STANDARD
+END:VTIMEZONE
 
-    def generate_calendar(self) -> Calendar:
-        self.get('https://timetreeapp.com/public_calendars/momomitsuki')
-        main = self.__wait_element(By.CLASS_NAME, 'main')
-        cal = Calendar()
+{event_list_str}
 
-        event_dict = {}
-        for calendarEvent in main.find_elements(By.CLASS_NAME, 'publicCalendarEventItem'):
-            event = Event()
-            event.title = calendarEvent.find_element(By.CLASS_NAME, 'title').text
-            url = calendarEvent.find_element(By.CLASS_NAME, 'event').get_attribute('href')
-            event_dict[event] = url
-        # __get_event_info中有get操作，会导致element不可用，需要先把url缓存下来
-        for event, url in event_dict.items():
-            self.__get_event_info(event, url)
-            cal.events.add(event)
-        return cal
+END:VCALENDAR'''
+        with open(self.ICS_PATH, 'w', encoding='utf-8') as f:
+            f.write(result)
 
-    def generate_ics(self,calendar):
-        path=data_path('momo.ics')
-        with open(path, 'w') as f:
-            f.write(calendar.serialize())
+    def generate(self):
+        self._generate_json()
+        self._generate_ics()
 
-        os.system('adb connect 192.168.1.100')
-        os.system(f'adb push {path} /storage/emulated/0/360')
+
+def is_file_today(path):
+    if not os.path.exists(path):
+        return False
+    if datetime.fromtimestamp(os.path.getmtime(path)).date() != datetime.now().date():
+        return False
+    return True
 
 
 @momo_calendar_msg.on_receive
 def momo_calendar():
     try:
-        calendar_browser=CalendarBrowser()
-        calendar=calendar_browser.generate_calendar()
-        calendar_browser.close()
-        return calendar.serialize()
+        if not is_file_today(CalendarBrowser.ICS_PATH):
+            CalendarBrowser().generate()
+        return CalendarBrowser.ICS_PATH
     except Exception:
         master_server_logger.error(f'momo_calendar {traceback.format_exc()}')
         return ''

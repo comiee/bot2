@@ -6,5 +6,9 @@ from robot.botClient import get_bot_client
 
 @FullCommand('momo日历')
 async def momo_calendar(session: Session):
-    result = get_bot_client().send(momo_calendar_msg.build())
-    await session.reply(result)
+    path = get_bot_client().send(momo_calendar_msg.build())
+    if not path:
+        await session.reply('日历生成失败')
+        return
+    with open(path, encoding='utf-8') as f:
+        await session.reply(f.read())
