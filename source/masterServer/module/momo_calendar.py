@@ -16,7 +16,7 @@ import os
 
 
 class CalendarBrowser(Firefox):
-    __SERVICE_PATH = "D:/geckodriver.exe"
+    __SERVICE_PATH = data_path('geckodriver')
 
     JSON_PATH = data_path('momo.json')
     ICS_PATH = data_path('momo.ics')
