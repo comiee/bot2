@@ -11,7 +11,7 @@ class _Sql:
         sql_config = get_config('sql')
         try:
             self.__db = pymysql.connect(**sql_config)
-        except pymysql.Error as e:
+        except Exception as e:
             public_logger.exception(f'连接数据库失败：{e!r}')
             raise
 
@@ -24,7 +24,7 @@ class _Sql:
         try:
             self.connect()
             return True
-        except pymysql.Error:
+        except Exception:
             return False
 
     def cursor(self):
@@ -36,7 +36,7 @@ class _Sql:
         try:
             with self.cursor() as cur:
                 return cur.execute(query)
-        except pymysql.Error as e:
+        except Exception as e:
             public_logger.exception(f'sql执行execute出错：{e!r}')
 
     def query(self, query, default=None):
@@ -50,7 +50,7 @@ class _Sql:
                         return res
                 else:
                     return default
-        except pymysql.Error as e:
+        except Exception as e:
             public_logger.exception(f'sql执行query出错：{e!r}')
             return default
 
@@ -59,7 +59,7 @@ class _Sql:
             with self.cursor() as cur:
                 cur.execute(query)
                 return cur.fetchall()
-        except pymysql.Error as e:
+        except Exception as e:
             public_logger.exception(f'sql执行query_all出错：{e!r}')
             return []
 
