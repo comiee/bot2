@@ -16,7 +16,7 @@ import os
 
 
 class CalendarBrowser(Firefox):
-    __SERVICE_PATH = data_path('geckodriver')
+    __SERVICE_PATH = 'geckodriver'
 
     JSON_PATH = data_path('momo.json')
     ICS_PATH = data_path('momo.ics')
@@ -28,7 +28,10 @@ class CalendarBrowser(Firefox):
         self.event_dict_list = []
 
     def __del__(self):
-        self.close()
+        try:
+            self.close()
+        except:
+            pass
 
     def __wait_element(self, by, val) -> WebElement:
         return self.__waiter.until(EC.presence_of_element_located((by, val)))
