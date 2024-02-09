@@ -9,6 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import NoSuchElementException
 from datetime import datetime, timedelta
+import platform
 import traceback
 import re
 import json
@@ -16,7 +17,7 @@ import os
 
 
 class CalendarBrowser(Firefox):
-    __SERVICE_PATH = 'geckodriver'
+    __SERVICE_PATH = 'geckodriver.exe' if platform.system() == 'Windows' else 'geckodriver'
 
     JSON_PATH = data_path('momo.json')
     ICS_PATH = data_path('momo.ics')
