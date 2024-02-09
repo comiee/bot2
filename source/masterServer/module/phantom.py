@@ -17,9 +17,9 @@ def main(img2, img1):
 
 def light_degree(img, i):
     if i > 0:
-        img = img.point(lambda x: x * 1.1)
+        img = img.point(lambda x: int(x * 1.1))
     else:
-        img = img.point(lambda x: x * 0.3)
+        img = img.point(lambda x: int(x * 0.3))
     return img
 
 
