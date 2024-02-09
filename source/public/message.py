@@ -95,3 +95,9 @@ p24_over_msg = Message('p24_over', {
 
 # momo日历
 momo_calendar_msg = Message('momo_calendar', {}, str)  # 返回ics文件中路径，如果出错则返回空字符串
+
+# 幻影坦克
+phantom_msg = Message('phantom', {
+    'path1': str,  # 图片1的路径
+    'path2': str,  # 图片2的路径
+}, str)  # 结果的路径

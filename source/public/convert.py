@@ -33,7 +33,10 @@ def convert_internal_part_to_mirai_seg(s: str) -> MiraiMessageSegment:
         case 'face':
             return MiraiMessageSegment.face(int(value))
         case 'image':
-            return MiraiMessageSegment.image(value)
+            return MiraiMessageSegment.image(
+                image_id=value,
+                url=temp['url'],
+            )
         case 'flashImage':
             return MiraiMessageSegment.flash_image(value)
         case 'voice':
@@ -109,7 +112,7 @@ def convert_dict_to_internal(d: dict) -> str:
         case 'Face':
             return f'[face:{d["faceId"]}]'
         case 'Image':
-            return f'[image:{d["imageId"]}]'
+            return f'[image:{d["imageId"]},url:{d["url"]}]'
         case 'FlashImage':
             return f'[flashImage:{d["imageId"]}]'
         case 'Voice':

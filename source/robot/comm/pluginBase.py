@@ -108,7 +108,7 @@ class Session(PluginBase[MessageEvent, StateT, ConfigT], ABC, Generic[StateT, Co
                 bot_logger.warning(f'回复消息失败：{ret}')
 
     async def ask(self, prompt: BuildMessageType = None, quote: bool = None, at: bool = False,
-                  timeout: int | float = None, return_plain_text: bool = True) -> str:
+                  timeout: int | float = None, return_plain_text: bool = False) -> str:
         """
         向用户询问
         :param prompt: 询问的话语，如果为None则直接等待回复
