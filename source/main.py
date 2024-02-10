@@ -1,5 +1,6 @@
 from masterServer import server_main
 from robot import bot_main
+from webpage import web_main
 import multiprocessing
 import time
 
@@ -10,6 +11,7 @@ def start_main(main_fun):
 
 def main():
     start_main(bot_main)
+    start_main(web_main)
 
     time.sleep(1)  # pycharm的bug，不加sleep会卡住
     server_main()  # server_main里面有input，只能在主线程运行

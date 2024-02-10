@@ -9,6 +9,7 @@ def index(request):
 
 
 def inquiry(request):
+    qq = ''
     result = ''
     if request.POST:
         if qq := request.POST['qq']:
@@ -18,5 +19,6 @@ def inquiry(request):
             ))
             result = f'金币：{coin}'
     return render(request, 'inquiry.html', {
+        'qq': qq,
         'result': result,
     })
