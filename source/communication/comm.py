@@ -1,7 +1,7 @@
 """服务端和客户端共用的东西"""
-import socket
+from public.utils import local_ip
 
-HOST = socket.gethostbyname(socket.gethostname())  # '127.0.0.1'
+HOST = local_ip()
 PORT = 9999
 ENCODING = 'utf-8'
 
