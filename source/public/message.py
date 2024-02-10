@@ -94,7 +94,7 @@ p24_over_msg = Message('p24_over', {
 }, list)  # [[user, score],]的排行榜
 
 # momo日历
-momo_calendar_msg = Message('momo_calendar', {}, str)  # 返回ics文件中路径，如果出错则返回空字符串
+momo_calendar_msg = Message('momo_calendar', {}, str)  # 返回ics文件中的内容，如果出错则返回空字符串
 
 # 幻影坦克
 phantom_msg = Message('phantom', {

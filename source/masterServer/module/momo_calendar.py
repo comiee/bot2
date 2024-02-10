@@ -136,7 +136,8 @@ def momo_calendar():
     try:
         if not is_file_today(CalendarBrowser.ICS_PATH):
             CalendarBrowser().generate()  # TODO 生成时长过长，会阻塞其他功能
-        return CalendarBrowser.ICS_PATH  # TODO 改成返回文件内容，同步修改安卓应用
+        with open(CalendarBrowser.ICS_PATH, encoding='utf-8') as f:
+            return f.read()
     except Exception:
         master_server_logger.error(f'momo_calendar {traceback.format_exc()}')
         return ''

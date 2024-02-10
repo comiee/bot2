@@ -1,11 +1,17 @@
-from public.message import query_currency_msg
+from public.message import momo_calendar_msg, query_currency_msg
 from public.currency import Currency
 from webpage.webClient import get_web_client
 from django.shortcuts import render
+from django.http import HttpResponse
 
 
 def index(request):
     return render(request, 'index.html')
+
+
+def momo_calendar(_):
+    result = get_web_client().send(momo_calendar_msg.build())
+    return HttpResponse(result)
 
 
 def inquiry(request):

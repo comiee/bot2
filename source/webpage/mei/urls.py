@@ -19,5 +19,6 @@ from . import views
 
 urlpatterns = [
     path('', views.index),
+    path('momo_calendar/', views.momo_calendar),
     path('inquiry/', views.inquiry),
 ]
