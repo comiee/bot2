@@ -39,7 +39,7 @@ def get_logger(name, level, file_name, file_level) -> logging.Logger:
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
-    fh = logging.FileHandler(str(os.path.join(LOG_PATH, file_name)), encoding='utf-8')
+    fh = logging.FileHandler(str(data_path('log', file_name)), encoding='utf-8')
     fh.setLevel(file_level)
     fh.setFormatter(formatter)
     logger.addHandler(fh)
