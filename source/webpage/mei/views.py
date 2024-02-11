@@ -10,7 +10,11 @@ def index(request):
     return render(request, 'index.html')
 
 
-def momo_calendar(_):
+def momo_calendar(request):
+    return render(request, 'momo_calendar.html')
+
+
+def momo_calendar_download(_):
     result = get_web_client().send(momo_calendar_msg.build())
     filename = quote('美月もも直播日历.ics')
     return HttpResponse(result, content_type='text/plain', headers={
