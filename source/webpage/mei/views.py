@@ -3,6 +3,7 @@ from public.currency import Currency
 from webpage.webClient import get_web_client
 from django.shortcuts import render
 from django.http import HttpResponse
+from urllib.parse import quote
 
 
 def index(request):
@@ -11,7 +12,10 @@ def index(request):
 
 def momo_calendar(_):
     result = get_web_client().send(momo_calendar_msg.build())
-    return HttpResponse(result)
+    filename = quote('美月もも直播日历.ics')
+    return HttpResponse(result, content_type='text/plain', headers={
+        'Content-Disposition': f'attachment; filename="{filename}"'
+    })
 
 
 def inquiry(request):
