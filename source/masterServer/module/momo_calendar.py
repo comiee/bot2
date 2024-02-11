@@ -1,6 +1,8 @@
 from public.log import master_server_logger
 from public.message import momo_calendar_msg
 from public.config import data_path
+from public.scheduler import scheduler
+from public.utils import is_file_today
 from selenium.webdriver import Firefox
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
@@ -9,6 +11,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import NoSuchElementException
 from datetime import datetime, timedelta
+from threading import Thread
 import platform
 import traceback
 import re
@@ -22,6 +25,8 @@ class CalendarBrowser(Firefox):
     JSON_PATH = data_path('momo.json')
     ICS_PATH = data_path('momo.ics')
 
+    __is_updating = False
+
     def __init__(self):
         super().__init__(service=Service(CalendarBrowser.__SERVICE_PATH))
         self.__waiter = WebDriverWait(self, 60)
@@ -29,15 +34,18 @@ class CalendarBrowser(Firefox):
         self.event_dict_list = []
 
     def __del__(self):
+        self.close()
+
+    def close(self):
         try:
-            self.close()
+            super().close()
         except:
             pass
 
     def __wait_element(self, by, val) -> WebElement:
         return self.__waiter.until(EC.presence_of_element_located((by, val)))
 
-    def _generate_dict_one_day(self, day):
+    def __generate_dict_one_day(self, day):
         day_str = day.strftime('%Y-%m-%d')
         self.get(f'https://timetreeapp.com/public_calendars/momomitsuki/daily/{day_str}')
         main = self.__wait_element(By.TAG_NAME, 'main')
@@ -57,7 +65,7 @@ class CalendarBrowser(Firefox):
         now = datetime.now()
         day = datetime(year=now.year, month=now.month, day=1)
         while day.month == now.month:
-            self._generate_dict_one_day(day)
+            self.__generate_dict_one_day(day)
             day += timedelta(days=1)
 
         # 保存中间件，方便拆分步骤
@@ -118,26 +126,38 @@ END:VCALENDAR'''
         with open(self.ICS_PATH, 'w', encoding='utf-8') as f:
             f.write(result)
 
-    def generate(self):
-        self._generate_json()
-        self._generate_ics()
+    def _generate(self):
+        try:
+            self._generate_json()
+            self._generate_ics()
+            master_server_logger.info('momo_calendar 日历已更新')
+        except Exception:
+            master_server_logger.error(f'momo_calendar {traceback.format_exc()}')
+        finally:
+            self.close()
+
+    @classmethod
+    def need_update(cls):
+        if cls.__is_updating:
+            return False
+        if is_file_today(cls.ICS_PATH):
+            return False
+        return True
+
+    @classmethod
+    def generate(cls):
+        if cls.need_update():
+            cls.__is_updating = True
+            cls()._generate()
+            cls.__is_updating = False
 
 
-def is_file_today(path):
-    if not os.path.exists(path):
-        return False
-    if datetime.fromtimestamp(os.path.getmtime(path)).date() != datetime.now().date():
-        return False
-    return True
-
-
+@scheduler.scheduled_job('cron', hour='4', misfire_grace_time=None)
 @momo_calendar_msg.on_receive
 def momo_calendar():
-    try:
-        if not is_file_today(CalendarBrowser.ICS_PATH):
-            CalendarBrowser().generate()  # TODO 生成时长过长，会阻塞其他功能
+    if not is_file_today(CalendarBrowser.ICS_PATH):
+        Thread(target=CalendarBrowser.generate).start()
+    if os.path.exists(CalendarBrowser.ICS_PATH):
         with open(CalendarBrowser.ICS_PATH, encoding='utf-8') as f:
             return f.read()
-    except Exception:
-        master_server_logger.error(f'momo_calendar {traceback.format_exc()}')
-        return ''
+    return ''

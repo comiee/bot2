@@ -1,6 +1,8 @@
 from public.log import public_logger
 import pkgutil
 import netifaces
+import os
+from datetime import datetime
 
 
 def load_module(path):
@@ -23,3 +25,11 @@ def local_ip():
             ip = addresses[netifaces.AF_INET][0]['addr']
             return ip
     return '127.0.0.1'
+
+
+def is_file_today(path):
+    if not os.path.exists(path):
+        return False
+    if datetime.fromtimestamp(os.path.getmtime(path)).date() != datetime.now().date():
+        return False
+    return True
