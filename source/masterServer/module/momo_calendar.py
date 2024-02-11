@@ -82,23 +82,23 @@ class CalendarBrowser(Firefox):
             title = event_dict['title']
             time = event_dict['time']
             # noinspection SpellCheckingInspection
-            event_list.append(f'''\
+            event_list.append(fr'''
 BEGIN:VEVENT
 DTSTAMP;TZID=Asia/Dongjing:{time}
 UID:美月momo{time}@bilibili.com
 DTSTART;TZID=Asia/Dongjing:{time}
 DURATION:PT0M
 SUMMARY:{title}
-URL:null
-DESCRIPTION:null\n点击上方链接打开哔哩哔哩，进入直播间
-LOCATION:@美月もも 直播间
+URL:http://live.bilibili.com/23698286
+DESCRIPTION:http://live.bilibili.com/23698286\n点击上方链接打开哔哩哔哩，进入直播间
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:直播即将开始
 TRIGGER:-PT10M
 END:VALARM
-END:VEVENT''')
-        event_list_str = '\n\n'.join(event_list)
+END:VEVENT
+''')
+        event_list_str = ''.join(event_list)
         # noinspection SpellCheckingInspection
         result = f'''\
 BEGIN:VCALENDAR
