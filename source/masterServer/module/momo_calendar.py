@@ -3,7 +3,7 @@ from public.message import momo_calendar_msg
 from public.config import data_path
 from public.scheduler import scheduler
 from public.utils import is_file_today
-from selenium.webdriver import Firefox
+from selenium.webdriver import Firefox, FirefoxOptions
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -28,7 +28,11 @@ class CalendarBrowser(Firefox):
     __is_updating = False
 
     def __init__(self):
-        super().__init__(service=Service(CalendarBrowser.__SERVICE_PATH))
+        options = FirefoxOptions()
+        options.set_preference('webdriver.timezone', 'Asia/Shanghai')
+        options.set_preference('intl.accept_languages', 'zh-CN')
+        service = Service(CalendarBrowser.__SERVICE_PATH)
+        super().__init__(options=options, service=service)
         self.__waiter = WebDriverWait(self, 60)
 
         self.event_dict_list = []
