@@ -1,3 +1,4 @@
+# noinspection GrazieInspection
 """
 URL configuration for mei project.
 
