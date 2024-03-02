@@ -53,3 +53,4 @@
 ^早$	{'早' if datetime.now().hour<12 else datetime.now().strftime('早什么早？都已经%H点%M分了')}
 ([早晚])(上好|安)	{match.group() if datetime.now().hour in {'早':range(0,12),'晚':range(18,24)}[match.group(1)] else '我们好像不在一个时区？'}
 ([上中下])午好	{match.group() if datetime.now().hour in {'上':range(0,12),'中':range(10,15),'下':range(12,20)}[match.group(1)] else '我们好像不在一个时区？'}
+"appid".*"bgImg":"(.*?)"	[image:,url:{match.group(1).replace(chr(92),'')}]
