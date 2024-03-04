@@ -10,10 +10,6 @@ exec('from datetime import datetime;'
 
 
 def get_report(user, group, text):
-    # 处理艾特自己
-    if '[at:1790218632]' in text:
-        return '有什么事你倒是说啊'
-
     # 匹配模板
     f = lambda *args: None
     f(user, group)
