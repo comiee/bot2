@@ -21,7 +21,10 @@ def get_report(user, group, text):
             if not probability or random.random() < eval(probability):
                 if match := re.search(pattern, text, re.S):
                     master_server_logger.debug(f'匹配到：{match.group()}')
-                    return eval(f"""f'''{random.choice(data)}'''""")
+                    try:
+                        return eval(f"""f'''{random.choice(data)}'''""")
+                    except:
+                        continue
 
     # 调教内容
     with open(data_path('teach.json'), encoding='utf-8') as f:
