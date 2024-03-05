@@ -24,6 +24,7 @@ def get_report(user, group, text):
                     try:
                         return eval(f"""f'''{random.choice(data)}'''""")
                     except:
+                        master_server_logger.warning(f'匹配模板时发生错误：模板：{pattern!r}，原文：{text!r}')
                         continue
 
     # 调教内容
