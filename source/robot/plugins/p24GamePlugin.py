@@ -53,7 +53,10 @@ class P24GamePlugin(Session, priority=Priority.Game):
         score = get_bot_client().send(p24_over_msg.build(
             group_id=self.id,
         ))
-        text = '\n'.join(f'[at:{k}]\t{v}' for k, v in score)
+        if self.is_group():
+            text = '\n'.join(f'[at:{k}]\t{v}' for k, v in score)
+        else:
+            text = '\n'.join(f'{k}\t{v}' for k, v in score)
         await self.reply(convert_to('mirai', f'24点游戏结束！得分情况：\n{text}\n下次想玩还可以找我哦。'))
 
     async def handle(self) -> None:
