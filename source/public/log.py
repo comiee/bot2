@@ -49,6 +49,9 @@ def get_logger(name, level, file_name, file_level) -> logging.Logger:
 client_logger: logging.Logger = get_logger('client', LogLevel.INFO, LogLevel.DEBUG)
 server_logger: logging.Logger = get_logger('server', LogLevel.DEBUG)
 
+# 公共部分使用的logger
+public_logger: logging.Logger = get_logger('public', LogLevel.DEBUG)
+
 # 服务器各组件使用的logger
 master_server_logger: logging.Logger = get_logger('masterServer', LogLevel.INFO, LogLevel.DEBUG)
 admin_logger: logging.Logger = get_logger('admin', LogLevel.DEBUG)
@@ -57,5 +60,5 @@ admin_logger: logging.Logger = get_logger('admin', LogLevel.DEBUG)
 bot_client_logger: logging.Logger = get_logger('botClient', LogLevel.DEBUG)
 bot_logger: logging.Logger = get_logger('bot', LogLevel.DEBUG)
 
-# 公共部分使用的logger
-public_logger: logging.Logger = get_logger('public', LogLevel.DEBUG)
+# web客户端各组件使用的logger
+web_logger: logging.Logger = get_logger('webClient', LogLevel.DEBUG)
