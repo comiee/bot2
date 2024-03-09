@@ -1,16 +1,101 @@
+from comiee import InfiniteDict
 from public.log import bot_logger
-from public.state import State
-from collections import deque
+from public.config import data_path
+from collections import deque, defaultdict
+from threading import Lock
 import time
 import asyncio
+import json
+import os
+
+_STATUS_FILE = data_path('status.json')
+
+_file_lock = Lock()
+
+status_dict: dict[str, type['Status']] = {}  # 用于config命令
 
 
-class Status:
-    options: tuple[str] = ()  # options中的变量可以用config命令修改，注意需要同时在status_dict里面注册
-    # TODO 写文件
+def status_load():
+    if _file_lock.locked():
+        return
+    with _file_lock:
+        if not os.path.exists(_STATUS_FILE):
+            return
+        with open(_STATUS_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        for name in data:
+            for option in data[name]:
+                for ids in data[name][option]:
+                    if ids.isdigit():
+                        setattr(status_dict[name][int(ids)], option, data[name][option][ids])
 
 
-class SessionStatus(Status):
+def status_save():
+    if _file_lock.locked():
+        return
+    with _file_lock:
+        data = InfiniteDict()
+        for name, status_cls in status_dict.items():
+            for option in status_cls.options:
+                for id in status_cls.data:
+                    data[name][option][id] = getattr(status_cls[id], option)
+        with open(_STATUS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False)
+
+
+class StatusMeta(type):
+    def __init__(cls, name, bases, attrs, **kwargs):  # 定义新类的时候执行
+        super().__init__(name, bases, attrs, **kwargs)
+        cls.data = defaultdict(cls)
+
+    def __call__(cls, *args, **kwargs):  # 新类实例化时执行
+        if _file_lock.locked():
+            return super().__call__(*args, **kwargs)
+        else:
+            with _file_lock:
+                return super().__call__(*args, **kwargs)
+
+    def __getitem__(cls, item):
+        return cls.data[item]
+
+    def __setitem__(cls, key, value):
+        cls.data[key] = value
+
+    def __delitem__(cls, key):
+        del cls.data[key]
+
+    def __get__(cls, instance, owner):
+        if instance is None:
+            return cls
+        return cls[instance.id]
+
+    def __set__(cls, instance, value):
+        cls[instance.id] = value
+
+    def __delete__(cls, instance):
+        del cls[instance.id]
+
+
+class Status(metaclass=StatusMeta):
+    """两种用法：
+    1、将子类设置为Session类的类变量，使用Session类实例.类变量名的方式访问此Session的Status
+    2、通过类名[id]的方式访问对应id的Status
+    """
+
+    # options中的变量会备份到文件中
+    # options中的变量可以用config命令修改，注意需要同时在status_dict里面注册
+    options: tuple[str] = ()
+
+    def __init_subclass__(cls, **kwargs):
+        # 初始化子类时使用config_name指定用于config命令和保存文件的名字
+        status_dict[kwargs.get('config_name', cls.__name__)] = cls
+
+    def __setattr__(self, key, value):
+        super().__setattr__(key, value)
+        status_save()
+
+
+class SessionStatus(Status, config_name='session'):
     options = (
         'interval',
         'max_times',
@@ -47,7 +132,7 @@ class SessionStatus(Status):
         return True
 
 
-class ChatStatus(Status):
+class ChatStatus(Status, config_name='chat'):
     options = (
         'switch',
         'at_switch',
@@ -84,24 +169,4 @@ class P24GameStatus(Status):
         return self.wrong_count > self.MAX_COUNT
 
 
-class SessionState(State):
-    def __init__(self, status_cls: type[Status]):
-        super().__init__(default_factory=status_cls)
-        self.options = status_cls.options
-
-    def __get__(self, instance, owner):
-        if instance is None:
-            return self
-        return self[instance.id]
-
-    def __set__(self, instance, value):
-        self[instance.id] = value
-
-    def __delete__(self, instance):
-        del self[instance.id]
-
-
-# Plugin加载会导致类成员被重新实例化，为保证全局唯一，SessionState类的变量统一在这里定义
-session_state = SessionState(SessionStatus)
-chat_state = SessionState(ChatStatus)
-p24_game_state = SessionState(P24GameStatus)
+status_load()

@@ -3,13 +3,13 @@ from public.error_code import ErrorCode
 from public.convert import convert_to
 from robot.comm.priority import Priority
 from robot.comm.pluginBase import Session
-from robot.comm.status import p24_game_state, P24GameStatus
+from robot.comm.status import P24GameStatus
 from robot.botClient import get_bot_client
 from alicebot.adapter.mirai.event import MessageEvent
 
 
 class P24GamePlugin(Session, priority=Priority.Game):
-    p24_game_state: P24GameStatus = p24_game_state
+    p24_game_state: P24GameStatus = P24GameStatus
 
     async def game_start(self):
         self.p24_game_state.in_game = True

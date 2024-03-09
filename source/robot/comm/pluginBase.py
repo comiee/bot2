@@ -5,7 +5,7 @@ from public.convert import convert_to
 from public.error_code import ErrorCode
 from robot.comm.priority import Priority
 from robot.comm.user import User
-from robot.comm.status import session_state, SessionStatus
+from robot.comm.status import SessionStatus
 from alicebot.plugin import Plugin
 from alicebot.typing import ConfigT, EventT, StateT
 from alicebot.exceptions import GetEventTimeout
@@ -40,7 +40,7 @@ class PluginBase(Plugin[EventT, StateT, ConfigT], ABC, Generic[EventT, StateT, C
 
 
 class Session(PluginBase[MessageEvent, StateT, ConfigT], ABC, Generic[StateT, ConfigT]):
-    session_state: SessionStatus = session_state
+    session_state: SessionStatus = SessionStatus
 
     @property
     def user(self) -> User:

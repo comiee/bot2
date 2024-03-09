@@ -1,11 +1,11 @@
 from public.currency import Currency
 from public.log import bot_logger
-from public.state import State
 from robot.comm.pluginBase import Session
 from alicebot.exceptions import GetEventTimeout
 from abc import abstractmethod
 from inspect import iscoroutinefunction, signature
 from typing import Callable, Awaitable
+from collections import defaultdict
 import re
 import asyncio
 import traceback
@@ -235,7 +235,7 @@ class Command(metaclass=_CommandMeta):
         :param cmd_name: 对外显示开关状态时使用的名字，如果为空字符串则使用self.cmd
         :return: 装饰后的command
         """
-        switch = State(default_value=default_state)
+        switch = defaultdict(lambda: default_state)
         if not cmd_name:
             cmd_name = self._cmd
 

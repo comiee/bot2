@@ -2,13 +2,13 @@ from public.message import chat_msg
 from public.convert import convert_to
 from robot.comm.priority import Priority
 from robot.comm.pluginBase import Session
-from robot.comm.status import chat_state
+from robot.comm.status import ChatStatus
 from robot.botClient import get_bot_client
 from alicebot.adapter.mirai.event import MessageEvent
 
 
 class ChatPlugin(Session, priority=Priority.Chat):
-    chat_state = chat_state
+    chat_state: ChatStatus = ChatStatus
 
     async def handle(self) -> None:
         # 防复读
