@@ -169,4 +169,9 @@ class P24GameStatus(Status):
         return self.wrong_count > self.MAX_COUNT
 
 
+class AntiStatus(Status):
+    def __init__(self):
+        self.switch: bool = True
+
+
 status_load()

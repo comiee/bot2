@@ -8,11 +8,11 @@ from alicebot.adapter.mirai.event import MessageEvent
 
 
 class ChatPlugin(Session, priority=Priority.Chat):
-    chat_state: ChatStatus = ChatStatus
+    chat_status: ChatStatus = ChatStatus
 
     async def handle(self) -> None:
         # 防复读
-        n = self.chat_state.get_repetitions(self.text)
+        n = self.chat_status.get_repetitions(self.text)
         if 4 <= n <= 6:
             await self.reply(['复读机？', '一直重复一句话有意思吗？', '再这样我就不理你了！'][n - 4])
             return
@@ -32,10 +32,10 @@ class ChatPlugin(Session, priority=Priority.Chat):
     async def rule(self) -> bool:
         if not isinstance(self.event, MessageEvent):
             return False
-        self.chat_state.save_history(self.text)
+        self.chat_status.save_history(self.text)
 
-        if not self.chat_state.switch:
+        if not self.chat_status.switch:
             return False
-        if self.chat_state.at_switch and not self.is_at_bot():
+        if self.chat_status.at_switch and not self.is_at_bot():
             return False
         return True
