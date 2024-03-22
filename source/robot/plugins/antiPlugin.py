@@ -1,5 +1,6 @@
 from robot.comm.priority import Priority
 from robot.comm.pluginBase import PluginBase, Session
+from robot.comm.user import User
 from alicebot.adapter.mirai.event import FriendRecallEvent, GroupRecallEvent, MessageEvent
 from alicebot.adapter.mirai.message import MiraiMessage, MiraiMessageSegment
 
@@ -17,8 +18,11 @@ class AntiFriendRecallPlugin(PluginBase, priority=Priority.Anti):
         await self.send(reply_message, 'friend', target)
 
     async def rule(self) -> bool:
-        if isinstance(self.event, FriendRecallEvent):
-            return True
+        if not isinstance(self.event, FriendRecallEvent):
+            return False
+        if User(self.event.authorId).is_super_user():
+            return False
+        return True
 
 
 class AntiGroupRecallPlugin(PluginBase, priority=Priority.Anti):
@@ -41,8 +45,11 @@ class AntiGroupRecallPlugin(PluginBase, priority=Priority.Anti):
         await self.send(reply_message, 'group', group)
 
     async def rule(self) -> bool:
-        if isinstance(self.event, GroupRecallEvent):
-            return True
+        if not isinstance(self.event, GroupRecallEvent):
+            return False
+        if User(self.event.operator.id).is_super_user():
+            return False
+        return True
 
 
 class AntiFlashPlugin(Session[str, None], priority=Priority.Anti):
