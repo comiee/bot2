@@ -84,6 +84,10 @@ draw_msg = Message('draw', {
     list,  # 抽奖的结果，如果失败则为空列表
     ])
 
+russian_turntable_msg = Message('russian_turntable',{
+    'user_id':int, # 用户id，比如QQ号
+})
+
 # 股票
 stock_msg = Message('stock', {
     'user_id': int,  # 用户id，比如QQ号
