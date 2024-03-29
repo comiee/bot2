@@ -5,3 +5,5 @@
     "value": JSON, # 具体的消息内容，详见message.py
 }
 """
+
+# TODO 新增异步对话类消息

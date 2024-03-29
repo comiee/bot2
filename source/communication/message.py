@@ -3,7 +3,7 @@ from comiee import overload
 from public.exception import MessageException
 import json
 
-ValueFormatType = dict | type | None
+ValueFormatType = type | dict | list | None
 
 
 class Message:
@@ -143,5 +143,15 @@ result_msg = Message('result', None)
 @result_msg.on_receive
 def _result(value):
     return value
+
+
+# 调测信息，使接受端打印信息
+debug_msg = Message('debug', str)
+
+
+@debug_msg.on_receive
+def _debug(val):
+    print('调测信息：', val)
+    return val
 
 # 特殊消息定义在此文件，其余消息定义在public.message
