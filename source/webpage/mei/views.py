@@ -5,8 +5,15 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from urllib.parse import quote
 
+def login(request):
+    if request.POST:
+        if qq:=request.POST['qq']:
+            
+    return render(request, 'login.html')
 
 def index(request):
+    if 'qq' not in request.session:
+        return render(request, 'login.html')
     return render(request, 'index.html')
 
 

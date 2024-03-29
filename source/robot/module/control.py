@@ -1,4 +1,4 @@
-from public.message import exit_msg
+from public.message import exit_msg, send_qq_text_msg
 from public.log import bot_client_logger, bot_logger
 from robot.botClient import get_bot_client
 
@@ -16,3 +16,8 @@ def exit_():
         bot_logger.warning('收到服务器的命令，已退出程序')
 
     bot.should_exit.set()
+
+
+@send_qq_text_msg.on_receive
+def send_qq_text(user_id, text):
+    get_bot_client().bot_proxy.send_friend(text, user_id)
