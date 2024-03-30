@@ -16,11 +16,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from . import views
 
-urlpatterns = [
-    path('', views.index),
-    path('momo_calendar/', views.momo_calendar),
-    path('momo_calendar_download/', views.momo_calendar_download),
-    path('inquiry/', views.inquiry),
-]
+urlpatterns = []
+
+
+def add_url(url, fun):
+    urlpatterns.append(path(url, fun))
