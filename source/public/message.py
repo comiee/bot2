@@ -1,4 +1,5 @@
-from communication.message import Message
+# noinspection PyUnresolvedReferences
+from communication.message import Message, debug_msg
 
 # 退出消息，收到此消息后退出程序
 exit_msg = Message('exit', {})

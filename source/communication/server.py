@@ -45,8 +45,7 @@ class Server:
             return ...
 
     def send_to_all(self, msg: str):
-        for name in self.__client_dict:
-            self.send_to(name, msg)
+        return {name: self.send_to(name, msg) for name in self.__client_dict}
 
     def __register_client(self, client_name, client_type, sock):
         self.__client_dict.setdefault(client_name, {})[client_type] = sock
@@ -62,7 +61,7 @@ class Server:
                 send_msg(client, result_msg.build(ret))
             except MessageException as e:
                 server_logger.error(f'服务器解析客户端[{name}]消息失败：{e.args[0]}')
-                send_msg(client, result_msg.build({'error':e.args[0]}))  # 出异常也要返回一个result，不然对端会一直处于接受态
+                send_msg(client, result_msg.build({'error': e.args[0]}))  # 出异常也要返回一个result，不然对端会一直处于接受态
             except ConnectionError as e:
                 server_logger.error(f'服务器接收客户端[{name}]消息失败，即将断开连接：{e}')
                 break
