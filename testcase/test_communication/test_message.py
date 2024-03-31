@@ -1,5 +1,6 @@
 from communication.server import Server
 from communication.client import Client
+from communication.message import debug_msg
 from public.message import *
 from public.currency import Currency
 from public.log import server_logger, client_logger, LogLevel
@@ -31,6 +32,11 @@ class MyTestCase(unittest.TestCase):
     def test_debug(self):
         result = self.client.send(debug_msg.build('test'))
         self.assertEqual('test', result)
+
+    def test_big_msg(self):
+        text = 'x' * 1000000
+        result = self.client.send(debug_msg.build(text))
+        self.assertEqual(text, result)
 
     def test_chat(self):
         pass  # TODO
