@@ -2,6 +2,7 @@ from comiee import overload
 from public.config import data_path
 from enum import IntEnum
 import logging
+from logging.handlers import RotatingFileHandler
 
 LOG_PATH = data_path('log')
 
@@ -38,7 +39,8 @@ def get_logger(name, level, file_name, file_level) -> logging.Logger:
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
-    fh = logging.FileHandler(str(data_path('log', file_name)), encoding='utf-8')
+    fh = RotatingFileHandler(str(data_path('log', file_name)), encoding='utf-8',
+                             maxBytes=1024 * 1024, backupCount=5)
     fh.setLevel(file_level)
     fh.setFormatter(formatter)
     logger.addHandler(fh)

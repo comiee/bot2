@@ -12,4 +12,4 @@ class LogPlugin(PluginBase, priority=Priority.Log):
         bot_logger.debug(f'收到事件：{d}')
 
     async def rule(self) -> bool:
-        return True
+        return False
