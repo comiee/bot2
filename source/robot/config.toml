@@ -5,7 +5,7 @@ adapters = ["alicebot.adapter.mirai", "alicebot.adapter.apscheduler"]
 
 [bot.log]
 # 这里是 AliceBot 自身日志相关的配置
-level = "DEBUG"
+level = "INFO"
 verbose_exception = true
 
 [adapter.mirai]
