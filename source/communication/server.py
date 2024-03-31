@@ -2,8 +2,8 @@ from communication.comm import *
 from communication.message import Message, register_msg, result_msg
 from public.log import server_logger
 from public.exception import MessageException
+from socket import AF_INET, SOCK_STREAM
 from threading import Thread
-import socket
 
 __all__ = ['Server']
 
@@ -11,7 +11,7 @@ __all__ = ['Server']
 class Server:
     def __init__(self):
         # 创建 socket 对象
-        self.__sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.__sock = socket(AF_INET, SOCK_STREAM)
         # 绑定端口号
         self.__sock.bind((HOST, PORT))
         # 设置最大连接数，超过后排队

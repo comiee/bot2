@@ -2,7 +2,7 @@ from communication.comm import *
 from communication.message import Message, register_msg, result_msg
 from public.log import client_logger
 from public.exception import MessageException
-import socket
+from socket import AF_INET, SOCK_STREAM
 import time
 
 __all__ = ['Client']
@@ -21,7 +21,7 @@ class Client:
     def __register(self, client_type):
         client_logger.info(f'客户端[{self.__name}]正在向服务器注册{client_type}')
         # 创建 socket 对象
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock = socket(AF_INET, SOCK_STREAM)
         # 连接服务，指定主机和端口
         while sock.connect_ex((HOST, PORT)):
             pass
