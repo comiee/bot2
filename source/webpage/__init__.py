@@ -17,8 +17,7 @@ def web_main():
     def run_django():
         os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'webpage.mei.settings')
         execute_from_command_line([__file__, 'migrate'])
-        #execute_from_command_line([__file__, 'runserver', f'{local_ip()}:{1234}', '--noreload'])
-        execute_from_command_line([__file__, 'runserver', f'127.0.0.1:{1234}', '--noreload'])
+        execute_from_command_line([__file__, 'runserver', f'{local_ip()}:{1234}', '--noreload'])
 
     @exit_msg.on_receive
     def exit_django():

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <script>
+        function cooldownButton(button) {
+            button.disabled = true; // 禁用按钮
+            var countdownElement = document.getElementById('countdown');
+            var totalTime = 5; // 总的冷却时间（秒）
+            var remainingTime = totalTime; // 剩余的冷却时间（秒）
+
+            var countdownInterval = setInterval(function() {
+                remainingTime -= 1; // 每秒减少1秒
+                countdownElement.textContent = remainingTime + 's'; // 更新显示剩余时间的元素内容
+
+                if (remainingTime <= 0) {
+                    clearInterval(countdownInterval); // 清除倒计时
+                    countdownElement.textContent = ''; // 清空剩余时间显示
+                    button.disabled = false; // 重新启用按钮
+                }
+            }, 1000); // 每秒更新一次倒计时
+
+            setTimeout(function() {
+                button.disabled = false; // 在一定时间后重新启用按钮
+                clearInterval(countdownInterval); // 清除倒计时
+                countdownElement.textContent = ''; // 清空剩余时间显示
+            }, totalTime * 1000); // 总冷却时间（毫秒）
+        }
+    </script>
+</head>
+<body>
+    <button onclick="cooldownButton(this)">Click me</button>
+    <span id="countdown"></span> <!-- 显示剩余时间的元素 -->
+</body>
+</html>

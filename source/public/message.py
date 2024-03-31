@@ -123,5 +123,5 @@ send_qq_text_msg = Message('send_qq_text', {
 # 登录网站
 web_login_msg = Message('web_login', {
     'user_id': int,  # 用户的qq号
-    'verification': int,  # 验证码，如果还未发送过验证码，会无视此字段，向用户发送验证码，否则会校验验证码
+    'captcha': int,  # 验证码，如果验证码为-1，向用户发送验证码，否则会校验验证码
 }, int)  # 错误码，详见error_code.py
