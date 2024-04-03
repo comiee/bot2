@@ -1,8 +1,12 @@
 from public.log import public_logger
+from public.convert import convert_to
 import pkgutil
 import netifaces
 import os
 from datetime import datetime
+import aiohttp
+from PIL import Image
+from io import BytesIO
 
 
 def load_module(path):
@@ -33,3 +37,26 @@ def is_file_today(path):
     if datetime.fromtimestamp(os.path.getmtime(path)).date() != datetime.now().date():
         return False
     return True
+
+
+async def fetch_image(url):
+    async with aiohttp.ClientSession() as aio_session:
+        async with aio_session.get(url) as resp:
+            return await resp.read()
+
+
+async def save_image(url, path):
+    with open(path, 'wb') as f:
+        f.write(await fetch_image(url))
+
+
+async def open_image(url):
+    return Image.open(BytesIO(await fetch_image(url)))
+
+
+def get_pic_url_from_internal(pic_internal: str):
+    pic_data = convert_to('data', pic_internal)
+    assert len(pic_data) >= 1
+    pic_dict = pic_data[0]
+    assert 'imageId' in pic_dict and 'url' in pic_dict
+    return pic_dict['url']
