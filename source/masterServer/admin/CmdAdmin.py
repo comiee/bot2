@@ -1,8 +1,9 @@
+from communication.server import Server
+from communication.asyncServer import AsyncServer
 from public.message import exit_msg, debug_msg, chat_msg
 from public.log import admin_logger
 from public.exception import ActiveExitException
 from masterServer.admin.Admin import Admin
-from communication.server import Server
 import inspect
 import traceback
 
@@ -24,6 +25,7 @@ class CmdAdmin(Admin):
             except ActiveExitException:
                 self.server.send_to_all(exit_msg.build())
                 self.server.close()
+                AsyncServer().wait_close()
                 return
             except Exception as e:
                 admin_logger.warning(f'执行命令失败：{e}')  # TODO 优化打印

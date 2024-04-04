@@ -1,36 +1,21 @@
 from communication.asyncServer import AsyncServer
-from public.config import data_path
 from masterServer import server_main
 from masterServer.admin.Admin import Admin
 from robot.section.h_pic import get_h_pic
-from multiprocessing import Process, Value, Queue
+from multiprocessing import Process, Value
 import unittest
 import asyncio
 import time
-import re
-import os
 
 __import__('robot.section.h_pic')
 
 
-def wait_download_pic(url):
-    name = re.search(r'^.*/(.*?)$', url).group(1)
-    size_old = size_new = 0
-    while size_new == 0 or size_old != size_new:
-        size_old, size_new = size_new, os.stat(data_path('pic', name)).st_size
-        time.sleep(2)
-    print('downloaded', name)
-
-
-def test_server_main(running_val, download_pic_queue):
+def test_server_main(running_val):
     class TestAdmin(Admin):
         def run(self):
             while running_val.value:
                 time.sleep(1)
-            for _ in range(download_pic_queue.qsize()):
-                url = download_pic_queue.get()
-                wait_download_pic(url)
-            asyncio.run(AsyncServer().close())
+            AsyncServer().wait_close()
             self.server.close()
 
     server_main(TestAdmin)
@@ -38,8 +23,7 @@ def test_server_main(running_val, download_pic_queue):
 
 class HPicTestCase(unittest.IsolatedAsyncioTestCase):
     running_val = Value('b', True)
-    download_pic_queue = Queue()
-    server_process = Process(target=test_server_main, args=[running_val, download_pic_queue])
+    server_process = Process(target=test_server_main, args=[running_val])
 
     @classmethod
     def setUpClass(cls):
@@ -54,17 +38,13 @@ class HPicTestCase(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(False, 'error' in res)
         urls = res['data']
         self.assertEqual(2, len(urls))
-        for url in urls:
-            self.download_pic_queue.put(url)
 
     async def test_mul(self):
         async def f():
             res = await get_h_pic(2, 1)
             self.assertEqual(False, 'error' in res)
             urls = res['data']
-            self.assertNotEqual(0, len(urls))
-            for url in urls:
-                self.download_pic_queue.put(url)
+            self.assertEqual(1, len(urls))
             return time.time()
 
         arr = await asyncio.gather(f(), f(), f(), f())

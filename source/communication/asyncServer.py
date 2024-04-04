@@ -1,4 +1,4 @@
-from comiee import Singleton
+from comiee import Singleton, TaskList
 from communication.comm import *
 from public.log import async_server_logger
 from functools import partial
@@ -10,7 +10,8 @@ __all__ = ['AsyncServer']
 
 class AsyncServer(Singleton):
     def __init__(self):
-        self.__cmd_dict: dict = {}
+        self.__cmd_dict = {}
+        self.__task_list = TaskList()
 
     async def run(self):
         self.__server = await asyncio.start_server(self.__handle_client, HOST, ASYNC_PORT)
@@ -46,8 +47,14 @@ class AsyncServer(Singleton):
         await writer.wait_closed()
 
     async def close(self):
+        await self.__task_list.wait()
+        await asyncio.sleep(1)  # 需要多等一会，不然task的析构访问event_loop会出错
         self.__server.close()
         await self.__server.wait_closed()
+
+    def wait_close(self):
+        # 用于在其他线程中等待异步服务器关闭
+        asyncio.run_coroutine_threadsafe(AsyncServer().close(), AsyncServer().get_loop()).result()
 
     def register(self, cmd):
         def get_receiver(handler):
@@ -56,3 +63,9 @@ class AsyncServer(Singleton):
             self.__cmd_dict[cmd] = handler
 
         return get_receiver
+
+    def add_task(self, co):
+        return self.__task_list.add_task(co)
+
+    def get_loop(self):
+        return self.__server.get_loop()

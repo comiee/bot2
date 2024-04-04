@@ -5,7 +5,6 @@ from public.utils import save_image
 from public.exception import CustomException
 import re
 import aiohttp
-import asyncio
 import json
 
 
@@ -36,8 +35,7 @@ async def h_pic(msg):
             url = x.get('urls', {}).get('original', '')
             data.append(url)
             name = re.search(r'^.*/(.*?)$', url).group(1)
-            # noinspection PyAsyncCall
-            asyncio.create_task(save_image(url, data_path('pic', name)))
+            AsyncServer().add_task(save_image(url, data_path('pic', name)))
         res = {'data': data}
     except CustomException as e:
         res = {'error': e.args[0]}

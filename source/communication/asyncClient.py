@@ -1,3 +1,4 @@
+from comiee import TaskList
 from communication.comm import *
 from public.log import async_client_logger
 import asyncio
@@ -6,10 +7,11 @@ __all__ = ['AsyncClient']
 
 
 class AsyncClient:
-    def __init__(self, cmd):
+    def __init__(self, cmd: str):
         self.__cmd = cmd
         self.__reader: asyncio.StreamReader | None = None
         self.__writer: asyncio.StreamWriter | None = None
+        self.__task_list = TaskList()
 
     async def _connection(self):
         self.__reader, self.__writer = await asyncio.open_connection(HOST, ASYNC_PORT)
@@ -22,6 +24,7 @@ class AsyncClient:
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.__task_list.wait()
         if self.__writer is not None:
             self.__writer.close()
             await self.__writer.wait_closed()
@@ -35,3 +38,6 @@ class AsyncClient:
         ret = await async_recv_msg(self.__reader)
         async_client_logger.debug(f'异步客户端{self.__cmd}收到服务器响应：{ret}')
         return ret
+
+    def add_task(self, co):
+        return self.__task_list.add_task(co)
