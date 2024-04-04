@@ -11,7 +11,7 @@ class AsyncClient:
         self.__writer: asyncio.StreamWriter | None = None
 
     async def _connection(self):
-        self.__reader, self.__writer = await asyncio.open_connection(HOST, PORT)
+        self.__reader, self.__writer = await asyncio.open_connection(HOST, ASYNC_PORT)
 
     async def __aenter__(self):
         await self._connection()

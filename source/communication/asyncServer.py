@@ -12,7 +12,7 @@ class AsyncServer:
         self.__cmd_dict: dict = {}
 
     async def run(self):
-        self.__server = await asyncio.start_server(self.__handle_client, HOST, PORT)
+        self.__server = await asyncio.start_server(self.__handle_client, HOST, ASYNC_PORT)
 
         addr = self.__server.sockets[0].getsockname()
         server_logger.info(f'异步服务器已开启：{addr}')
