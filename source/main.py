@@ -1,3 +1,4 @@
+from masterServer.admin import CmdAdmin
 from masterServer import server_main
 from robot import bot_main
 from webpage import web_main
@@ -14,7 +15,7 @@ def main():
     start_main(web_main)
 
     time.sleep(1)  # pycharm的bug，不加sleep会卡住
-    server_main()  # server_main里面有input，只能在主线程运行
+    server_main(CmdAdmin)  # CmdAdmin里面有input，只能在主线程运行
 
 
 if __name__ == '__main__':

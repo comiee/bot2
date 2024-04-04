@@ -1,6 +1,6 @@
 from robot.comm.command import *
 from robot.plugins.commandPlugin import CommandPlugin
-from test_robot.faker import spread_event, dummy_friend_message_event
+from faker.bot_faker import spread_event, dummy_friend_message_event
 from unittest import mock
 import unittest
 

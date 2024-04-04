@@ -48,8 +48,10 @@ def get_logger(name, level, file_name, file_level) -> logging.Logger:
 
 
 # 底层的client和server使用logger
-client_logger: logging.Logger = get_logger('client', LogLevel.DEBUG)
-server_logger: logging.Logger = get_logger('server', LogLevel.INFO, LogLevel.DEBUG)
+client_logger: logging.Logger = get_logger('client', LogLevel.INFO, LogLevel.DEBUG)
+server_logger: logging.Logger = get_logger('server', LogLevel.DEBUG)
+async_client_logger: logging.Logger = get_logger('asyncClient', LogLevel.DEBUG)
+async_server_logger: logging.Logger = get_logger('asyncServer', LogLevel.INFO, LogLevel.DEBUG)
 
 # 公共部分使用的logger
 public_logger: logging.Logger = get_logger('public', LogLevel.DEBUG)

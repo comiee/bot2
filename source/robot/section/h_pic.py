@@ -1,10 +1,10 @@
+from communication.asyncClient import AsyncClient
 from public.log import bot_logger
-from public.message import h_pic_msg
 from public.currency import Currency
 from public.tools import to_int
 from robot.comm.pluginBase import Session
 from robot.comm.command import KeywordCommand, FullCommand, RegexCommand
-from robot.botClient import get_bot_client
+import json
 import traceback
 
 white_groups = {694541980, 811912656, 324085758, 272943085}
@@ -24,6 +24,40 @@ async def h_pic_help(session: Session):
 作者：指定作者的uid，可指定多个，用逗号隔开，最多可指定20个，使用此功能会加收10金币
 排除AI：1为排除，0为不排除，默认为1
 ''')
+
+
+# noinspection PyPep8Naming
+async def get_h_pic(
+        r18: int = None,
+        num: int = None,
+        uid: list[int] = None,
+        keyword: str = None,
+        tag: list[str] = None,
+        size: list[str] = None,
+        proxy: str = None,
+        dateAfter: int = None,
+        dateBefore: int = None,
+        dsc: bool = None,
+        excludeAI: bool = None
+):
+    post_json = {
+        'r18': r18,
+        'num': num,
+        'uid': uid,
+        'keyword': keyword,
+        'tag': tag,
+        'size': size,
+        'proxy': proxy,
+        'dateAfter': dateAfter,
+        'dateBefore': dateBefore,
+        'dsc': dsc,
+        'excludeAI': excludeAI,
+    }
+    post_json = {k: v for k, v in post_json.items() if v is not None}
+    async with AsyncClient('h_pic') as client:
+        msg = json.dumps(post_json, ensure_ascii=False)
+        res = await client.send(msg)
+        return json.loads(res)
 
 
 # noinspection NonAsciiCharacters,PyPep8Naming
@@ -56,11 +90,12 @@ async def h_pic(session: Session,
     max_price = unit_price * num
     await session.check_cost((max_price, Currency.coin))
 
-    err, res = get_h_pic(r18, num, uid, keyword, tag, excludeAI=excludeAI)
-    if err:
-        await session.reply(f'爬取失败，金币已返还：{err}')
+    res = await get_h_pic(r18, num, uid, keyword, tag, excludeAI=excludeAI)
+    if 'error' in res:
+        await session.reply(f'爬取失败，金币已返还：{res["error"]}')
         return
-    count = len(res)
+    data = res['data']
+    count = len(data)
     coin = unit_price * count
     if count == 0:
         await session.reply('未找到符合条件的结果，金币已返还')
@@ -69,41 +104,10 @@ async def h_pic(session: Session,
     if count != num:
         text += f'，实际花费{coin}金币'
     text += '，结果如下：'
-    for url in res:
+    for url in data:
         text += '\n' + url
     await session.reply(text)
     await session.ensure_cost((coin, Currency.coin))
-
-
-# noinspection PyPep8Naming
-def get_h_pic(
-        r18: int = None,
-        num: int = None,
-        uid: list[int] = None,
-        keyword: str = None,
-        tag: list[str] = None,
-        size: list[str] = None,
-        proxy: str = None,
-        dateAfter: int = None,
-        dateBefore: int = None,
-        dsc: bool = None,
-        excludeAI: bool = None
-):
-    post_json = {
-        'r18': r18,
-        'num': num,
-        'uid': uid,
-        'keyword': keyword,
-        'tag': tag,
-        'size': size,
-        'proxy': proxy,
-        'dateAfter': dateAfter,
-        'dateBefore': dateBefore,
-        'dsc': dsc,
-        'excludeAI': excludeAI,
-    }
-    post_json = {k: v for k, v in post_json.items() if v is not None}
-    return get_bot_client().send(h_pic_msg.build(post_json=post_json))
 
 
 @RegexCommand(r'来([\d\-负〇一二三四五六七八九十百千万亿零壹贰叁肆伍陆柒捌玖拾佰仟億两貮兆]*)[张点](.*)色图') \

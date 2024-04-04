@@ -1,7 +1,7 @@
 from robot.comm.status import ChatStatus, SessionStatus, status_load
 from robot.plugins.commandPlugin import CommandPlugin
 from robot.comm.user import User
-from test_robot.faker import spread_event, dummy_friend_message_event, DUMMY_QQ
+from faker.bot_faker import spread_event, dummy_friend_message_event, DUMMY_QQ
 from unittest import mock
 import unittest
 

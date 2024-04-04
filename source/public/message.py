@@ -81,13 +81,6 @@ stock_msg = Message('stock', {
     'count': int,  # 买入的数量，如果为负数则为卖出
 }, int)  # 错误码，详见error_code.py
 
-# 色图  色图的扣钱在客户端执行
-h_pic_msg = Message('h_pic', {
-    'post_json': dict,  # 请求json
-}, [str,  # 错误信息，没有发生错误则为空字符串
-    list,  # 查找到的url列表
-    ])
-
 # 翻译
 translate_msg = Message('translate', {
     'from_': str,  # 源语言
