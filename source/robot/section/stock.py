@@ -13,10 +13,10 @@ async def stock_help(session: Session):
     quantity = session.user.query(Currency.stock)
     money = session.user.query(Currency.coin)
     count = await session.ask(f'''\
-    当前股价为{price}，你持有的股份为{quantity}，你拥有的金币为{money}。
-    小魅开机的时候每到整点会随机更新股价（范围1~30）。
-    买入花费的金币自动向上取整，卖出花费的金币自动向下取整。
-    请输入操作的股份数量（正数为买入，负数为卖出）：''')
+当前股价为{price}，你持有的股份为{quantity}，你拥有的金币为{money}。
+小魅开机的时候每到整点会随机更新股价（范围1~30）。
+买入花费的金币自动向上取整，卖出花费的金币自动向下取整。
+请输入操作的股份数量（正数为买入，负数为卖出）：''')
     if price != get_bot_client().send(query_stock_price_msg.build()):
         await session.reply('股价已变动，请重新操作。')
         return

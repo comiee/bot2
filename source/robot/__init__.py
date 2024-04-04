@@ -20,7 +20,9 @@ def bot_main():
 
     @bot.bot_run_hook
     async def run_hook(_):
-        logger.add(data_path('log', 'alice.txt'))  # 必须放在bot.run后面执行，不然会被remove
+        # logger.add必须放在bot.run后面执行，不然会被remove
+        logger.add(data_path('log', 'alice.txt'),
+                   rotation='1 MB', retention='1 week')
         bot_client.init_bot_proxy(bot, asyncio.get_running_loop())
         Thread(target=get_bot_client().listen_server, daemon=True).start()
 
