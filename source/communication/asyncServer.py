@@ -1,3 +1,4 @@
+from comiee import Singleton
 from communication.comm import *
 from public.log import server_logger
 from functools import partial
@@ -7,7 +8,7 @@ import asyncio
 __all__ = ['AsyncServer']
 
 
-class AsyncServer:
+class AsyncServer(Singleton):
     def __init__(self):
         self.__cmd_dict: dict = {}
 
