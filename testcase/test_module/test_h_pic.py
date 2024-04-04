@@ -18,7 +18,7 @@ def wait_download_pic(url):
     size_old = size_new = 0
     while size_new == 0 or size_old != size_new:
         size_old, size_new = size_new, os.stat(data_path('pic', name)).st_size
-        time.sleep(1)
+        time.sleep(2)
     print('downloaded', name)
 
 
@@ -53,9 +53,23 @@ class HPicTestCase(unittest.IsolatedAsyncioTestCase):
         res = await get_h_pic(2, 2)
         self.assertEqual(False, 'error' in res)
         urls = res['data']
-        self.assertNotEqual(0, len(urls))
+        self.assertEqual(2, len(urls))
         for url in urls:
             self.download_pic_queue.put(url)
+
+    async def test_mul(self):
+        async def f():
+            res = await get_h_pic(2, 1)
+            self.assertEqual(False, 'error' in res)
+            urls = res['data']
+            self.assertNotEqual(0, len(urls))
+            for url in urls:
+                self.download_pic_queue.put(url)
+            return time.time()
+
+        arr = await asyncio.gather(f(), f(), f(), f())
+        print(arr)
+        self.assertLess(max(arr) - min(arr), 2)  # 服务器应该同步处理多人请求，返回结果的时间应该是接近的
 
 
 if __name__ == '__main__':
