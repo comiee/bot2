@@ -1,8 +1,5 @@
-from communication.asyncServer import AsyncServer
-from masterServer import server_main
-from masterServer.admin.Admin import Admin
 from robot.section.h_pic import get_h_pic
-from multiprocessing import Process, Value
+from faker.master_server_faker import AsyncServerController
 import unittest
 import asyncio
 import time
@@ -10,28 +7,16 @@ import time
 __import__('robot.section.h_pic')
 
 
-def test_server_main(running_val):
-    class TestAdmin(Admin):
-        def run(self):
-            while running_val.value:
-                time.sleep(1)
-            AsyncServer().wait_close()
-            self.server.close()
-
-    server_main(TestAdmin)
-
-
 class HPicTestCase(unittest.IsolatedAsyncioTestCase):
-    running_val = Value('b', True)
-    server_process = Process(target=test_server_main, args=[running_val])
+    server_controller = AsyncServerController()
 
     @classmethod
     def setUpClass(cls):
-        cls.server_process.start()
+        cls.server_controller.start()
 
     @classmethod
     def tearDownClass(cls):
-        cls.running_val.value = False
+        cls.server_controller.close()
 
     async def test_h_pic(self):
         res = await get_h_pic(2, 2)

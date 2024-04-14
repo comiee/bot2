@@ -7,11 +7,11 @@ __all__ = ['AsyncClient']
 
 
 class AsyncClient:
-    def __init__(self, cmd: str):
+    def __init__(self, cmd: str, loop: asyncio.AbstractEventLoop = None):
         self.__cmd = cmd
         self.__reader: asyncio.StreamReader | None = None
         self.__writer: asyncio.StreamWriter | None = None
-        self.__task_list = TaskList()
+        self.__task_list = TaskList(loop or asyncio.get_event_loop())
 
     async def _connection(self):
         self.__reader, self.__writer = await asyncio.open_connection(HOST, ASYNC_PORT)

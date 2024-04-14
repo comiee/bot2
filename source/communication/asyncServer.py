@@ -11,10 +11,10 @@ __all__ = ['AsyncServer']
 class AsyncServer(Singleton):
     def __init__(self):
         self.__cmd_dict = {}
-        self.__task_list = TaskList()
 
     async def run(self):
         self.__server = await asyncio.start_server(self.__handle_client, HOST, ASYNC_PORT)
+        self.__task_list = TaskList(self.__server.get_loop())
 
         addr = self.__server.sockets[0].getsockname()
         async_server_logger.info(f'异步服务器已开启：{addr}')
@@ -53,16 +53,16 @@ class AsyncServer(Singleton):
         await self.__server.wait_closed()
 
     def wait_close(self):
-        # 用于在其他线程中等待异步服务器关闭
+        """用于在其他线程中等待异步服务器关闭"""
         asyncio.run_coroutine_threadsafe(AsyncServer().close(), AsyncServer().get_loop()).result()
 
     def register(self, cmd):
-        def get_receiver(handler):
+        def get_handler(handler):
             if cmd in self.__cmd_dict:
                 async_server_logger.error(f'异步服务器：重复注册：{cmd}')
             self.__cmd_dict[cmd] = handler
 
-        return get_receiver
+        return get_handler
 
     def add_task(self, co):
         return self.__task_list.add_task(co)
