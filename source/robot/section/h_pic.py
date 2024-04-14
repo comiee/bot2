@@ -8,7 +8,7 @@ import json
 import traceback
 
 white_groups = {694541980, 811912656, 324085758, 272943085}
-white_friends = {1440667228, 2667336028, 1192916519}
+white_friends = {1440667228, 2667336028, 1192916519, 2856606631}
 
 
 @FullCommand('色图帮助').trim_white_list(groups=white_groups, friends=white_friends)
