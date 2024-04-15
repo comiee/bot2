@@ -1,6 +1,7 @@
 from comiee import Singleton, TaskList
-from communication.comm import *
+from communication.asyncComm import *
 from public.log import async_server_logger
+from public.exception import CustomException
 from functools import partial
 from inspect import signature
 import asyncio
@@ -26,25 +27,29 @@ class AsyncServer(Singleton):
                 async_server_logger.info('异步服务器已关闭')
 
     async def __handle_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
-        addr = writer.get_extra_info('peername')
-        cmd = await async_recv_msg(reader)
-        await async_send_msg(writer, 'success')
-        async_server_logger.debug(f'异步服务器建立连接：{addr} {cmd}')
+        try:
+            addr = writer.get_extra_info('peername')
+            cmd = await async_recv(reader)
+            if cmd not in self.__cmd_dict:
+                await async_send(writer, 'fail')
+                raise CustomException(f'未知的命令字：{cmd}')
+            await async_send(writer, 'success')
+            async_server_logger.debug(f'异步服务器建立连接：{addr} {cmd}')
 
-        if cmd not in self.__cmd_dict:
-            async_server_logger.error(f'异步服务器：未知的命令字：{cmd}')
-            return
-        send = partial(async_send_msg, writer)
-        recv = partial(async_recv_msg, reader)
-        handler = self.__cmd_dict[cmd]
-        if len(signature(handler).parameters) == 1:
-            msg = await recv()
-            ret = await handler(msg)
-            await send(ret)
-        else:
-            await handler(send, recv)
-        writer.close()
-        await writer.wait_closed()
+            send = partial(async_send, writer)
+            recv = partial(async_recv, reader)
+            handler = self.__cmd_dict[cmd]
+            if len(signature(handler).parameters) == 1:
+                msg = await recv()
+                ret = await handler(msg)
+                await send(ret)
+            else:
+                await handler(send, recv)
+        except Exception as e:
+            async_server_logger.exception(f'异步服务器出错：{e.args[0]}')
+        finally:
+            writer.close()
+            await writer.wait_closed()
 
     async def close(self):
         await self.__task_list.wait()

@@ -44,10 +44,34 @@ class AsyncTestCase(unittest.IsolatedAsyncioTestCase):
             await send(s)
 
         async with AsyncClient(cmd) as client:
-            self.assertEqual(await client.send('1'), '1')
-            self.assertEqual(await client.send('2'), '2')
+            self.assertEqual('1', await client.send('1'))
+            self.assertEqual('2', await client.send('2'))
 
         self.assertEqual(['1', '2'], a)
+
+    async def test_send_json(self):
+        cmd = 'test_send_json'
+        val = {'1': 1, '2': 2}
+
+        @self.server.register(cmd)
+        async def _(d):
+            self.assertEqual(val, d)
+            return d
+
+        async with AsyncClient(cmd) as client:
+            self.assertEqual(val, await client.send(val))
+
+    async def test_send_pickle(self):
+        cmd = 'test_send_pickle'
+        val = ...
+
+        @self.server.register(cmd)
+        async def _(o):
+            self.assertEqual(val, o)
+            return o
+
+        async with AsyncClient(cmd) as client:
+            self.assertEqual(val, await client.send(val))
 
     async def test_sync(self):
         cmd = 'test_sync'

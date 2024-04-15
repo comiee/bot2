@@ -1,6 +1,7 @@
 from comiee import TaskList
-from communication.comm import *
+from communication.asyncComm import *
 from public.log import async_client_logger
+from public.exception import CustomException
 import asyncio
 
 __all__ = ['AsyncClient']
@@ -18,7 +19,10 @@ class AsyncClient:
 
     async def __aenter__(self):
         await self._connection()
-        await self.send(self.__cmd)
+        ret = await self.send(self.__cmd)
+        if ret != 'success':
+            await self.__aexit__(None, None, None)
+            raise CustomException(f'异步客户端{self.__cmd}出错：服务器未注册的命令字')
         addr = self.__writer.get_extra_info('peername')
         async_client_logger.debug(f'异步客户端{self.__cmd}建立连接：{addr}')
         return self
@@ -32,10 +36,11 @@ class AsyncClient:
         self.__writer = None
         async_client_logger.debug(f'异步客户端{self.__cmd}已关闭连接')
 
-    async def send(self, msg: str):
-        async_client_logger.debug(f'异步客户端{self.__cmd}向服务器发送消息：{msg}')
-        await async_send_msg(self.__writer, msg)
-        ret = await async_recv_msg(self.__reader)
+    async def send(self, obj):
+        async_client_logger.debug(f'异步客户端{self.__cmd}向服务器发送消息：{obj}')
+        await async_send(self.__writer, obj)
+
+        ret = await async_recv(self.__reader)
         async_client_logger.debug(f'异步客户端{self.__cmd}收到服务器响应：{ret}')
         return ret
 
