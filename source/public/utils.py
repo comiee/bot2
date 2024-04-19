@@ -42,12 +42,15 @@ def is_file_today(path):
 async def fetch_image(url):
     async with aiohttp.ClientSession() as aio_session:
         async with aio_session.get(url) as resp:
+            if resp.status != 200:
+                raise ConnectionError(f'连接{url}失败，错误码：{resp.status}')
             return await resp.read()
 
 
 async def save_image(url, path):
+    data = await fetch_image(url)
     with open(path, 'wb') as f:
-        f.write(await fetch_image(url))
+        f.write(data)
 
 
 async def open_image(url):

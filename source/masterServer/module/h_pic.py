@@ -5,13 +5,21 @@ from public.utils import save_image
 from public.exception import CustomException
 import re
 import aiohttp
-import json
+
+
+async def save_pic(url):
+    name = re.search(r'^.*/(.*?)$', url).group(1)
+    try:
+        await save_image(url, data_path('pic', name))
+    except Exception as e:
+        master_server_logger.warning(f'h_pic 保存图片失败：{e.args[0]}')
+    else:
+        master_server_logger.info(f'h_pic 图片已保存为 {name}')
 
 
 @AsyncServer().register('h_pic')
-async def h_pic(msg):
+async def h_pic(post_json):
     try:
-        post_json = json.loads(msg)
         async with aiohttp.ClientSession() as aio_session:
             async with aio_session.post('https://api.lolicon.app/setu/v2', json=post_json) as resp:
                 if resp.status != 200:
@@ -34,9 +42,8 @@ async def h_pic(msg):
         for x in ret_json.get('data', []):
             url = x.get('urls', {}).get('original', '')
             data.append(url)
-            name = re.search(r'^.*/(.*?)$', url).group(1)
-            AsyncServer().add_task(save_image(url, data_path('pic', name)))
+            AsyncServer().add_task(save_pic(url))
         res = {'data': data}
     except CustomException as e:
         res = {'error': e.args[0]}
-    return json.dumps(res, ensure_ascii=False)
+    return res

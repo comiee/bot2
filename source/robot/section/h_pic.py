@@ -55,9 +55,8 @@ async def get_h_pic(
     }
     post_json = {k: v for k, v in post_json.items() if v is not None}
     async with AsyncClient('h_pic') as client:
-        msg = json.dumps(post_json, ensure_ascii=False)
-        res = await client.send(msg)
-        return json.loads(res)
+        res = await client.send(post_json)
+        return res
 
 
 # noinspection NonAsciiCharacters,PyPep8Naming

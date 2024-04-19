@@ -21,7 +21,7 @@ async def async_send(writer: StreamWriter, obj) -> None:
     if isinstance(obj, str):
         await async_send_bytes(writer, b'str:' + obj.encode(ENCODING))
     elif isinstance(obj, dict):
-        await async_send_bytes(writer, b'json:' + json.dumps(obj).encode(ENCODING))
+        await async_send_bytes(writer, b'json:' + json.dumps(obj, ensure_ascii=False).encode(ENCODING))
     else:
         await async_send_bytes(writer, b'pickle:' + pickle.dumps(obj))
 
