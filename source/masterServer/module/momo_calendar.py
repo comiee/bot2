@@ -11,9 +11,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import NoSuchElementException
 from datetime import datetime, timedelta
-from threading import Thread
+from threading import Thread, Lock
 import platform
-import traceback
 import re
 import json
 import os
@@ -25,7 +24,7 @@ class CalendarBrowser(Firefox):
     JSON_PATH = data_path('momo.json')
     ICS_PATH = data_path('momo.ics')
 
-    __is_updating = False
+    __update_lock = Lock()
 
     def __init__(self):
         options = FirefoxOptions()
@@ -60,8 +59,12 @@ class CalendarBrowser(Firefox):
             return
 
         for a in ul.find_elements(By.TAG_NAME, 'a'):
-            title, time_str = a.text.split('\n')
-            hour, minute = map(int, re.search(r'(\d+):(\d+)', time_str).groups())
+            title, time_str = a.text.split('\n', 1)
+            if m := re.search(r'(\d+):(\d+)', time_str):
+                hour, minute = map(int, m.groups())
+            else:
+                master_server_logger.exception(f'momo_calendar 已跳过日程：获取{day_str}时间失败')
+                continue  # TODO 适配全天类日程
             time = day.replace(hour=hour, minute=minute)
             self.event_dict_list.append({'title': title, 'time': time.strftime('%Y%m%dT%H%M%S')})
 
@@ -136,13 +139,13 @@ END:VCALENDAR'''
             self._generate_ics()
             master_server_logger.info('momo_calendar 日历已更新')
         except Exception:
-            master_server_logger.error(f'momo_calendar {traceback.format_exc()}')
+            master_server_logger.exception('momo_calendar 日历更新失败')
         finally:
             self.close()
 
     @classmethod
     def need_update(cls):
-        if cls.__is_updating:
+        if cls.__update_lock.locked():
             return False
         if is_file_today(cls.ICS_PATH):
             return False
@@ -150,16 +153,14 @@ END:VCALENDAR'''
 
     @classmethod
     def generate(cls):
-        if cls.need_update():
-            cls.__is_updating = True
+        with cls.__update_lock:
             cls()._generate()
-            cls.__is_updating = False
 
 
 @scheduler.scheduled_job('cron', hour='4', misfire_grace_time=None)
 @momo_calendar_msg.on_receive
 def momo_calendar():
-    if not is_file_today(CalendarBrowser.ICS_PATH):
+    if CalendarBrowser.need_update():
         Thread(target=CalendarBrowser.generate).start()
     if os.path.exists(CalendarBrowser.ICS_PATH):
         with open(CalendarBrowser.ICS_PATH, encoding='utf-8') as f:
