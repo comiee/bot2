@@ -134,6 +134,49 @@ class AsyncTestCase(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual([1, 2], a)
 
+    async def test_send_file(self):
+        from functools import reduce
+        import operator as op
+        from public.config import data_path
+        sep = 1048576
+
+        def check(b: bytes) -> bytes:
+            return bytes([reduce(op.xor, b)])
+
+        @AsyncServer().register('file')
+        async def _(send, recv):
+            with open(data_path('test_file'), 'wb') as f:
+                while isinstance((chunk := await recv()), bytes):
+                    await send(check(chunk))
+                    if await recv():
+                        f.write(chunk)
+                    await send('')
+                size = chunk
+                if size == f.tell():
+                    await send(True)
+                else:
+                    await send(False)
+                    raise Exception('接受文件失败')
+
+        async def send_file():
+            async with AsyncClient('file') as client:
+                with open(data_path('geckodriver'), 'rb') as f:
+                    while chunk := f.read(sep):
+                        x = await client.send(chunk)
+                        if x != check(chunk):
+                            print('重试')
+                            await client.send(False)
+                            x = await client.send(chunk)
+                            if x != check(chunk):
+                                raise Exception('数据块发送失败')
+                        else:
+                            await client.send(True)
+                    y = await client.send(f.tell())
+                    if not y:
+                        raise Exception('大小校验失败')
+
+        await send_file()
+
 
 if __name__ == '__main__':
     unittest.main()
