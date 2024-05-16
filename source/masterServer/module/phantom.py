@@ -33,7 +33,7 @@ def opposed_line(img2, img1):
             a = imga[x, y]
             color = (255 - b + a,)
             if color > (220,):
-                imgb[x, y] = (160 - b + a,)
+                imgb[x, y] = 220
             else:
                 imgb[x, y] = color
     return img2
