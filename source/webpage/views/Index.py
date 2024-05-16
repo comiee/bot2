@@ -8,5 +8,5 @@ class Index(View):
 
     def post(self, request):
         if 'qq' not in request.session:
-            return HttpResponseRedirect('/login/')
+            return HttpResponseRedirect('/login')
         return render(request, 'index.html')

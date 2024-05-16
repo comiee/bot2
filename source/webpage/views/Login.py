@@ -10,20 +10,27 @@ class Login(View):
     url = 'login'
 
     def post(self, request):
-        if 'qq' not in request.session:
+        if 'qq' not in request.POST or request.POST['qq'] == '':
             return render(request, 'login.html', {'status': 0})
-        qq = int(request.session['qq'])
-        captcha = int(request.session.get('captcha', -1))
+        qq = int(request.POST['qq'])
+        if request.POST['login']:
+            captcha = int(request.POST.get('captcha',-1))
+        else:
+            captcha = -1
         ret = get_web_client().send(web_login_msg.build(
             user_id=qq,
             captcha=captcha,
         ))
         match ret:
             case ErrorCode.already_logged_in | ErrorCode.login_success:
-                return HttpResponseRedirect('/index/')
+                return HttpResponseRedirect('/index')
             case ErrorCode.sent_captcha:
-                return render(request, 'login.html', {'status': 1})
+                status = 1
             case ErrorCode.wrong_captcha:
-                return render(request, 'login.html', {'status': 2})
+                status = 2
             case _:
-                return render(request, 'login.html', {'status': 0})
+                status = 0
+        return render(request, 'login.html', {
+            'qq': qq,
+            'status': status,
+        })
