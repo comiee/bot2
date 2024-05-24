@@ -32,17 +32,17 @@ class _Sql:
             self.connect()
         return self.__db.cursor()
 
-    def execute(self, query):
+    def execute(self, query, args=None):
         try:
             with self.cursor() as cur:
-                return cur.execute(query)
+                return cur.execute(query, args)
         except Exception as e:
             public_logger.exception(f'sql执行execute出错：{e!r}')
 
-    def query(self, query, default=None):
+    def query(self, query, *, args=None, default=None):
         try:
             with self.cursor() as cur:
-                if cur.execute(query):
+                if cur.execute(query, args):
                     res = cur.fetchone()
                     if len(res) == 1:
                         return res[0]

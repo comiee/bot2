@@ -6,7 +6,7 @@ def query_currency(user_id: int, currency: str | Currency) -> int:
     """查询货币"""
     if isinstance(currency, Currency):
         currency = currency.name
-    return sql.query(f'select {currency} from info where qq={user_id};', 0)
+    return sql.query(f'select {currency} from info where qq={user_id};', default=0)
 
 
 def increase_currency(user_id: int, currency: str | Currency, num: int):

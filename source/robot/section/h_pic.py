@@ -4,7 +4,6 @@ from public.currency import Currency
 from public.tools import to_int
 from robot.comm.pluginBase import Session
 from robot.comm.command import KeywordCommand, FullCommand, RegexCommand
-import json
 import traceback
 
 white_groups = {694541980, 811912656, 324085758, 272943085}
