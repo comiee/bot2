@@ -8,11 +8,10 @@ def _sql(s):
     try:
         with sql.cursor() as cur:
             cur.execute(s)
+            return '\t'.join(next(zip(*cur.description))) + '\n' + \
+                '\n'.join('\t'.join(map(str, i)) for i in cur.fetchall())
     except Exception as e:
         return str(e)
-    else:
-        return '\t'.join(next(zip(*cur.description))) + '\n' + \
-            '\n'.join('\t'.join(map(str, i)) for i in cur.fetchall())
 
 
 @query_currency_msg.on_receive
