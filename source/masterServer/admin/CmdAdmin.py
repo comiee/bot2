@@ -4,8 +4,11 @@ from public.message import exit_msg, debug_msg, chat_msg
 from public.log import admin_logger
 from public.exception import ActiveExitException
 from masterServer.admin.Admin import Admin
+from masterServer.module.air_conditioner import TTLSerialIR03T, bytes_to_hex_str
 import inspect
 import traceback
+import asyncio
+import time
 
 
 class CmdAdmin(Admin):
@@ -74,3 +77,40 @@ class CmdAdmin(Admin):
                 group_id=0,
                 text=text,
             ))
+
+        @self.add_cmd('ttl_learn')
+        def ttl_learn(index):
+            index = int(index)
+            with TTLSerialIR03T() as ser:
+                async def f():
+                    try:
+                        await ser.learn_cmd(index)
+                    except Exception as e:
+                        print(e)
+
+                asyncio.run(f())
+                data = ser.read_cmd(index)
+                print(bytes_to_hex_str(data))
+
+        @self.add_cmd('ttl_run')
+        def ttl_run(index):
+            index = int(index)
+            with TTLSerialIR03T() as ser:
+                try:
+                    ser.run_cmd(index)
+                except Exception as e:
+                    print(e)
+                data = ser.read_cmd(index)
+                print(bytes_to_hex_str(data))
+
+        @self.add_cmd('ttl_remove')
+        def ttl_remove(index):
+            index = int(index)
+            with TTLSerialIR03T() as ser:
+                try:
+                    ser.remove_cmd(index)
+                    time.sleep(1)
+                except Exception as e:
+                    print(e)
+                data = ser.read_cmd(index)
+                print(bytes_to_hex_str(data))

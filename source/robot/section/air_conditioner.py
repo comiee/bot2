@@ -14,7 +14,15 @@ async def air_conditioner_learn(session: Session, cmd):
 
 @NormalCommand('空调').trim_super().trim_friend()
 async def air_conditioner_run(session: Session, cmd):
-    cmd=cmd.strip()
+    cmd = cmd.strip()
     async with AsyncClient('air_conditioner_run') as client:
+        res = await client.send(cmd)
+        await session.reply(res)
+
+
+@NormalCommand('空调删除').trim_super().trim_friend()
+async def air_conditioner_remove(session: Session, cmd):
+    cmd = cmd.strip()
+    async with AsyncClient('air_conditioner_remove') as client:
         res = await client.send(cmd)
         await session.reply(res)

@@ -23,7 +23,7 @@ def find_one_port(key: str) -> str:
 
 
 def bytes_to_hex_str(b: bytes) -> str:
-    return '<' + ' '.join(f'{c:X}' for c in b) + '>'
+    return '<' + ' '.join(f'{c:02X}' for c in b) + '>'
 
 
 class TTLSerial(Serial):
@@ -68,7 +68,8 @@ class TTLSerialIR03T(TTLSerial):
     async def learn_cmd(self, index: int) -> None:
         assert 0 <= index <= 0xFE, f'index的范围为[0x00,0xFE]，当前为{index}'
         self.send_and_check(bytes([0xFA, 0xFD, 0x01, index, 0xDF]), bytes([0xA1]))
-        await self.wait_for(bytes([0xA2]), 120)
+        await self.wait_for(bytes([0xA2]), 30)
+        await asyncio.sleep(1)  # 等待指令执行完成
 
     def run_cmd(self, index: int) -> None:
         assert 0 <= index <= 0xFE, f'index的范围为[0x00,0xFE]，当前为{index}'
@@ -95,7 +96,10 @@ class TTLSerialIR03T(TTLSerial):
 
 class AirConditioner(Singleton):
     def append_sql(self, index: int, cmd: str, data: bytes) -> None:
-        sql.execute('insert into air_conditioner(index,cmd,data) values(%d,%s,%s);', (index, cmd, data))
+        sql.execute('insert into air_conditioner(`index`,cmd,data) values(%s,%s,%s);', (index, cmd, data))
+
+    def find_index(self, cmd: str) -> int:
+        return sql.query(f'select `index` from air_conditioner where cmd="{cmd}";', default=0)
 
     def get_next_index(self) -> int:
         return sql.query('select count(*) from air_conditioner;') + 0x10
@@ -108,9 +112,14 @@ class AirConditioner(Singleton):
             self.append_sql(index, cmd, data)
 
     def run(self, cmd: str):
-        index = sql.query(f'sql select `index` from air_conditioner where cmd={cmd};', default=0)
+        index = self.find_index(cmd)
         with TTLSerialIR03T() as ser:
             ser.run_cmd(index)
+
+    def remove(self, cmd: str):
+        index = self.find_index(cmd)
+        with TTLSerialIR03T() as ser:
+            ser.remove_cmd(index)
 
 
 # TODO 写入数据库或文件（考虑到格式更像表格，优先使用数据库），自动生成索引（从0x10开始，防止按到学习键导致命令被覆盖）
@@ -132,5 +141,14 @@ async def air_conditioner_run(cmd: str) -> str:
     try:
         AirConditioner().run(cmd)
         return '命令执行成功'
+    except Exception as e:
+        return e.args[0]
+
+
+@AsyncServer().register('air_conditioner_remove')
+async def air_conditioner_remove(cmd: str) -> str:
+    try:
+        AirConditioner().remove(cmd)
+        return '命令删除成功'
     except Exception as e:
         return e.args[0]
