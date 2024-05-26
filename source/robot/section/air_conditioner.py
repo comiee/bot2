@@ -12,14 +12,6 @@ async def air_conditioner_learn(session: Session, cmd):
         await session.reply(res)
 
 
-@NormalCommand('空调').trim_super().trim_friend()
-async def air_conditioner_run(session: Session, cmd):
-    cmd = cmd.strip()
-    async with AsyncClient('air_conditioner_run') as client:
-        res = await client.send(cmd)
-        await session.reply(res)
-
-
 @NormalCommand('空调删除').trim_super().trim_friend()
 async def air_conditioner_remove(session: Session, cmd):
     cmd = cmd.strip()
@@ -32,4 +24,12 @@ async def air_conditioner_remove(session: Session, cmd):
 async def air_conditioner_check(session: Session):
     async with AsyncClient('air_conditioner_check') as client:
         res = await client.send('')  # 发送空字符串提高兼容性，服务器不会使用这个参数
+        await session.reply(res)
+
+
+@NormalCommand('空调').trim_super().trim_friend()  # 这条放在最后，防止匹配不到其他的
+async def air_conditioner_run(session: Session, cmd):
+    cmd = cmd.strip()
+    async with AsyncClient('air_conditioner_run') as client:
+        res = await client.send(cmd)
         await session.reply(res)

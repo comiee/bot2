@@ -1,4 +1,4 @@
-from masterServer.module.air_conditioner import TTLSerialIR03T, bytes_to_hex_str
+from masterServer.module.air_conditioner import TTLSerialIR03T, bytes_hex
 import unittest
 
 
@@ -6,7 +6,7 @@ class AirConditionerTestCase(unittest.IsolatedAsyncioTestCase):
     async def test_read(self):
         with TTLSerialIR03T() as ser:
             res = ser.read_cmd(5)
-            print(bytes_to_hex_str(res))
+            print(bytes_hex(res))
 
     async def test_learn(self):
         with TTLSerialIR03T() as ser:

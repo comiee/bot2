@@ -4,11 +4,10 @@ from public.message import exit_msg, debug_msg, chat_msg
 from public.log import admin_logger
 from public.exception import ActiveExitException
 from masterServer.admin.Admin import Admin
-from masterServer.module.air_conditioner import TTLSerialIR03T, bytes_to_hex_str
+from masterServer.comm.TTLSerial import TTLSerialIR03T, bytes_hex
 import inspect
 import traceback
 import asyncio
-import time
 
 
 class CmdAdmin(Admin):
@@ -37,7 +36,10 @@ class CmdAdmin(Admin):
         # 空格分隔后，第一项为命令字，其他的作为参数传给fun
         def get_function(fun):
             assert cmd not in self.cmd_dict, '命令已被注册'
-            self.cmd_dict[cmd] = fun
+            if asyncio.iscoroutinefunction(fun):
+                self.cmd_dict[cmd] = lambda *args: asyncio.run(fun(*args))
+            else:
+                self.cmd_dict[cmd] = fun
             return fun
 
         return get_function
@@ -79,38 +81,34 @@ class CmdAdmin(Admin):
             ))
 
         @self.add_cmd('ttl_learn')
-        def ttl_learn(index):
+        async def ttl_learn(index):
             index = int(index)
             with TTLSerialIR03T() as ser:
-                async def f():
-                    try:
-                        await ser.learn_cmd(index)
-                    except Exception as e:
-                        print(e)
-
-                asyncio.run(f())
-                data = ser.read_cmd(index)
-                print(bytes_to_hex_str(data))
+                try:
+                    await ser.learn_cmd(index)
+                    data = await ser.read_cmd(index)
+                    print(bytes_hex(data))
+                except Exception as e:
+                    print(e)
 
         @self.add_cmd('ttl_run')
-        def ttl_run(index):
+        async def ttl_run(index):
             index = int(index)
             with TTLSerialIR03T() as ser:
                 try:
-                    ser.run_cmd(index)
+                    await ser.run_cmd(index)
+                    data = await ser.read_cmd(index)
+                    print(bytes_hex(data))
                 except Exception as e:
                     print(e)
-                data = ser.read_cmd(index)
-                print(bytes_to_hex_str(data))
 
         @self.add_cmd('ttl_remove')
-        def ttl_remove(index):
+        async def ttl_remove(index):
             index = int(index)
             with TTLSerialIR03T() as ser:
                 try:
-                    ser.remove_cmd(index)
-                    time.sleep(1)
+                    await ser.remove_cmd(index)
+                    data = await ser.read_cmd(index)
+                    print(bytes_hex(data))
                 except Exception as e:
                     print(e)
-                data = ser.read_cmd(index)
-                print(bytes_to_hex_str(data))
