@@ -39,7 +39,7 @@ class _Sql:
         except Exception as e:
             public_logger.exception(f'sql执行execute出错：{e!r}')
 
-    def query(self, query, *, args=None, default=None):
+    def query(self, query, args=None, default=None):
         try:
             with self.cursor() as cur:
                 if cur.execute(query, args):
@@ -54,10 +54,10 @@ class _Sql:
             public_logger.exception(f'sql执行query出错：{e!r}')
             return default
 
-    def query_all(self, query):
+    def query_all(self, query, args=None):
         try:
             with self.cursor() as cur:
-                cur.execute(query)
+                cur.execute(query, args)
                 return cur.fetchall()
         except Exception as e:
             public_logger.exception(f'sql执行query_all出错：{e!r}')

@@ -37,7 +37,7 @@ async def async_recv_bytes(reader: StreamReader) -> bytes:
     return await reader.readexactly(length)
 
 
-async def async_recv(reader: StreamReader) -> str:
+async def async_recv(reader: StreamReader):
     msg = await async_recv_bytes(reader)
     type_, val = msg.split(b':', 1)
     if type_ == b'bytes':

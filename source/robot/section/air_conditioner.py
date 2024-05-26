@@ -1,6 +1,6 @@
 from communication.asyncClient import AsyncClient
 from robot.comm.pluginBase import Session
-from robot.comm.command import NormalCommand
+from robot.comm.command import NormalCommand, FullCommand
 
 
 @NormalCommand('空调学习').trim_super().trim_friend()
@@ -25,4 +25,11 @@ async def air_conditioner_remove(session: Session, cmd):
     cmd = cmd.strip()
     async with AsyncClient('air_conditioner_remove') as client:
         res = await client.send(cmd)
+        await session.reply(res)
+
+
+@FullCommand('空调检查').trim_super().trim_friend()
+async def air_conditioner_check(session: Session):
+    async with AsyncClient('air_conditioner_check') as client:
+        res = await client.send('')  # 发送空字符串提高兼容性，服务器不会使用这个参数
         await session.reply(res)

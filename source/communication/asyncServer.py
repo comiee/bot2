@@ -32,7 +32,7 @@ class AsyncServer(Singleton):
             cmd = await async_recv(reader)
             if cmd not in self.__cmd_dict:
                 await async_send(writer, 'fail')
-                raise CustomException(f'未知的命令字：{cmd}')
+                raise CustomException(f'异步服务器：未知的命令字：{cmd}')
             await async_send(writer, 'success')
             async_server_logger.debug(f'异步服务器建立连接：{addr} {cmd}')
 
@@ -64,7 +64,7 @@ class AsyncServer(Singleton):
     def register(self, cmd):
         def get_handler(handler):
             if cmd in self.__cmd_dict:
-                async_server_logger.error(f'异步服务器：重复注册：{cmd}')
+                raise CustomException(f'异步服务器：重复注册：{cmd}')
             self.__cmd_dict[cmd] = handler
 
         return get_handler
