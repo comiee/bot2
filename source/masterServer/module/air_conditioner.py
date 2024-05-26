@@ -10,7 +10,8 @@ class AirConditioner(Singleton):
 
     def find_index(self, cmd: str) -> int:
         index = sql.query(f'select `index` from air_conditioner where cmd="{cmd}";')
-        assert index is not None
+        cmds = next(zip(*sql.query_all(f"select cmd from air_conditioner;")))
+        assert index is not None, f'未找到此命令，当前已学习的命令：{cmds}'
         return index
 
     def get_next_index(self) -> int:
@@ -49,7 +50,7 @@ async def air_conditioner_learn(cmd: str) -> str:
         await AirConditioner().learn(cmd)
         return '命令学习成功'
     except Exception as e:
-        return e.args[0]
+        return str(e)
 
 
 @AsyncServer().register('air_conditioner_run')
@@ -58,7 +59,7 @@ async def air_conditioner_run(cmd: str) -> str:
         await AirConditioner().run(cmd)
         return '命令执行成功'
     except Exception as e:
-        return e.args[0]
+        return str(e)
 
 
 @AsyncServer().register('air_conditioner_remove')
@@ -67,7 +68,7 @@ async def air_conditioner_remove(cmd: str) -> str:
         await AirConditioner().remove(cmd)
         return '命令删除成功'
     except Exception as e:
-        return e.args[0]
+        return str(e)
 
 
 @AsyncServer().register('air_conditioner_check')
@@ -80,4 +81,4 @@ async def air_conditioner_check(_) -> str:
             return '检查完毕，以下数据与数据库不一致：\n' + \
                 '\n'.join(f'{index}\t{cmd}\t{bytes_hex(data)}\t{bytes_hex(ret)}' for index, cmd, data, ret in result)
     except Exception as e:
-        return e.args[0]
+        return str(e)
