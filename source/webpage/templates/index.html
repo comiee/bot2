@@ -1,12 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <title>小魅</title>
+    <style>
+        .navbar {
+            display: flex;
+            justify-content: flex-end;
+            background-color: #f8f9fa;
+            padding: 10px;
+        }
+        .navbar span {
+            margin-right: 20px;
+        }
+        .rainbow {
+            background: linear-gradient(to right, red, orange, yellow, green, cyan, blue, violet);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+    </style>
 </head>
 <body>
-<a href="/inquiry">
-    查询金币
-</a>
+    <div class="navbar">
+        <span>已登录QQ号: {{ qq }}，金币：{{ coin }}</span>
+        <form id="logoutForm" method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit">退出登录</button>
+        </form>
+    </div>
+    <h1 class="rainbow">Hello World!</h1>
+    <a href="/inquiry">
+        查询他人金币
+    </a>
 </body>
 </html>

@@ -1,5 +1,5 @@
 """网页模块，通过网页和用户交互"""
-from public.utils import local_ip
+from public.utils import local_ip, load_module
 from public.message import exit_msg
 from public.log import web_logger
 from webpage.webClient import get_web_client
@@ -11,6 +11,8 @@ import time
 
 def web_main():
     """web客户端的入口"""
+    os.chdir(os.path.dirname(__file__))
+    load_module('views')
 
     def run_django():
         os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'webpage.mei.settings')

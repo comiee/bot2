@@ -113,3 +113,9 @@ phantom_msg = Message('phantom', {
     'path1': str,  # 图片1的路径
     'path2': str,  # 图片2的路径
 }, str)  # 结果的路径
+
+# 向指定qq发送内容
+send_qq_text_msg = Message('send_qq_text', {
+    'user_id': int,  # 用户的qq号
+    'text': str,  # 发送的内容
+}, bool)  # 是否发送成功
