@@ -41,12 +41,12 @@ def send_verification_view(request):
         verification_code[qq] = code
         ret = get_web_client().send(send_qq_text_msg.build(
             user_id=int(qq),
-            text=code,
+            text=f'您的验证码为：{code}',
         ))
         if ret:
             return JsonResponse({'success': True})
         else:
-            return JsonResponse({'success': True, 'error': '发送验证码失败，请检查小魅是否为您的好友'})
+            return JsonResponse({'success': False, 'error': '发送验证码失败，请检查小魅是否为您的好友'})
     return JsonResponse({'success': False, 'error': 'QQ号为空'})
 
 
