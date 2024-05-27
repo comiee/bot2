@@ -35,9 +35,3 @@ class ErrorCode(IntEnum):
     already_learned = 303  # 已经学会的回答
     # 洗脑
     not_remember = 311  # 没有学会的回答
-
-    # web
-    login_success = 401  # 登录成功
-    already_logged_in = 402  # 已经登录
-    wrong_captcha = 403  # 验证码错误
-    sent_captcha = 404  # 已发送验证码

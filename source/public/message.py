@@ -118,10 +118,4 @@ phantom_msg = Message('phantom', {
 send_qq_text_msg = Message('send_qq_text', {
     'user_id': int,  # 用户的qq号
     'text': str,  # 发送的内容
-})
-
-# 登录网站
-web_login_msg = Message('web_login', {
-    'user_id': int,  # 用户的qq号
-    'captcha': int,  # 验证码，如果验证码为-1，向用户发送验证码，否则会校验验证码
-}, int)  # 错误码，详见error_code.py
+}, bool)  # 是否发送成功

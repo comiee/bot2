@@ -20,4 +20,5 @@ async def debug(send, recv):
 
 @send_qq_text_msg.on_receive
 def send_qq_text(user_id, text):
-    get_master_server().send_to('bot', send_qq_text_msg.build(user_id=user_id, text=text))
+    ret = get_master_server().send_to('bot', send_qq_text_msg.build(user_id=user_id, text=text))
+    return False if ret is ... else ret

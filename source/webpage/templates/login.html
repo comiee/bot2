@@ -1,46 +1,135 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <title>登录</title>
-    <script>
-        /** 给元素的点击添加冷却时间
-        element：元素，一般传this
-        key：用于显示文本的属性名，如button是textContent，input是value
-        time：冷却时间
-        fun：点击时执行的函数
-        */
-        function cooldownElement(element, key, time=5, fun=()=>{}) {
-            fun();
-            element.disabled = true; // 禁用按钮
-            var text=element[key];
-
-            var countdownInterval = setInterval(function() {
-                time -= 1; // 每秒减少1秒
-                element[key] = `${text} (${time})`; // 更新显示剩余时间的元素内容
-
-                if (time <= 0) {
-                    clearInterval(countdownInterval); // 清除倒计时
-                    element[key] = text; // 清空剩余时间显示
-                    element.disabled = false; // 重新启用按钮
-                }
-            }, 1000); // 每秒更新一次倒计时
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
         }
-        function submitLogin(element){
-            document.login.submit();
-            cooldownElement(element, 'value')
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-    </script>
+        .error {
+            color: red;
+        }
+        .shake {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+    </style>
 </head>
 <body>
-<form name="login" method="post">
-    {% csrf_token %} <!--这是Django提供的防止伪装提交请求的功能。POST 方法提交的表格，必须有此标签。 -->
-    <p>请输入qq号：</p>
-    <input type="number" name="qq" value={{qq}}>
-    <p>请输入验证码</p>
-    <input type="number" name="captcha">
-    <input type="submit" value="获取验证码" onclick="submitLogin(this)">
-    <input type="submit" name="login" value="登录" onclick="submitLogin(this)">
-</form>
+    <div class="container">
+        <form id="loginForm">
+            <div>
+                <label for="qq">请输入QQ号</label>
+                <input type="text" id="qq" name="qq" pattern="\d*">
+                <span id="qqError" class="error"></span>
+            </div>
+            <div>
+                <label for="code">请输入验证码</label>
+                <input type="text" id="code" name="code" pattern="\d*">
+                <span id="codeError" class="error"></span>
+            </div>
+            <div>
+                <button type="button" id="getVerification">获取验证码</button>
+                <span id="getVerificationError" class="error"></span>
+            </div>
+            <div>
+                <button type="submit" id="loginButton" disabled>登录</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            let verificationSent = false;
+            let cooldown = false;
+
+            $('#getVerification').click(function() {
+                if (cooldown) return;
+
+                let qq = $('#qq').val();
+                if (!qq) {
+                    $('#qq').addClass('shake').css('border-color', 'red');
+                    $('#qqError').text('QQ号为空');
+                    setTimeout(() => $('#qq').removeClass('shake'), 500);
+                    return;
+                }
+
+                $.post('{% url "send_verification" %}', {qq: qq}, function(response) {
+                    if (response.success) {
+                        verificationSent = true;
+                        $('#loginButton').prop('disabled', false); // 启用登录按钮
+                        startCooldown($('#getVerification'), 10);
+                    } else {
+                        $('#getVerificationError').text(response.error);
+                    }
+                });
+            });
+
+            $('#loginForm').submit(function(e) {
+                e.preventDefault();
+                if (!verificationSent) return;
+
+                let qq = $('#qq').val();
+                let code = $('#code').val();
+
+                $.post('{% url "login" %}', {qq: qq, code: code}, function(response) {
+                    if (response.success) {
+                        window.location.href = '/';
+                    } else {
+                        $('#code').addClass('shake').css('border-color', 'red');
+                        $('#codeError').text(response.error);
+                        setTimeout(() => $('#code').removeClass('shake'), 500);
+                    }
+                });
+            });
+
+            function startCooldown(button, seconds) {
+                cooldown = true;
+                let originalText = button.text();
+                button.attr('disabled', true);
+                let countdown = seconds;
+
+                let interval = setInterval(() => {
+                    button.text(`${originalText} (${countdown})`);
+                    countdown -= 1;
+                    if (countdown < 0) {
+                        clearInterval(interval);
+                        button.text(originalText);
+                        button.attr('disabled', false);
+                        cooldown = false;
+                    }
+                }, 1000);
+            }
+
+            $('#qq').on('input', function() {
+                $(this).css('border-color', '');
+                $('#qqError').text('');
+            });
+
+            $('#code').on('input', function() {
+                $(this).css('border-color', '');
+                $('#codeError').text('');
+            });
+        });
+    </script>
 </body>
 </html>

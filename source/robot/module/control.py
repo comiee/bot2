@@ -20,4 +20,9 @@ def exit_():
 
 @send_qq_text_msg.on_receive
 def send_qq_text(user_id, text):
-    get_bot_client().bot_proxy.send_friend(text, user_id)
+    try:
+        get_bot_client().bot_proxy.send_friend(text, user_id)
+        return True
+    except Exception as e:
+        bot_client_logger.exception(f'发送QQ消息失败：{e}')
+        return False

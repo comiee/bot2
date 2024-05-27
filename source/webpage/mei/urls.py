@@ -20,5 +20,9 @@ from django.urls import path
 urlpatterns = []
 
 
-def add_url(url, fun):
-    urlpatterns.append(path(url, fun))
+def register_url(url):
+    def get_fun(fun):
+        urlpatterns.append(path(url, fun, name=url))
+        return fun
+
+    return get_fun
