@@ -3,6 +3,7 @@ from communication.message import Message, register_msg, result_msg
 from public.log import client_logger
 from public.exception import MessageException
 from socket import AF_INET, SOCK_STREAM
+from threading import Lock
 import time
 
 __all__ = ['Client']
@@ -13,6 +14,7 @@ class Client:
         self.__name = name
         self.__sender = None
         self.__receiver = None
+        self.__send_lock= Lock()
 
     @property
     def name(self):
@@ -31,19 +33,20 @@ class Client:
         return sock
 
     def send(self, msg: str):
-        if self.__sender is None:
-            self.__sender = self.__register('sender')
-        try:
-            send_msg(self.__sender, msg)
-            client_logger.debug(f'客户端[{self.__name}]发送消息到服务器：{msg}')
-            ret = result_msg.parse(recv_msg(self.__sender))
-            client_logger.debug(f'客户端[{self.__name}]收到服务器回响应：{ret}')
-            return ret
-        except ConnectionError as e:
-            client_logger.error(f'客户端[{self.__name}]发送消息失败，将在{RECONNECT_TIME}秒后重连：{e}')
-            time.sleep(RECONNECT_TIME)
-            self.__sender = self.__register('sender')
-            self.send(msg)
+        with self.__send_lock:
+            if self.__sender is None:
+                self.__sender = self.__register('sender')
+            try:
+                send_msg(self.__sender, msg)
+                client_logger.debug(f'客户端[{self.__name}]发送消息到服务器：{msg}')
+                ret = result_msg.parse(recv_msg(self.__sender))
+                client_logger.debug(f'客户端[{self.__name}]收到服务器回响应：{ret}')
+                return ret
+            except ConnectionError as e:
+                client_logger.error(f'客户端[{self.__name}]发送消息失败，将在{RECONNECT_TIME}秒后重连：{e}')
+                time.sleep(RECONNECT_TIME)
+                self.__sender = self.__register('sender')
+                self.send(msg)
 
     def listen_server(self):
         self.__receiver = self.__register('receiver')

@@ -28,6 +28,14 @@ class MyTestCase(unittest.TestCase):
         cls.server.close()
         cls.client.close()
 
+    def test_multi_msg(self):
+        self.test_debug()
+        ts = [Thread(target=self.test_debug) for _ in range(30)]
+        for t in ts:
+            t.start()
+        for t in ts:
+            t.join()
+
     def test_debug(self):
         result = self.client.send(debug_msg.build('test'))
         self.assertEqual('test', result)
