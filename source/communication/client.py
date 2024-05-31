@@ -64,6 +64,11 @@ class Client:
                 client_logger.error(f'客户端[{self.__name}]接受消息失败，将在{RECONNECT_TIME}秒后重连：{e}')
                 time.sleep(RECONNECT_TIME)
                 self.__receiver = self.__register('receiver')
+            except Exception as e:
+                client_logger.exception(f'客户端[{self.__name}]接受消息失败，将在{RECONNECT_TIME}秒后重连：{e}')
+                time.sleep(RECONNECT_TIME)
+                self.__receiver = self.__register('receiver')
+                send_msg(self.__receiver, result_msg.build({'error': e.args[0]}))  # 出异常也要返回一个result，不然对端会一直处于接受态
 
     def close(self):
         if self.__sender is not None:

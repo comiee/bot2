@@ -65,6 +65,10 @@ class Server:
             except ConnectionError as e:
                 server_logger.error(f'服务器接收客户端[{name}]消息失败，即将断开连接：{e}')
                 break
+            except Exception as e:
+                server_logger.exception(f'服务器接收客户端[{name}]消息失败，即将断开连接：{e}')
+                send_msg(client, result_msg.build({'error': e.args[0]}))  # 出异常也要返回一个result，不然对端会一直处于接受态
+                break
 
     def __accept_client(self, client, addr):
         server_logger.info("连接地址: %s" % str(addr))
