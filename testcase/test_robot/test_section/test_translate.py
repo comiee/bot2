@@ -21,10 +21,10 @@ class TranslateCommandTestCase(unittest.IsolatedAsyncioTestCase):
         }))
 
     async def test_translate1(self):
-        await self.translate_command_test('翻译测试', 'auto', 'en', '测试')
+        await self.translate_command_test('翻译测试', 'auto', 'zh', '测试')
 
     async def test_translate2(self):
-        await self.translate_command_test('测试是什么意思', 'auto', 'en', '测试')
+        await self.translate_command_test('测试是什么意思', 'auto', 'zh', '测试')
 
     async def test_translate3(self):
         await self.translate_command_test('测试用英语怎么说', 'auto', '英', '测试')
