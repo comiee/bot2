@@ -15,6 +15,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from public.exception import CustomException
 from django.urls import path
 
 urlpatterns = []
@@ -22,6 +23,9 @@ urlpatterns = []
 
 def register_url(url):
     def get_fun(fun):
+        for url_pattern in urlpatterns:
+            if url_pattern.name == url:
+                raise CustomException(f'异步服务器：重复注册：{url}')
         urlpatterns.append(path(url, fun, name=url))
         return fun
 

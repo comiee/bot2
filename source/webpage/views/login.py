@@ -41,7 +41,7 @@ def send_verification_view(request):
         verification_code[qq] = code
         ret = get_web_client().send(send_qq_text_msg.build(
             user_id=int(qq),
-            text=f'您的验证码为：{code}',
+            text=f'您正在登陆小魅网页版，您的验证码为：{code}，如非本人操作，请勿泄漏此验证码。',
         ))
         if ret:
             return JsonResponse({'success': True})
