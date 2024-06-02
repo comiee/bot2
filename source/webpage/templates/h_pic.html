@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    {% if has_permission %}
+    <title>随机色图</title>
+    {% else %}
+    <title>无权访问</title>
+    {% endif %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .navbar {
+            display: flex;
+            justify-content: flex-end;
+            background-color: #f8f9fa;
+            padding: 10px;
+        }
+        .navbar span {
+            margin-right: 20px;
+        }
+        .error {
+            color: red;
+            font-size: 20px;
+        }
+        .content {
+            text-align: center;
+            margin-top: 50px;
+        }
+        .input-field {
+            margin: 5px;
+        }
+        .button {
+            padding: 4px 10px;
+            margin: 5px;
+        }
+        .image-container {
+            margin-top: 20px;
+        }
+    </style>
+    <script>
+        function generateImage(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                if (data.image_url) {
+                    $('#image-container').html( '<img src="' + data.image_url + '">');
+                } else if(data.fail) {
+                    $('#fail').text(data.fail);
+                } else if (data.error) {
+                    alert(data.error);
+                }
+            });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</head>
+<body>
+<div class="navbar">
+    <span>已登录QQ号: {{ qq }}，金币：{{ coin }}</span>
+    <form id="logoutForm" method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">退出登录</button>
+    </form>
+</div>
+<div class="content">
+    {% if has_permission %}
+    <form id="generate-pic-form" action="{% url 'generate_h_pic' %}" method="post" onsubmit="generateImage(event)">
+        {% csrf_token %}
+        <select id="r18" name="r18" class="input-field">
+            <option value="0">非R18</option>
+            <option value="1">R18</option>
+            <option value="2" selected>混合</option>
+        </select>
+        <select id="excludeAI" name="excludeAI" class="input-field">
+            <option value="false">包含AI</option>
+            <option value="true" selected>不包含AI</option>
+        </select>
+        <input id="uid" name="uid" class="input-field" type="text" placeholder="uid">
+        <input id="tag" name="tag" class="input-field" type="text" placeholder="标签">
+        <input id="keyword" name="keyword" class="input-field" type="text" placeholder="关键字">
+        <button type="submit" class="button">获取图片</button>
+    </form>
+    <p id="fail"></p>
+    <div id="image-container" class="image-container"></div>
+    {% else %}
+    <p class="error"> 您无权限访问此页面，请联系小魅的主人</p>
+    {% endif %}
+</div>
+</body>
+</html>

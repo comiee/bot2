@@ -122,7 +122,7 @@ async def h_pic_regex(session: Session, num, keyword):
     await h_pic(session, 数量=num, 关键字=keyword)
 
 
-@FullCommand('申请网页色图权限').trim_white_list(groups=white_groups, friends=white_friends)
+@FullCommand('申请色图权限').trim_white_list(groups=white_groups, friends=white_friends)
 async def h_pic_web_auth(session: Session):
     session.user.set_authority('h_pic', 1)
     await session.reply('权限自动审批完成')
