@@ -14,6 +14,7 @@ class ErrorCode(IntEnum):
 
     # 数据库相关错误
     sql_disconnected = 11  # 未连接数据库
+    sql_column_does_not_exist = 12  # 列不存在
 
     # 货币相关
     insufficient_coin = 21  # 金币不足

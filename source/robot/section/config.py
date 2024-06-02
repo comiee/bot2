@@ -3,6 +3,8 @@ from public.log import bot_logger
 from robot.comm.status import status_dict, ChatStatus
 from robot.comm.pluginBase import Session
 from robot.comm.command import FullCommand, RegexCommand, SplitCommand
+from robot.comm.user import User
+import re
 
 
 @RegexCommand(r'^(?:聊天|开|开启)$').trim_group('聊天开关只在群聊中有效哦').trim_cost((10, Currency.coin))
@@ -53,3 +55,33 @@ async def config_show(session: Session):
             value = getattr(status_cls[session.id], option)
             text_list.append(f'\t{option}: {value}')
     await session.reply('\n'.join(text_list))
+
+
+@SplitCommand('auth_get').trim_super()
+async def auth_get(session: Session, qq: str, auth_type: str):
+    user = User(re.search(r'\d+', qq).group())
+    level = user.get_authority(auth_type)
+    await session.reply(f'用户{user}的{auth_type}权限等级为：{level}')
+
+
+@SplitCommand('auth_set').trim_super()
+async def auth_set(session: Session, qq: str, auth_type: str, level: str):
+    user = User(re.search(r'\d+', qq).group())
+    level = int(level)
+    user.set_authority(auth_type, level)
+    await session.reply(f'用户{user}的{auth_type}权限等级已设为：{level}')
+
+
+@SplitCommand('auth_group_get').trim_super()
+async def auth_group_get(session: Session, auth_type: str):
+    group = session.group
+    level = group.get_authority(auth_type)
+    await session.reply(f'当前群的{auth_type}权限等级为：{level}')
+
+
+@SplitCommand('auth_group_set').trim_super()
+async def auth_group_set(session: Session, auth_type: str, level: str):
+    group = session.group
+    level = int(level)
+    group.set_authority(auth_type, level)
+    await session.reply(f'当前群的{auth_type}权限等级已设为：{level}')
