@@ -6,6 +6,7 @@ from robot.comm.pluginBase import Session
 from robot.comm.command import KeywordCommand, FullCommand, RegexCommand
 import traceback
 
+# TODO 白名单的判断放到服务端，使用权限控制数据库
 white_groups = {694541980, 811912656, 324085758, 272943085}
 white_friends = {1440667228, 2667336028, 1192916519, 2856606631}
 
@@ -119,3 +120,9 @@ async def h_pic_regex(session: Session, num, keyword):
         await session.reply('不买就不要来打扰我，我可是很忙的')
         return
     await h_pic(session, 数量=num, 关键字=keyword)
+
+
+@FullCommand('申请网页色图权限').trim_white_list(groups=white_groups, friends=white_friends)
+async def h_pic_web_auth(session: Session):
+    session.user.set_authority('h_pic', 1)
+    await session.reply('权限自动审批完成')

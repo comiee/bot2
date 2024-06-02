@@ -27,6 +27,7 @@ def dummy_friend_message_event(message: BuildMessageType):
     event.message = MiraiMessage(message)
     event.messageChain = MiraiMessage(message)
     event.get_plain_text = event.messageChain.get_plain_text
+    event.get_reply = lambda: event.reply.call_args[0][0]  # call_args的结构是(args, kwargs)
     return event
 
 # TODO 群消息

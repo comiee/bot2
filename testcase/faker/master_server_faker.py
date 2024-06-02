@@ -5,7 +5,7 @@ from multiprocessing import Process, Value
 import time
 
 
-class AsyncServerController:
+class ServerController:
     def __init__(self):
         self.running_val = Value('b', True)
 

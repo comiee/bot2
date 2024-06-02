@@ -64,11 +64,11 @@ class Message:
             if not isinstance(msg_value, (list, tuple)):
                 raise MessageException('参数类型错误：应为列表')
             if len(value_format) != len(msg_value):
-                raise MessageException(f'列表参数长度不符合，期望{len(value_format)}，实际{len(msg_value)}')
+                raise MessageException(f'列表参数长度不符合，期望{len(value_format)}，实际{len(msg_value)}：{msg_value!r}')
             for i in range(len(value_format)):
                 Message.__check_format(value_format[i], msg_value[i])
         elif not isinstance(msg_value, value_format):
-            raise MessageException(f'参数类型错误：期望{value_format}，实际{type(msg_value)}')
+            raise MessageException(f'参数类型错误：期望{value_format}，实际{type(msg_value)}：{msg_value!r}')
 
     @overload
     def build(self, **kwargs) -> str:

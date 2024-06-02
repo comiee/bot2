@@ -58,8 +58,26 @@ increase_currency_msg = Message('change_currency', {
 })
 
 # 查询股价
-query_stock_price_msg = Message('query_stock_price', {},
-                                float)  # 当前的股价
+query_stock_price_msg = Message('query_stock_price', {
+
+}, float)  # 当前的股价
+
+# 查询权限等级
+get_authority_message = Message('get_authority', {
+    'user_id': int,  # 用户id，比如QQ号
+    'user_type': str,  # 用户类型，私聊为"friend"，群聊为"group"
+    'auth_type': str,  # 要查询的权限类型
+}, [int,  # 错误码，详见error_code.py
+    int,  # 用户的权限等级
+    ])
+
+# 设置权限等级
+set_authority_message = Message('set_authority', {
+    'user_id': int,  # 用户id，比如QQ号
+    'user_type': str,  # 用户类型，私聊为"friend"，群聊为"group"
+    'auth_type': str,  # 要设置的权限类型
+    'level': int,  # 要设置的权限等级
+}, int)  # 错误码，详见error_code.py
 ############################## sql类消息 end ##############################
 
 # 签到

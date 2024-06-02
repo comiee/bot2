@@ -1,5 +1,5 @@
 from robot.section.h_pic import get_h_pic
-from faker.master_server_faker import AsyncServerController
+from faker.master_server_faker import ServerController
 import unittest
 import asyncio
 import time
@@ -8,7 +8,7 @@ __import__('robot.section.h_pic')
 
 
 class HPicTestCase(unittest.IsolatedAsyncioTestCase):
-    server_controller = AsyncServerController()
+    server_controller = ServerController()
 
     @classmethod
     def setUpClass(cls):

@@ -5,6 +5,7 @@ from public.convert import convert_to
 from public.error_code import ErrorCode
 from robot.comm.priority import Priority
 from robot.comm.user import User
+from robot.comm.group import Group
 from robot.comm.status import SessionStatus
 from alicebot.plugin import Plugin
 from alicebot.typing import ConfigT, EventT, StateT
@@ -46,6 +47,13 @@ class Session(PluginBase[MessageEvent, StateT, ConfigT], ABC, Generic[StateT, Co
     def user(self) -> User:
         """返回qq号对应的User对象"""
         return User(self.qq)
+
+    @property
+    def group(self) -> Group | None:
+        """返回群号对应的Group对象，如果不是群聊则返回None"""
+        if self.is_group():
+            return Group(self.id)
+        return None
 
     @property
     def qq(self) -> int:
