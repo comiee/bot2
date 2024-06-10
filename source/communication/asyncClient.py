@@ -15,7 +15,14 @@ class AsyncClient:
         self.__task_list = TaskList(loop or asyncio.get_event_loop())
 
     async def _connection(self):
-        self.__reader, self.__writer = await asyncio.open_connection(HOST, ASYNC_PORT)
+        async_client_logger.debug(f'异步客户端{self.__cmd}正在连接服务器')
+        while True:
+            try:
+                self.__reader, self.__writer = await asyncio.open_connection(HOST, ASYNC_PORT)
+            except:
+                continue
+            else:
+                break
 
     async def __aenter__(self):
         await self._connection()

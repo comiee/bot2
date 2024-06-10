@@ -3,56 +3,31 @@ from public.message import momo_calendar_msg
 from public.config import data_path
 from public.scheduler import scheduler
 from public.utils import is_file_today
-from selenium.webdriver import Firefox, FirefoxOptions
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from masterServer.comm.FirefoxBrowser import FirefoxBrowser
 from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import NoSuchElementException
 from datetime import datetime, timedelta
 from threading import Thread, Lock
-import platform
 import re
 import json
 import os
 
 
-class CalendarBrowser(Firefox):
-    __SERVICE_PATH = 'geckodriver.exe' if platform.system() == 'Windows' else 'geckodriver'
-
+class CalendarBrowser(FirefoxBrowser):
     JSON_PATH = data_path('momo.json')
     ICS_PATH = data_path('momo.ics')
 
     __update_lock = Lock()
 
     def __init__(self):
-        options = FirefoxOptions()
-        options.set_preference('webdriver.timezone', 'Asia/Shanghai')
-        options.set_preference('intl.accept_languages', 'zh-CN')
-        service = Service(CalendarBrowser.__SERVICE_PATH)
-        super().__init__(options=options, service=service)
-        self.__waiter = WebDriverWait(self, 60)
-
+        super().__init__()
         self.event_dict_list = []
-
-    def __del__(self):
-        self.close()
-
-    def close(self):
-        try:
-            super().close()
-        except:
-            pass
-
-    def __wait_element(self, by, val) -> WebElement:
-        return self.__waiter.until(EC.presence_of_element_located((by, val)))
 
     def __generate_dict_one_day(self, day):
         day_str = day.strftime('%Y-%m-%d')
         self.get(f'https://timetreeapp.com/public_calendars/momomitsuki/daily/{day_str}')
-        main = self.__wait_element(By.TAG_NAME, 'main')
-        self.__wait_element(By.TAG_NAME, 'h2')
+        main = self.wait_element(By.TAG_NAME, 'main')
+        self.wait_element(By.TAG_NAME, 'h2')
         try:
             ul = main.find_element(By.XPATH, '//ul[@data-date]')
         except NoSuchElementException:

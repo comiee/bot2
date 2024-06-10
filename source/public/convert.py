@@ -102,44 +102,47 @@ def convert_internal_to_data(msg: str) -> list[dict]:
 
 
 def convert_dict_to_internal(d: dict) -> str:
+    def g(k):
+        return d.get(k, '')
+
     match d["type"]:
         case 'Source' | 'Quote':
             return ''
         case 'At':
-            return f'[at:{d["target"]}]'
+            return f'[at:{g("target")}]'
         case 'AtAll':
             return f'[atAll:]'
         case 'Face':
-            return f'[face:{d["faceId"]}]'
+            return f'[face:{g("faceId")}]'
         case 'Image':
-            return f'[image:{d["imageId"]},url:{d["url"]}]'
+            return f'[image:{g("imageId")},url:{g("url")}]'
         case 'FlashImage':
-            return f'[flashImage:{d["imageId"]}]'
+            return f'[flashImage:{g("imageId")}]'
         case 'Voice':
-            return f'[voice:{d["imageId"]}]'
+            return f'[voice:{g("imageId")}]'
         case 'Xml':
-            return f'[xml:{d["xml"]}]'
+            return f'[xml:{g("xml")}]'
         case 'Json':
-            return f'[json:{d["json"]}]'
+            return f'[json:{g("json")}]'
         case 'App':
-            return f'[app:{d["content"]}]'
+            return f'[app:{g("content")}]'
         case 'Poke':
-            return f'[poke:{d["name"]}]'
+            return f'[poke:{g("name")}]'
         case 'Dice':
-            return f'[dice:{d["value"]}]'
+            return f'[dice:{g("value")}]'
         case 'MusicShare':
-            return f'[musicShare:{d["title"]},kind:{d["kind"]},title:{d["title"]},summary:{d["summary"]},' \
-                   f'jumpUrl:{d["jumpUrl"]},pictureUrl:{d["pictureUrl"]},musicUrl:{d["musicUrl"]},brief:{d["brief"]}]'
+            return f'[musicShare:{g("title")},kind:{g("kind")},title:{g("title")},summary:{g("summary")},' \
+                   f'jumpUrl:{g("jumpUrl")},pictureUrl:{g("pictureUrl")},musicUrl:{g("musicUrl")},brief:{g("brief")}]'
         case 'File':
-            return f'[file:{d["name"]}]'
+            return f'[file:{g("name")}]'
         case 'MarketFace':
-            return f'[marketFace:{d["id"]}]'
+            return f'[marketFace:{g("id")}]'
         case 'Plain':
-            return re.sub(r'[\[\]]', lambda m: {'[': '[left]', ']': '[right]'}[m.group()], d["text"])
+            return re.sub(r'[\[\]]', lambda m: {'[': '[left]', ']': '[right]'}[m.group()], g("text"))
         case _:
             public_logger.error(f'未知的类型的消息：{d}')
             s = ','.join(f'{k}:{v}' for k, v in d.items() if k != 'type')
-            return f'[unknown:{d["type"]},{s}]'
+            return f'[unknown:{g("type")},{s}]'
 
 
 def convert_data_to_internal(data: list[dict]) -> str:
