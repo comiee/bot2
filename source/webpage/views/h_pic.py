@@ -8,6 +8,7 @@ from webpage.mei.urls import register_url
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 import asyncio
 
 
@@ -59,6 +60,7 @@ def h_pic(request):
 
 @register_url('generate_h_pic')
 @login_required
+@csrf_exempt
 def generate_h_pic(request):
     qq = int(request.user.username)
 
