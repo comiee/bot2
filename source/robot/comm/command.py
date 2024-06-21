@@ -262,6 +262,13 @@ class Command(metaclass=_CommandMeta):
 
         return self
 
+    def trim_filter(self, *, before: 'Command.JudgeFun' = None, after: 'Command.JudgeFun' = None):
+        if before:
+            self._before_judge(before)
+        if after:
+            self._after_judge(after)
+        return self
+
 
 class FullCommand(Command):
     """全匹配命令，只有与文本完全匹配才会生效"""
@@ -379,7 +386,7 @@ class ArgCommand(Command):
         if not text.startswith(self._cmd):
             return False
         arg_str = text[len(self._cmd):].strip()
-        if len(arg_str)>=2 and arg_str[0] == '(' and arg_str[-1] == ')':
+        if len(arg_str) >= 2 and arg_str[0] == '(' and arg_str[-1] == ')':
             arg_str = arg_str[1:-1].strip()
 
         args = []

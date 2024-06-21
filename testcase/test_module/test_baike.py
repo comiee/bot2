@@ -1,4 +1,5 @@
 from robot.plugins.commandPlugin import CommandPlugin
+from robot.comm.status import ChatStatus
 from faker.master_server_faker import ServerController
 from faker.bot_faker import spread_event, dummy_friend_message_event
 import unittest
@@ -26,3 +27,14 @@ class BaikeTestCase(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(
             '机器人（Robot）是一种能够半自主或全自主工作的智能机器。机器人能够通过编程和自动控制来执行诸如作业或移动等任务。历史上最早的机器人见于隋炀帝命工匠按照柳抃形象所营造的木偶机器人，施有机关，有坐、起、拜、伏等能力。机器人具有感知、决策、执行等基本特征，可以辅助甚至替代人类完成危险、繁重、复杂的工作，提高工作效率与质量，服务人类生活，扩大或延伸人的活动及能力范围。 2021年，美国1/3的手术是使用机器人系统进行的。 2023年，美国亚利桑那州立大学（ASU）科学家研制出了世界上第一个能像人类一样出汗、颤抖和呼吸的户外行走机器人模型。\n————来自百度百科',
             text)
+
+    async def test_baike_not_chat(self):
+        event = dummy_friend_message_event('机器人是什么')
+        ChatStatus[event.sender.id].switch = False
+        await spread_event(CommandPlugin, event)
+        self.assertEqual(0, event.reply.call_count)
+        ChatStatus[event.sender.id].switch = True  # status有持久化，记得恢复回原样
+
+
+if __name__ == '__main__':
+    unittest.main()
