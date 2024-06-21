@@ -7,7 +7,7 @@ from robot.comm.status import ChatStatus
 def judge_chat(session: Session):
     if not ChatStatus[session.id].switch:
         return False
-    if ChatStatus[session.id].at_switch and not session.is_at_bot():
+    if ChatStatus[session.id].at_switch:
         return False
     return True
 
