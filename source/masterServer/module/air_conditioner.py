@@ -6,16 +6,21 @@ from masterServer.comm.sql import sql
 
 class AirConditioner(Singleton):
     def append_sql(self, index: int, cmd: str, data: bytes) -> None:
+        old = sql.query(f'select `index` from air_conditioner where `index`={index}')
+        assert old is None, f'添加sql失败，重复的索引：{index}'
         sql.execute('insert into air_conditioner(`index`,cmd,data) values(%s,%s,%s);', (index, cmd, data))
 
     def find_index(self, cmd: str) -> int:
         index = sql.query(f'select `index` from air_conditioner where cmd="{cmd}";')
-        cmds = next(zip(*sql.query_all(f"select cmd from air_conditioner;")))
+        cmds = sql.query_col(f"select cmd from air_conditioner;")
         assert index is not None, f'未找到此命令，当前已学习的命令：{cmds}'
         return index
 
     def get_next_index(self) -> int:
-        return sql.query('select count(*) from air_conditioner;') + 0x10
+        indexes = set(sql.query_col('select `index` from air_conditioner;'))
+        for i in range(0x10, 0xFF):
+            if i not in indexes:
+                return i
 
     async def learn(self, cmd: str) -> None:
         index = self.get_next_index()

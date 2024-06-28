@@ -63,5 +63,11 @@ class _Sql:
             public_logger.exception(f'sql执行query_all出错：{e!r}')
             return []
 
+    def query_col(self, query, col=0, args=None):
+        arr = list(zip(*self.query_all(query, args)))
+        if len(arr) <= col:
+            return []
+        return arr[col]
+
 
 sql = _Sql()
