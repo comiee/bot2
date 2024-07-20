@@ -126,6 +126,11 @@ class SessionStatus(Status, config_name='session'):
 
     def can_reply(self):
         # 最大回复次数限制
+        last_date = time.strftime("%Y-%m-%d", time.gmtime(self._last_reply_timestamp))
+        this_date = time.strftime("%Y-%m-%d", time.gmtime(time.time()))
+        if last_date != this_date:
+            self._reply_times = 0
+            bot_logger.info('回复次数已清零')
         if self._reply_times > self.max_times:
             bot_logger.info('回复次数已达上限，将不再回复')
             return False
