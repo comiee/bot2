@@ -66,3 +66,6 @@ bot_logger: logging.Logger = get_logger('bot', LogLevel.DEBUG)
 
 # web客户端各组件使用的logger
 web_logger: logging.Logger = get_logger('webClient', LogLevel.DEBUG)
+
+# qqbot客户端各组件使用的logger
+qq_bot_logger: logging.Logger = get_logger('qqBot', LogLevel.DEBUG)
