@@ -5,6 +5,9 @@ from masterServer.comm.sql import sql
 
 
 class AirConditioner(Singleton):
+    def get_all_cmds(self):
+        return sql.query_col(f"select cmd from air_conditioner;")
+
     def append_sql(self, index: int, cmd: str, data: bytes) -> None:
         old = sql.query(f'select `index` from air_conditioner where `index`={index}')
         assert old is None, f'添加sql失败，重复的索引：{index}'
@@ -12,7 +15,7 @@ class AirConditioner(Singleton):
 
     def find_index(self, cmd: str) -> int:
         index = sql.query(f'select `index` from air_conditioner where cmd="{cmd}";')
-        cmds = sql.query_col(f"select cmd from air_conditioner;")
+        cmds = self.get_all_cmds()
         assert index is not None, f'未找到此命令，当前已学习的命令：{cmds}'
         return index
 
@@ -23,7 +26,7 @@ class AirConditioner(Singleton):
                 return i
 
     async def learn(self, cmd: str) -> None:
-        cmds = sql.query_col(f"select cmd from air_conditioner;")
+        cmds = self.get_all_cmds()
         assert cmd not in cmds, f'已有同名命令，当前已学习的命令：{cmds}'
         index = self.get_next_index()
         with TTLSerialIR03T() as ser:
@@ -89,3 +92,8 @@ async def air_conditioner_check(_) -> str:
                 '\n'.join(f'{index}\t{cmd}\t{bytes_hex(data)}\t{bytes_hex(ret)}' for index, cmd, data, ret in result)
     except Exception as e:
         return str(e)
+
+
+@AsyncServer().register('air_conditioner_get_all')
+async def air_conditioner_get_all(_) -> str:
+    return AirConditioner().get_all_cmds()
