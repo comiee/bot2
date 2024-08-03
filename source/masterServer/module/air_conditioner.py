@@ -23,6 +23,8 @@ class AirConditioner(Singleton):
                 return i
 
     async def learn(self, cmd: str) -> None:
+        cmds = sql.query_col(f"select cmd from air_conditioner;")
+        assert cmd not in cmds, f'已有同名命令，当前已学习的命令：{cmds}'
         index = self.get_next_index()
         with TTLSerialIR03T() as ser:
             await ser.learn_cmd(index)
