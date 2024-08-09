@@ -26,11 +26,11 @@ class MyClient(botpy.Client):
 
     async def handle_chat(self, message):
         content = message.content.strip()
-        user_id = int(message.author.user_openid, 16)
+        user_id = hash(message.id)
         client = get_qq_bot_client()
         ret = client.send(chat_msg.build(
             user_id=user_id,
-            group_id=user_id,
+            group_id=0,
             text=convert_to('internal', content),
         ))
         if ret:
