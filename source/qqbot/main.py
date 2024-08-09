@@ -45,6 +45,8 @@ class MyClient(botpy.Client):
         if await self.handle_chat(message):
             return
 
+        await message.reply(content='这个问题小魅还不会回答，请耐心等待小魅学习更多技能吧')
+
     async def on_group_at_message_create(self, message: GroupMessage):
         await self.handle_message(message)
 
