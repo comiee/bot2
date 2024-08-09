@@ -37,4 +37,4 @@ class SingleCommand(Command):
     async def handle(self, message, text):
         result = self._fun(text)
         await message.reply(content=result)
-        qq_bot_logger.info(f'qqbot 收到：{text}，回复：{result}')
+        qq_bot_logger.info(f'qqbot 执行命令：{self.cmd}，参数：{text}，回复：{result}')

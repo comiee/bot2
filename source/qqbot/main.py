@@ -1,6 +1,9 @@
 from public.config import get_config
 from public.log import qq_bot_logger
+from public.message import chat_msg
+from public.convert import convert_to
 from qqbot.comm.Command import SingleCommand
+from qqbot.qqBotClient import get_qq_bot_client
 import botpy
 from botpy.message import GroupMessage, C2CMessage
 from threading import Thread
@@ -11,15 +14,36 @@ class MyClient(botpy.Client):
     async def on_ready(self):
         qq_bot_logger.info(f"qqbot 「{self.robot.name}」 on_ready!")
 
-    async def handle_message(self, message):
+    async def handle_command(self, message):
         content = message.content.strip()
         if content.startswith('/'):
             cmd, text, *_ = *content[1:].split(maxsplit=1), ''
             # TODO 当前仅考虑单次命令，后续添加其他命令的适配
             if command := SingleCommand.find(cmd):
                 await command.handle(message, text)
-                return
-        # TODO chat
+                return True
+        return False
+
+    async def handle_chat(self, message):
+        content = message.content.strip()
+        user_id = int(message.author.user_openid, 16)
+        client = get_qq_bot_client()
+        ret = client.send(chat_msg.build(
+            user_id=user_id,
+            group_id=user_id,
+            text=convert_to('internal', content),
+        ))
+        if ret:
+            await message.reply(content=ret)
+            qq_bot_logger.info(f'qqbot 聊天：{content}，回复：{ret}')
+            return True
+        return False
+
+    async def handle_message(self, message):
+        if await self.handle_command(message):
+            return
+        if await self.handle_chat(message):
+            return
 
     async def on_group_at_message_create(self, message: GroupMessage):
         await self.handle_message(message)
