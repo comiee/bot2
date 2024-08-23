@@ -4,6 +4,7 @@ from public.currency import Currency
 from public.tools import to_int
 from robot.comm.pluginBase import Session
 from robot.comm.command import KeywordCommand, FullCommand, RegexCommand
+from alicebot.adapter.mirai.message import MiraiMessageSegment
 import traceback
 
 # TODO 白名单的判断放到服务端，使用权限控制数据库
@@ -104,7 +105,10 @@ async def h_pic(session: Session,
         text += f'，实际花费{coin}金币'
     text += '，结果如下：'
     for url in data:
-        text += '\n' + url
+        if r18:
+            text += '\n' + url
+        else:
+            text += MiraiMessageSegment.image(url=url)
     await session.reply(text)
     await session.ensure_cost((coin, Currency.coin))
 
