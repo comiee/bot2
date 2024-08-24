@@ -66,6 +66,7 @@ class AsyncServer(Singleton):
             if cmd in self.__cmd_dict:
                 raise CustomException(f'异步服务器：重复注册：{cmd}')
             self.__cmd_dict[cmd] = handler
+            return handler
 
         return get_handler
 
