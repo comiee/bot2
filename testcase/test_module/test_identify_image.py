@@ -26,4 +26,7 @@ class IdentifyImageTestCase(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(1, event.reply.call_count)
         text = event.get_reply()
         print(text)
-        self.assertIn('https://www.pixiv.net/artworks/117709975', text)
+        self.assertTrue(
+            'https://www.pixiv.net/artworks/117709975' in text or \
+            'https://danbooru.donmai.us/post/show/7644188' in text
+        )

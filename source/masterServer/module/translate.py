@@ -66,7 +66,7 @@ def translate(from_, to_, text):
         "salt": salt,
         "sign": sign
     }
-    resp = requests.post(url, params=data, headers=header)
+    resp = requests.post(url, params=data, headers=header)  # TODO 这种方式可能会阻塞其他功能
     result = resp.json()
     if 'error_msg' in result:
         error_msg = result['error_msg']

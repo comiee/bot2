@@ -1,6 +1,7 @@
 from communication.asyncServer import AsyncServer
 from public.log import master_server_logger
 from public.exception import CustomException
+from public.config import get_config
 from masterServer.comm.FirefoxBrowser import FirefoxBrowser
 from selenium.webdriver.common.by import By
 import asyncio
@@ -17,8 +18,20 @@ async def ascii2d_aiohttp(url):
             items = html.xpath('//*[@class="detail-box gray-link"]/h6/a[1]')
             return [x.get('href') for x in items]
 
+
 async def saucenao(url):
-    pass
+    async with aiohttp.ClientSession() as clientSession:
+        params = {
+            'api_key': get_config('saucenao', 'api_key'),
+            'db': 999,
+            'output_type': 2,
+            'numres': 3,
+            'url': url,
+        }
+        async with clientSession.get('https://saucenao.com/search.php', params=params) as resp:
+            res = await resp.json()
+            return [x['data']['ext_urls'][0] for x in res['results']]
+
 
 def ascii2d_selenium(url):
     with FirefoxBrowser() as browser:
@@ -36,9 +49,16 @@ async def identify_image(url):
     except Exception as e:
         master_server_logger.warning(f'使用ascii2d_aiohttp识图失败，将使用其他方案，原因：{e}')
 
-    return await asyncio.to_thread(ascii2d_selenium, url)
+    try:
+        res = await saucenao(url)
+        assert res
+        return res
+    except Exception as e:
+        master_server_logger.warning(f'使用saucenao识图失败，将使用其他方案，原因：{e}')
 
+    return await asyncio.to_thread(ascii2d_selenium, url)
 
 # TODO 识字（OCR）
 # TODO 识码（QR)
 # TODO 识番（https://trace.moe）
+# TODO 识本（danbooru）
