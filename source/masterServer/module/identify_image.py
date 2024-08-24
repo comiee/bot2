@@ -29,8 +29,19 @@ async def saucenao(url):
             'url': url,
         }
         async with clientSession.get('https://saucenao.com/search.php', params=params) as resp:
-            res = await resp.json()
-            return [x['data']['ext_urls'][0] for x in res['results']]
+            ret = await resp.json()
+            res = []
+            for x in ret['results']:
+                data = x['data']
+                if 'ext_urls' in data:
+                    res.append(data['ext_urls'][0])
+                elif 'jp_name' in data:
+                    res.append(data['jp_name'])
+                elif 'source' in data:
+                    res.append(data['source'])
+                else:
+                    res.append(data)
+            return res
 
 
 def ascii2d_selenium(url):
@@ -44,17 +55,17 @@ def ascii2d_selenium(url):
 async def identify_image(url):
     try:
         res = await ascii2d_aiohttp(url)
-        assert res
+        assert res, '结果为空'
         return res
     except Exception as e:
-        master_server_logger.warning(f'使用ascii2d_aiohttp识图失败，将使用其他方案，原因：{e}')
+        master_server_logger.warning(f'使用ascii2d_aiohttp识图失败，将使用其他方案，原因：{e.args[0]}')
 
     try:
         res = await saucenao(url)
-        assert res
+        assert res, '结果为空'
         return res
     except Exception as e:
-        master_server_logger.warning(f'使用saucenao识图失败，将使用其他方案，原因：{e}')
+        master_server_logger.warning(f'使用saucenao识图失败，将使用其他方案，原因：{e.args[0]}')
 
     return await asyncio.to_thread(ascii2d_selenium, url)
 

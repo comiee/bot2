@@ -1,10 +1,11 @@
 from communication.asyncClient import AsyncClient
 from public.utils import get_pic_url_from_internal
 from robot.comm.pluginBase import Session
-from robot.comm.command import SplitArgCommand
+from robot.comm.command import SplitArgCommand, NormalCommand
 
 
 @SplitArgCommand('识图', ['请输入图片'])
+@NormalCommand('识图')
 async def identify_image(session: Session, pic_str):
     try:
         url = get_pic_url_from_internal(pic_str)
