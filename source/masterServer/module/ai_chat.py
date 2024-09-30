@@ -20,7 +20,6 @@ async def get_ai_report(prompt, text):
         ],
     )
     result = completion.choices[0].message.content
-    master_server_logger.info(f'ai_chat 输入：{text}，输出：{result}')
     return result
 
 
