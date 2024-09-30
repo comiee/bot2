@@ -1,3 +1,4 @@
+from communication.asyncClient import AsyncClient
 from public.message import chat_msg
 from public.convert import convert_to
 from robot.comm.priority import Priority
@@ -28,6 +29,11 @@ class ChatPlugin(Session, priority=Priority.Chat):
         if ret:
             await self.reply(convert_to('mirai', ret))
             self.stop()
+
+        if self.is_at_bot():
+            async with AsyncClient('ai_chat') as client:
+                ret = await client.send(self.exclude_at_bot_text())
+                await self.reply(ret)
 
     async def rule(self) -> bool:
         if not isinstance(self.event, MessageEvent):
