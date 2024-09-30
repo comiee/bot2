@@ -38,6 +38,11 @@ class HPicTestCase(unittest.IsolatedAsyncioTestCase):
         await spread_event(ChatPlugin, event)
         self.assertIn('2019年11月21日', event.get_reply().lower())
 
+    async def test_ai_cat(self):
+        event = dummy_friend_message_event('猫娘，你好')
+        await spread_event(CommandPlugin, event)
+        self.assertIn('喵', event.get_reply())
+
 
 if __name__ == '__main__':
     unittest.main()
