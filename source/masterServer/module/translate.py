@@ -72,7 +72,7 @@ def translate(from_, to_, text):
         error_msg = result['error_msg']
         master_server_logger.warning(f'translate 出错：{error_msg}')
         return error_msg
-    if 'trans_result' not in result or len(result['trans_result']) != 1 or 'dst' not in result['trans_result'][0]:
+    if 'trans_result' not in result or any('dst' not in x for x in result['trans_result']):
         master_server_logger.error(f'translate 解析爬取结果出错，结果为：{result}')
         return f'解析爬取结果出错，结果为：{result}'
-    return result['trans_result'][0]['dst']
+    return '\n'.join(x['dst'] for x in result['trans_result'])
