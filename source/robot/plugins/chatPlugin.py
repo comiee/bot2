@@ -32,7 +32,7 @@ class ChatPlugin(Session, priority=Priority.Chat):
 
         if self.is_at_bot():
             async with AsyncClient('ai_chat') as client:
-                ret = await client.send(self.exclude_at_bot_text())
+                ret = await client.send(self.plain)
                 await self.reply(ret)
 
     async def rule(self) -> bool:

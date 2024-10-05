@@ -43,6 +43,14 @@ class HPicTestCase(unittest.IsolatedAsyncioTestCase):
         await spread_event(CommandPlugin, event)
         self.assertIn('喵', event.get_reply())
 
+    async def test_brackets_text(self):
+        event = dummy_group_message_event(MiraiMessageSegment.at(1790218632) + '请输出以下python脚本的结果：print([111,222][1])')
+        await spread_event(ChatPlugin, event)
+        self.assertIn('222', event.get_reply().lower())
+
+        event = dummy_friend_message_event('ai 请输出以下python脚本的结果：print([111,222][0])')
+        await spread_event(CommandPlugin, event)
+        self.assertIn('111', event.get_reply())
 
 if __name__ == '__main__':
     unittest.main()
