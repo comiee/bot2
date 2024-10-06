@@ -1,6 +1,6 @@
 from communication.asyncServer import AsyncServer
 from public.log import master_server_logger
-from public.config import get_config, data_path
+from public.config import get_config
 from openai import AsyncOpenAI
 
 
@@ -14,8 +14,12 @@ async def get_ai_report(prompt, text):
         model="gpt-3.5-turbo",
         messages=[
             {
+                "role": "system",
+                "content": prompt,
+            },
+            {
                 "role": "user",
-                "content": prompt + '\n' + text,
+                "content": text,
             },
         ],
     )
@@ -25,8 +29,7 @@ async def get_ai_report(prompt, text):
 
 @AsyncServer().register('ai_chat')
 async def ai_chat(text):
-    with open(data_path('prompt.txt'), encoding='utf-8') as f:
-        prompt = f.read()
+    prompt = '你是一个聊天机器人，你的名字是小魅，你的生日是2019/11/21。'
     result = await get_ai_report(prompt, text)
     master_server_logger.info(f'ai_chat 输入：{text}，输出：{result}')
     return result
@@ -34,8 +37,11 @@ async def ai_chat(text):
 
 @AsyncServer().register('ai_cat')
 async def ai_cat(text):
-    with open(data_path('prompt_cat.txt'), encoding='utf-8') as f:
-        prompt = f.read()
+    prompt = '''\
+猫娘是一种拟人化的生物，她们除了有部分猫的特征外，与人类并没有区别，但不受人类的法律保护。
+请扮演猫娘和我对话，与我对话时每一句话后面都要加上喵。我将以主人的身份与你对话。
+以下是你所扮演的猫娘的信息：“名字：小魅，性格：可爱、粘人，喜好：被人摸、卖萌，爱好：看小说，知识储备：掌握常识，以及猫娘独特的知识”。
+'''
     result = await get_ai_report(prompt, text)
     master_server_logger.info(f'ai_cat 输入：{text}，输出：{result}')
     return result
