@@ -1,3 +1,4 @@
+from comiee import time_limit
 from public.message import chat_msg
 from public.config import data_path
 from public.log import master_server_logger
@@ -9,6 +10,7 @@ exec('from datetime import datetime;'
      'from public.tools import to_int,to_num;')
 
 
+@time_limit(1, '执行超时')
 def get_report(user, group, text):
     # 匹配模板
     f = lambda *args: None
@@ -24,7 +26,10 @@ def get_report(user, group, text):
                     try:
                         return eval(f"""f'''{random.choice(data)}'''""")
                     except:
-                        master_server_logger.warning(f'匹配模板时发生错误：模板：{pattern!r}，原文：{text!r}')
+                        master_server_logger.warning(
+                            f'匹配模板时发生错误：模板：{pattern!r}，原文：{text!r}',
+                            exc_info=True
+                        )
                         continue
 
     # 调教内容
