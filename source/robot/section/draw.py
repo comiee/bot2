@@ -19,7 +19,7 @@ async def draw(session: Session, count: str):
     try:
         count = int(count)
         assert count > 0
-    except:
+    except Exception:
         await session.reply('错误的次数，命令已取消')
         return
 

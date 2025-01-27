@@ -1,6 +1,7 @@
 from django.contrib.auth.backends import BaseBackend, UserModel
 from django.contrib.auth.models import User
 
+
 class QQBackend(BaseBackend):
     def authenticate(self, request, username=None, code=None):
         try:

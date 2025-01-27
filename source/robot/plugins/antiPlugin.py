@@ -12,7 +12,7 @@ class AntiFriendRecallPlugin(PluginBase, priority=Priority.Anti):
             ret = await self.call_api('messageFromId',
                                       messageId=self.event.messageId,
                                       target=target)
-        except:
+        except Exception:
             return
         reply_message = MiraiMessage('撤回也没用，我已经看见了，你刚才发送的是：\n', ret['data']['messageChain'])
         await self.send(reply_message, 'friend', target)
@@ -32,7 +32,7 @@ class AntiGroupRecallPlugin(PluginBase, priority=Priority.Anti):
             ret = await self.call_api('messageFromId',
                                       messageId=self.event.messageId,
                                       target=group)
-        except:
+        except Exception:
             return
         author = self.event.authorId
         operator = self.event.operator.id

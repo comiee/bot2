@@ -28,7 +28,7 @@ async def stock_help(session: Session):
 async def stock(session: Session, count: str):
     try:
         count = int(count)
-    except:
+    except Exception:
         await session.reply('错误的输入，命令已取消。')
         return
 

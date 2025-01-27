@@ -19,5 +19,6 @@ class ShowBot(unittest.TestCase):
                 temp.append(repr(command))
         print('\n'.join(temp))
 
+
 if __name__ == '__main__':
     unittest.main()

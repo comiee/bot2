@@ -38,7 +38,7 @@ show_answer_msg = Message('show_answer', {
     'question': str,  # 问题
 }, list)  # 回答列表
 
-############################## sql类消息 start ##############################
+# ############################# sql类消息 start ##############################
 # 通用的sql消息（该消息仅用于管理员命令，sql操作应该尽量在服务器完成）
 sql_msg = Message('sql',
                   str,  # sql语句
@@ -78,7 +78,7 @@ set_authority_message = Message('set_authority', {
     'auth_type': str,  # 要设置的权限类型
     'level': int,  # 要设置的权限等级
 }, int)  # 错误码，详见error_code.py
-############################## sql类消息 end ##############################
+# ############################# sql类消息 end ##############################
 
 # 签到
 sign_in_msg = Message('sign_in', {

@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from urllib.parse import quote
 
+
 @register_url('momo_calendar')
 def momo_calendar(request):
     if 'download' in request.GET:

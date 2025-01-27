@@ -25,7 +25,7 @@ def get_report(user, group, text):
                     master_server_logger.debug(f'匹配到：{match.group()}')
                     try:
                         return eval(f"""f'''{random.choice(data)}'''""")
-                    except:
+                    except Exception:
                         master_server_logger.warning(
                             f'匹配模板时发生错误：模板：{pattern!r}，原文：{text!r}',
                             exc_info=True

@@ -19,7 +19,7 @@ class AsyncClient:
         while True:
             try:
                 self.__reader, self.__writer = await asyncio.open_connection(HOST, ASYNC_PORT)
-            except:
+            except Exception:
                 continue
             else:
                 break

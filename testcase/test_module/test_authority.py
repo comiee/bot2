@@ -9,6 +9,7 @@ import unittest
 
 __import__('robot.section.config')
 
+
 class AuthorityTestCase(unittest.IsolatedAsyncioTestCase):
     server_controller = ServerController()
 

@@ -29,7 +29,7 @@ class FirefoxBrowser(Firefox):
     def close(self):
         try:
             super().close()
-        except:
+        except Exception:
             pass
 
     def wait_element(self, by, val) -> WebElement:

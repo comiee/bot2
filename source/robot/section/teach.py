@@ -55,7 +55,7 @@ async def diary(session: Session, start: str = '0', end: str = '10'):
         start = int(start)
         end = int(end)
         assert 0 <= start < end
-    except:
+    except Exception:
         await session.reply('参数错误，命令已取消')
         return
 

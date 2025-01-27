@@ -81,7 +81,7 @@ async def h_pic(session: Session,
         no_AI = int(排除AI)
         assert 0 <= no_AI <= 1
         excludeAI = bool(no_AI)
-    except:
+    except Exception:
         bot_logger.warning(f'h_pic 参数错误：{traceback.format_exc()}')
         await session.reply('参数错误，请检查参数，获取参数使用方法请使用命令：色图帮助')
         return
