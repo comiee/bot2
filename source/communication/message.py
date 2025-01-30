@@ -1,7 +1,9 @@
 """定义组件中通信的消息格式"""
 from comiee import overload
 from public.exception import MessageException
+from public.log import public_logger
 import json
+import time
 
 ValueFormatType = type | dict | list | None
 
@@ -109,10 +111,14 @@ class Message:
             raise MessageException(f'命令字<{self.__cmd}>消息解析失败：{e.args[0]}')
 
         if function := self.__call_back:
+            start = time.time()
             if isinstance(self.__value_format, dict):
                 result = function(**value)
             else:
                 result = function(value)
+            end = time.time()
+            if end - start > 1:
+                public_logger.warning(f'命令字<{self.__cmd}>执行回调函数时间过长，用时{end - start}s')
         else:
             result = None
         try:

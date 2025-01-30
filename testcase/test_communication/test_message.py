@@ -5,6 +5,8 @@ from public.currency import Currency
 from public.log import server_logger, client_logger, LogLevel
 from threading import Thread
 import unittest
+import time
+import logging
 
 server_logger.setLevel(LogLevel.DEBUG)
 client_logger.setLevel(LogLevel.DEBUG)
@@ -29,12 +31,25 @@ class MyTestCase(unittest.TestCase):
         cls.client.close()
 
     def test_multi_msg(self):
+        # 此用例的目的在于验证多条消息同时发送时不会错乱，校验方式为运行过程不报错，不需要用assert系列方法
         self.test_debug()
         ts = [Thread(target=self.test_debug) for _ in range(30)]
         for t in ts:
             t.start()
         for t in ts:
             t.join()
+
+    def test_time(self):
+        test_msg = Message('test', {}, None)
+
+        @test_msg.on_receive
+        def _():
+            time.sleep(2)
+
+        with self.assertLogs('public', logging.DEBUG) as cm:
+            self.client.send(test_msg.build())
+
+        self.assertIn('WARNING:public:命令字<test>执行回调函数时间过长', cm.output[0])
 
     def test_debug(self):
         result = self.client.send(debug_msg.build('test'))
