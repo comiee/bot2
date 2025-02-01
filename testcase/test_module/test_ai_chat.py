@@ -8,7 +8,7 @@ import unittest
 __import__('robot.section.ai_chat')
 
 
-class HPicTestCase(unittest.IsolatedAsyncioTestCase):
+class AITestCase(unittest.IsolatedAsyncioTestCase):
     server_controller = ServerController()
 
     @classmethod
