@@ -5,9 +5,10 @@ from openai import AsyncOpenAI
 
 
 async def get_ai_report(prompt, text):
+    # api使用方法见 https://github.com/chatanywhere/GPT_API_free
     client = AsyncOpenAI(
         api_key=get_config('ai', 'api_key'),
-        base_url="https://free.gpt.ge/v1/",
+        base_url="https://api.chatanywhere.tech/v1",
         default_headers={"x-foo": "true"},
     )
     completion = await client.chat.completions.create(
