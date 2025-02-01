@@ -1,0 +1,15 @@
+alicebot==0.9.0
+alicebot-adapter-mirai==0.9.0
+alicebot-adapter-apscheduler==0.9.0
+Pillow
+netifaces
+aiohttp
+tomli
+APScheduler
+Django
+PyMySQL
+pyserial
+selenium
+openai
+requests
+lxml
