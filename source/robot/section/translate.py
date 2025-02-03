@@ -18,14 +18,14 @@ async def translate_from_to(session: Session, from_: str, to_: str, text: str) -
     await session.reply(result)
 
 
-@RegexCommand(r'(.*)用(.*?)[语文]?怎么说')
+@RegexCommand(r'(.*)用(.*?)[语文]?怎么说[?？]?$')
 async def translate_to(session: Session, text: str, to_: str) -> None:
     result = translate('auto', to_, text)
     await session.reply(result)
 
 
 @NormalCommand('翻译')
-@RegexCommand(r'(.*)是什么意思')
+@RegexCommand(r'(.*)是什么意思[?？]?$')
 async def translate_auto(session: Session, text: str) -> None:
     result = translate('auto', 'zh', text)
     if result == text:

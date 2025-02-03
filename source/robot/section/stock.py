@@ -24,7 +24,7 @@ async def stock_help(session: Session):
     await stock(session, count)
 
 
-@RegexCommand(r'(?:股市|股票) ?([+\-]?\d+)')
+@RegexCommand(r'^(?:股市|股票) ?([+\-]?\d+)$')
 async def stock(session: Session, count: str):
     try:
         count = int(count)

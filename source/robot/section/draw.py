@@ -13,7 +13,7 @@ help_str = '''\
 请输入抽奖次数：'''
 
 
-@RegexCommand(r'抽奖(\d+)')
+@RegexCommand(r'^抽奖(\d+)$')
 @SplitArgCommand('抽奖', [help_str])
 async def draw(session: Session, count: str):
     try:
