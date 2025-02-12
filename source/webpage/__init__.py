@@ -19,13 +19,21 @@ def run_django():
 
 
 def start_natapp():
-    natapp_path = 'natapp.exe' if platform.system() == 'Windows' else 'natapp'
-    return subprocess.Popen([
-        f'./{natapp_path}',
-        f'-authtoken={get_config("natapp", "authtoken")}',
-        f'-log={data_path("web", "natapp.txt")}',  # 与robot/section/web_entrance.py内保持一致
-        '-loglevel=INFO',
-    ])
+    if platform.system() == 'Windows':
+        return subprocess.Popen([
+            'start',
+            'natapp.exe',
+            f'-authtoken={get_config("natapp", "authtoken")}',
+            f'-log={data_path("web", "natapp.txt")}',  # 与robot/section/web_entrance.py内保持一致
+            '-loglevel=INFO',
+        ], shell=True)
+    else:
+        return subprocess.Popen([
+            './natapp',
+            f'-authtoken={get_config("natapp", "authtoken")}',
+            f'-log={data_path("web", "natapp.txt")}',  # 与robot/section/web_entrance.py内保持一致
+            '-loglevel=INFO',
+        ])
 
 
 def web_main():
