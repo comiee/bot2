@@ -183,6 +183,15 @@ class Session(PluginBase[MessageEvent, StateT, ConfigT], ABC, Generic[StateT, Co
                 bot_logger.error(f'预期外的错误码：{error_code}')
                 await self.reply(f'遇到了预期外的错误，请联系小魅的主人，错误码：{error_code}')
 
+    async def get_group_member_info_list(self):
+        if not self.is_group():
+            return []
+        res = await self.call_api('memberList', target=self.group)
+        return res['data']
+
+    async def get_group_member_list(self):
+        return [User(member['id']) for member in await self.get_group_member_info_list()]
+
 
 """api
 object Paths {

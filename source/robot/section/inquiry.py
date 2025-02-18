@@ -13,3 +13,9 @@ async def coin_inquiry(session: Session):
 async def stamina_inquiry(session: Session):
     stamina = session.user.query(Currency.stamina)
     await session.reply(f'体力值：{stamina}', at=True)
+
+
+# @FullCommand('金币排行').trim_group('请在群聊中使用此命令')
+async def coin_rank(session: Session):
+    # TODO 封装一个通用排行消息，在服务器端处理
+    pass

@@ -130,3 +130,10 @@ async def h_pic_regex(session: Session, num, keyword):
 async def h_pic_web_auth(session: Session):
     session.user.set_authority('h_pic', 1)
     await session.reply('权限自动审批完成')
+
+
+@FullCommand('批量申请色图权限').trim_super().trim_group('请在群聊中使用此命令')
+async def h_pic_web_auth_group(session: Session):
+    for user in await session.get_group_member_list():
+        user.set_authority('h_pic', 1)
+    await session.reply('权限添加完成')

@@ -47,6 +47,7 @@ def get_logger(name, level, file_name, file_level) -> logging.Logger:
     return logger
 
 
+# TODO 多进程使用同一个logger对象，会导致抢占日志文件
 # 底层的client和server使用logger
 client_logger: logging.Logger = get_logger('client', LogLevel.INFO, LogLevel.DEBUG)
 server_logger: logging.Logger = get_logger('server', LogLevel.DEBUG)
