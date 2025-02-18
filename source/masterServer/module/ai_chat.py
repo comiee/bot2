@@ -1,6 +1,7 @@
 from communication.asyncServer import AsyncServer
 from public.log import master_server_logger
 from masterServer.comm.ai import get_ai_report
+from asyncio import Semaphore
 
 
 @AsyncServer().register('ai_chat')
@@ -21,3 +22,12 @@ async def ai_cat(text):
     result = await get_ai_report(prompt, text)
     master_server_logger.info(f'ai_cat 输入：{text}，输出：{result}')
     return result
+
+
+# @AsyncServer().register('ai_group')
+async def ai_group(text, *, semaphore=Semaphore(5)):
+    if semaphore.locked():
+        master_server_logger.warning(f'ai_group 同时运行的任务太多，已放弃回复，原文：{text}')
+        return
+    with semaphore:
+        pass  # TODO 判断是否需要回复并返回回复

@@ -13,3 +13,4 @@ selenium
 openai
 requests
 lxml
+ollama

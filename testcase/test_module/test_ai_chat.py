@@ -1,3 +1,4 @@
+from public.log import master_server_logger, LogLevel
 from robot.plugins.commandPlugin import CommandPlugin
 from robot.plugins.chatPlugin import ChatPlugin
 from faker.master_server_faker import ServerController
@@ -6,6 +7,8 @@ from alicebot.adapter.mirai.message import MiraiMessageSegment
 import unittest
 
 __import__('robot.section.ai_chat')
+
+master_server_logger.setLevel(LogLevel.DEBUG)
 
 
 class AITestCase(unittest.IsolatedAsyncioTestCase):
@@ -24,7 +27,7 @@ class AITestCase(unittest.IsolatedAsyncioTestCase):
         await spread_event(CommandPlugin, event)
         self.assertIn('小魅', event.get_reply())
 
-        event = dummy_friend_message_event('AI 苹果用英语怎么说')
+        event = dummy_friend_message_event('AI “苹果”用英语怎么说')
         await spread_event(CommandPlugin, event)
         self.assertIn('apple', event.get_reply().lower())
 
