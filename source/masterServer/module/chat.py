@@ -7,10 +7,11 @@ import random
 import re
 
 exec('from datetime import datetime;'
-     'from public.tools import to_int,to_num;')
+     'from public.tools import to_int,to_num;'
+     'from masterServer.comm.ai import get_ai_report_sync')
 
 
-@time_limit(5, '匹配聊天回复超时')
+@time_limit(30, '匹配聊天回复超时')
 def get_report(user, group, text):
     # 匹配模板
     f = lambda *args: None

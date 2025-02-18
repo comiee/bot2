@@ -56,3 +56,4 @@
 "appid".*?"bgImg":"(.*?)"	{chr(10).join(s.replace(chr(92),'') for s in re.findall(r'"bgImg":"(.*?)"',text))}
 ^刮刮乐\s*\[image:.*url:(.*?)\]	https://koalastothemax.com/?{__import__('base64').b64encode(match.group(1).encode('utf-8')).decode('utf-8')}
 ^刮刮乐\s*(https://.*)	https://koalastothemax.com/?{__import__('base64').b64encode(match.group(1).encode('utf-8')).decode('utf-8')}
+/今日运势	{get_ai_report_sync('',chr(10).join(['仿照以下格式，生成一份今日运势，注意内容不要与之相同：','少女祈祷中(~▽~")...您今天的运势为...','财运：72','桃花运：71','事业运：61','符卡：借符「大穴牟迟大人的药」','点评： 中吉+学霸']))}

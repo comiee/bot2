@@ -26,6 +26,9 @@ class TranslateTestCase(unittest.TestCase):
         print(end - start)
         self.assertLess(end - start, 5)  # 虽然chat函数的限制时间是1秒，但是实际执行时间会花3秒多
 
+    def test_report_by_ai(self):
+        self.assertIn('您今天的运势为', chat(0, 0, '/今日运势'))
+
 
 if __name__ == '__main__':
     unittest.main()
