@@ -10,7 +10,7 @@ exec('from datetime import datetime;'
      'from public.tools import to_int,to_num;')
 
 
-@time_limit(2, '匹配聊天回复超时')
+@time_limit(5, '匹配聊天回复超时')
 def get_report(user, group, text):
     # 匹配模板
     f = lambda *args: None

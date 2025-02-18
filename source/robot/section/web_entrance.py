@@ -6,7 +6,7 @@ import re
 
 @FullCommand('网页版')
 async def web_entrance(session: Session):
-    log_path = data_path("web", "natapp.txt")  # 与webpage/__init__.py内保持一致
+    log_path = data_path("web", "natapp.txt")  # 与webpage/config.ini内保持一致
     with open(log_path, encoding='utf-8') as f:
         for s in f:
             if m := re.search(r'Tunnel established at (\S+)', s):
