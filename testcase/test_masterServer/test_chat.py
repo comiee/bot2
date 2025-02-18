@@ -14,9 +14,19 @@ class TranslateTestCase(unittest.TestCase):
         self.assertIn('打听女孩子的年龄是不礼貌的行为', result)
 
     def test_random_report(self):
+        result = [chat(0, 0, '一抹多！！！') for _ in range(20)]
+        self.assertIn('欧尼酱！！！！', result)
+        self.assertIn('', result)
+
+    def test_random_by_len(self):
         result = [chat(0, 0, '名字') for _ in range(20)]
         self.assertIn('我的名字是小魅。', result)
-        self.assertIn('', result)
+        result = [chat(0, 0, '名字' * 10) for _ in range(20)]
+        self.assertNotIn('我的名字是小魅。', result)
+
+    def test_cal(self):
+        self.assertEqual('2', chat(0, 0, '1+1='))
+        self.assertEqual('2', chat(0, 0, '一加一等于几？'))
 
     def test_time_limit(self):
         # 因为会强制中断子线程，这个用例出现 WARNING: 匹配模板时发生错误 是正常现象
