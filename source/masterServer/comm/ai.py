@@ -52,9 +52,9 @@ async def get_deepseek_report(prompt, text) -> DeepSeekResult:
             },
         ],
     )
-    content = response['message']['content']
+    content = response['message']['content'].replace('\n\n', '\n')
     master_server_logger.debug(f'prompt:\n{prompt}\ntext:\n{text}\ncontent:\n{content}')
-    think, result = re.search(r'<think>\s*(.*)\s*</think>\s*(.*)', content, re.I).groups()
+    think, result = re.search(r'<think>\s*(.*)\s*</think>\s*(.*)', content, re.S).groups()
     return DeepSeekResult(content, think, result)
 
 

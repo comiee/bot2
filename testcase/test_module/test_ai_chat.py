@@ -47,10 +47,10 @@ class AITestCase(unittest.IsolatedAsyncioTestCase):
         self.assertIn('喵', event.get_reply())
 
     async def test_ai_deepseek(self):
-        event = dummy_friend_message_event('deepseek 你是谁？')
+        event = dummy_friend_message_event('deepseek 苹果的英语是什么？其中有几个p？')
         await spread_event(CommandPlugin, event)
         self.assertIn('<think>', event.get_reply())
-        self.assertIn('deepseek', event.get_reply().lower())
+        self.assertIn('</think>', event.get_reply())
 
     async def test_brackets_text(self):
         event = dummy_group_message_event(
