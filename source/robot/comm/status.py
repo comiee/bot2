@@ -141,6 +141,7 @@ class ChatStatus(Status, config_name='chat'):
     options = (
         'switch',
         'at_switch',
+        # TODO 增加ai回复类型
     )
 
     def __init__(self):

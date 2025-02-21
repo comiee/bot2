@@ -1,6 +1,6 @@
 from communication.asyncServer import AsyncServer
 from public.log import master_server_logger
-from masterServer.comm.ai import get_ai_report
+from masterServer.comm.ai import get_ai_report, get_deepseek_report
 from asyncio import Semaphore
 
 
@@ -24,10 +24,17 @@ async def ai_cat(text):
     return result
 
 
+@AsyncServer().register('ai_deepseek')
+async def ai_deepseek(text):
+    deepseek_result = await get_deepseek_report('', text)
+    master_server_logger.info(f'ai_deepseek 输入：{text}，结果：{deepseek_result.content}')
+    return deepseek_result
+
+
 # @AsyncServer().register('ai_group')
-async def ai_group(text, *, semaphore=Semaphore(5)):
+async def ai_group(history, *, semaphore=Semaphore(5)):
     if semaphore.locked():
-        master_server_logger.warning(f'ai_group 同时运行的任务太多，已放弃回复，原文：{text}')
+        master_server_logger.warning(f'ai_group 同时运行的任务太多，已放弃回复，原文：{history}')
         return
     with semaphore:
         pass  # TODO 判断是否需要回复并返回回复

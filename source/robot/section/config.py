@@ -7,6 +7,7 @@ from robot.comm.user import User
 import re
 
 
+# TODO 聊天开关改为限制间隔时间而非扣钱
 @RegexCommand(r'^(?:聊天|开|开启)$').trim_group('聊天开关只在群聊中有效哦').trim_cost((10, Currency.coin))
 @FullCommand('on').trim_super()
 async def chat_on(session: Session):

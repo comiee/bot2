@@ -46,6 +46,12 @@ class AITestCase(unittest.IsolatedAsyncioTestCase):
         await spread_event(CommandPlugin, event)
         self.assertIn('喵', event.get_reply())
 
+    async def test_ai_deepseek(self):
+        event = dummy_friend_message_event('deepseek 你是谁？')
+        await spread_event(CommandPlugin, event)
+        self.assertIn('<think>', event.get_reply())
+        self.assertIn('deepseek', event.get_reply().lower())
+
     async def test_brackets_text(self):
         event = dummy_group_message_event(
             MiraiMessageSegment.at(1790218632) + '请输出以下python脚本的结果：print([111,222][1])')

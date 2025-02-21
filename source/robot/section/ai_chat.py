@@ -17,3 +17,10 @@ async def ai_cat(session: Session, text: str):
     async with AsyncClient('ai_cat') as client:
         ret = await client.send(convert_to('plain', text))
         await session.reply(ret)
+
+
+@NormalCommand('deepseek ')
+async def ai_deepseek(session: Session, text: str):
+    async with AsyncClient('ai_deepseek') as client:
+        deepseek_result = await client.send(convert_to('plain', text))
+        await session.reply(deepseek_result.content)

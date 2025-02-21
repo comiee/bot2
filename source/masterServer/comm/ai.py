@@ -1,8 +1,10 @@
 from public.config import get_config
 from public.log import master_server_logger
 from openai import AsyncOpenAI
+from dataclasses import dataclass
 import ollama
 import asyncio
+import re
 
 
 async def get_gpt_report(prompt, text):
@@ -29,7 +31,14 @@ async def get_gpt_report(prompt, text):
     return result
 
 
-async def get_local_report(prompt, text):
+@dataclass
+class DeepSeekResult:
+    content: str
+    think: str
+    result: str
+
+
+async def get_deepseek_report(prompt, text) -> DeepSeekResult:
     response = await ollama.AsyncClient().chat(
         model="deepseek-r1:1.5b",
         messages=[
@@ -45,8 +54,8 @@ async def get_local_report(prompt, text):
     )
     content = response['message']['content']
     master_server_logger.debug(f'prompt:\n{prompt}\ntext:\n{text}\ncontent:\n{content}')
-    result = content.split('</think>')[-1].lstrip('\n')
-    return result
+    think, result = re.search(r'<think>\s*(.*)\s*</think>\s*(.*)', content, re.I).groups()
+    return DeepSeekResult(content, think, result)
 
 
 async def get_ai_report(prompt, text):
