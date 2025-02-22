@@ -59,12 +59,16 @@ async def get_deepseek_report(prompt, text) -> DeepSeekResult:
 
 
 async def get_ai_report(prompt, text):
-    # try:
-    #     return await get_local_report(prompt, text)
-    # except Exception as e:
-    #     master_server_logger.error(f'调用本地ai失败，将使用ChatGPT回复。错误信息：{e}')
-    #     return await get_gpt_report(prompt, text)
-    return await get_gpt_report(prompt, text)
+    try:
+        return await get_gpt_report(prompt, text)
+    except Exception as e:
+        master_server_logger.error(f'调用ChatGPT api失败，将尝试使用本地deepseek回复。错误信息：{e}')
+    try:
+        deepseek_result = await get_deepseek_report(prompt, text)
+        return deepseek_result.result
+    except Exception as e:
+        master_server_logger.error(f'调用本地deepseek失败，错误信息：{e}')
+        return ''
 
 
 def get_ai_report_sync(prompt, text):
