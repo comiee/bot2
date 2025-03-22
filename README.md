@@ -1,1 +1,2 @@
-开发中的项目，使用新架构的小魅机器人二代
+此项目已迁移到gitee，链接：
+https://gitee.com/comiee/bot2
